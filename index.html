@@ -578,6 +578,10 @@
             <label class="slider-wrap">Moc <input type="range" id="heatIntensity" min="1" max="10" value="6" oninput="updateHeatmap()" /><span class="slider-val" id="heatIntensityVal">6</span></label>
             <button class="btn btn-sm" id="toggleMarkersBtn" onclick="toggleMarkers()">Punkty: WŁ</button>
             <button class="btn btn-sm" id="toggleArcsBtn" onclick="toggleArcs()">Trasy: WŁ</button>
+            <button class="btn btn-sm btn-primary" id="exportMapBtn" onclick="exportHeatmapPNG()" title="Zapisz aktualny widok HeatMapy w wysokiej rozdzielczości PNG">
+              <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Zapisz PNG (HD)</span>
+            </button>
           </div>
         </div>
         <div class="map-stage">
@@ -1294,13 +1298,223 @@
     function hexToRgb(h) { h = h.replace("#", ""); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
     function interpolateColor(ratio, stops) { const t = Math.max(0, Math.min(1, ratio)); for (let i = 0; i < stops.length - 1; i++) { const [p1, c1] = stops[i], [p2, c2] = stops[i + 1]; if (t >= p1 && t <= p2) { const l = p2 === p1 ? 0 : (t - p1) / (p2 - p1); const [r1, g1, b1] = hexToRgb(c1), [r2, g2, b2] = hexToRgb(c2); return `rgb(${Math.round(r1 + (r2 - r1) * l)},${Math.round(g1 + (g2 - g1) * l)},${Math.round(b1 + (b2 - b1) * l)})`; } } return stops[stops.length - 1][1]; }
     function buildArcPoints(from, to, steps = 26) { const [lat1, lng1] = from, [lat2, lng2] = to, dLat = lat2 - lat1, dLng = lng2 - lng1; const bend = Math.min(14, Math.hypot(dLat, dLng) * 0.22); const midLat = (lat1 + lat2) / 2 + bend * 0.55, midLng = (lng1 + lng2) / 2 - dLat * 0.12, pts = []; for (let i = 0; i <= steps; i++) { const t = i / steps; pts.push([(1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2, (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * midLng + t * t * lng2]); } return pts; }
-    function loadBasemap() { if (!map) return; baseLayers.forEach(l => map.removeLayer(l)); baseLayers = []; const p = getThemeProfile(); const add = (u, o) => { const l = L.tileLayer(u, o).addTo(map); baseLayers.push(l); }; if (currentMapStyle === "sat") add("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", maxZoom: 18 }); else if (currentMapStyle === "osm") add("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OSM", className: "themed-basemap", maxZoom: 18 }); else if (p.isDarkMap) { add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", maxZoom: 16 }); add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", opacity: 0.78, maxZoom: 16 }); } else { add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", maxZoom: 16 }); add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", opacity: 0.82, maxZoom: 16 }); } }
+    function loadBasemap() { if (!map) return; baseLayers.forEach(l => map.removeLayer(l)); baseLayers = []; const p = getThemeProfile(); const add = (u, o) => { const l = L.tileLayer(u, { crossOrigin: "anonymous", ...o }).addTo(map); baseLayers.push(l); }; if (currentMapStyle === "sat") add("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", maxZoom: 18 }); else if (currentMapStyle === "osm") add("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OSM", className: "themed-basemap", maxZoom: 18 }); else if (p.isDarkMap) { add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", maxZoom: 16 }); add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", opacity: 0.78, maxZoom: 16 }); } else { add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", maxZoom: 16 }); add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", opacity: 0.82, maxZoom: 16 }); } }
     function setMapStyle(s, btn) { currentMapStyle = s; document.querySelectorAll("#styleGroup .seg-btn").forEach(b => b.classList.remove("active")); if (btn) btn.classList.add("active"); loadBasemap(); }
     function zoomPreset(pr, btn) { document.querySelectorAll("#zoomGroup .seg-btn").forEach(b => b.classList.remove("active")); if (btn) btn.classList.add("active"); if (pr === "pl") map.flyTo([52.1, 19.0], 6, { duration: 0.8 }); else if (pr === "eu") map.flyTo([49.8, 17.5], 5, { duration: 0.8 }); else map.flyTo([30, 52], 3, { duration: 0.9 }); }
     function toggleMarkers() { showMarkers = !showMarkers; document.getElementById("toggleMarkersBtn").textContent = showMarkers ? "Punkty: WŁ" : "Punkty: WYŁ"; updateHeatmap(); }
     function toggleArcs() { showArcs = !showArcs; document.getElementById("toggleArcsBtn").textContent = showArcs ? "Trasy: WŁ" : "Trasy: WYŁ"; updateHeatmap(); }
 
     function updateHeatmap() { if (!map) return; const sz = map.getSize(); if (!sz || sz.x === 0 || sz.y === 0) return; if (heatLayer) map.removeLayer(heatLayer); arcsLayer.clearLayers(); markersLayer.clearLayers(); const p = getThemeProfile(), home = settings.hometown_coords || [52.4064, 16.9252], groups = {}; filteredConcerts.forEach(c => { if (!c.miasto) return; if (!groups[c.miasto]) groups[c.miasto] = { city: c.miasto, country: c.kraj, items: [] }; groups[c.miasto].items.push(c); }); const radius = parseInt(document.getElementById("heatRadius").value, 10), moc = parseInt(document.getElementById("heatIntensity").value, 10); document.getElementById("heatRadiusVal").textContent = radius; document.getElementById("heatIntensityVal").textContent = moc; const sorted = Object.values(groups).sort((a, b) => b.items.length - a.items.length), maxC = sorted[0] ? sorted[0].items.length : 1, heatPts = []; sorted.forEach(g => { const coords = getCityCoords(g.city); if (!coords) return; const lRatio = maxC > 1 ? g.items.length / maxC : 1, col = interpolateColor(Math.pow(lRatio, 0.72), p.colorStops); const reps = Math.max(1, Math.min(6, Math.round(1 + lRatio * 5))); for (let k = 0; k < reps; k++) heatPts.push([coords[0], coords[1], 0.22 + 0.78 * lRatio]); const distKm = Math.round(haversineKm(home[0], home[1], coords[0], coords[1])); if (showArcs && distKm > 18) { L.polyline(buildArcPoints(home, coords), { color: col, weight: 1.5 + lRatio * 1.4, opacity: 0.46, dashArray: "5 7" }).bindTooltip(`${escapeHtml(settings.hometown)} → ${escapeHtml(g.city)}: ${distKm.toLocaleString("pl-PL")} km`, { sticky: true }).addTo(arcsLayer); } if (showMarkers) { const r = Math.round(7 + 21 * lRatio); L.circleMarker(coords, { radius: r, color: p.markerStroke, weight: 2, fillColor: col, fillOpacity: 0.76 }).bindPopup(`<div style="font-family:var(--font-display);font-weight:800;font-size:15px;">${escapeHtml(g.city)}</div><div style="font-family:var(--font-mono);font-size:12px;color:${col};font-weight:700;margin:2px 0 6px;">${g.items.length} koncertów • ${distKm.toLocaleString("pl-PL")} km</div><div style="font-size:11px;color:var(--text-muted);">${escapeHtml([...new Set(g.items.map(i => i.artysta))].slice(0, 8).join(", "))}</div>`).addTo(markersLayer); if (g.items.length >= 6) L.marker(coords, { interactive: false, icon: L.divIcon({ className: "city-count-label", html: `<div style="color:${p.labelTextColor};line-height:${r * 2}px;">${g.items.length}</div>`, iconSize: [r * 2, r * 2], iconAnchor: [r, r] }) }).addTo(markersLayer); } }); heatLayer = L.heatLayer(heatPts, { radius, blur: Math.max(12, Math.round(radius * 0.68)), maxZoom: 11, max: Math.max(0.45, 5.2 - moc * 0.46), minOpacity: Math.min(0.85, 0.16 + moc * 0.062), gradient: p.heatGradient }).addTo(map); document.getElementById("topCitiesList").innerHTML = sorted.slice(0, 10).map(g => { const cCol = interpolateColor(Math.pow(maxC > 1 ? g.items.length / maxC : 1, 0.72), p.colorStops); return `<button class="city-jump" onclick="map.flyTo([${getCityCoords(g.city)}],9,{duration:0.8})"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${cCol};"></span>${escapeHtml(g.city)}</span><span class="cnt">${g.items.length}</span></button>`; }).join(""); }
+
+
+    async function exportHeatmapPNG() {
+      if (!map) { showToast("Najpierw otwórz zakładkę Mapa."); return; }
+      const btn = document.getElementById("exportMapBtn");
+      const prevHtml = btn ? btn.innerHTML : "";
+      if (btn) { btn.disabled = true; btn.textContent = "Generuję HD..."; }
+      showToast("Generuję HeatMapę w wysokiej rozdzielczości (PNG HD)...");
+
+      try {
+        const mapEl = document.getElementById("heatmap");
+        const rect = mapEl.getBoundingClientRect();
+        const w = Math.max(1, Math.round(rect.width));
+        const h = Math.max(1, Math.round(rect.height));
+        // Target ultra-sharp ~2800-3600px wide output (3x Retina on mobile, 2.5-3x on desktop)
+        const scale = Math.min(3, Math.max(2, Math.round(2800 / Math.max(w, 600))));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+
+        const cs = getComputedStyle(document.documentElement);
+        const mapBg = (cs.getPropertyValue("--map-bg") || "#0D071A").trim();
+        const mapFilter = (cs.getPropertyValue("--map-filter") || "none").trim();
+        const textCol = (cs.getPropertyValue("--text") || "#FFF2EB").trim();
+        const mutedCol = (cs.getPropertyValue("--text-muted") || "#B8A5C8").trim();
+        const surfaceSolid = (cs.getPropertyValue("--surface-solid") || "#160D28").trim();
+        const borderStrong = (cs.getPropertyValue("--border-strong") || "rgba(255,42,133,0.44)").trim();
+
+        ctx.fillStyle = mapBg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 1. Draw basemap tiles with exact theme CSS filter
+        const tileImgs = Array.from(mapEl.querySelectorAll(".leaflet-tile-pane img.leaflet-tile"));
+        ctx.save();
+        if (currentMapStyle !== "sat" && mapFilter && mapFilter !== "none") {
+          ctx.filter = mapFilter;
+        }
+        for (const img of tileImgs) {
+          if (!img.complete || img.naturalWidth === 0) continue;
+          const tr = img.getBoundingClientRect();
+          const dx = (tr.left - rect.left) * scale;
+          const dy = (tr.top - rect.top) * scale;
+          const dw = tr.width * scale;
+          const dh = tr.height * scale;
+          const layerEl = img.closest(".leaflet-layer");
+          const op = layerEl ? parseFloat(getComputedStyle(layerEl).opacity || "1") : 1;
+          ctx.globalAlpha = isNaN(op) ? 1 : op;
+          try { ctx.drawImage(img, dx, dy, dw, dh); } catch (_) {}
+        }
+        ctx.restore();
+
+        // 2. Draw HeatLayer canvas
+        const heatCanvas = mapEl.querySelector("canvas.leaflet-heatmap-layer");
+        if (heatCanvas) {
+          const hr = heatCanvas.getBoundingClientRect();
+          ctx.save();
+          ctx.drawImage(
+            heatCanvas,
+            (hr.left - rect.left) * scale,
+            (hr.top - rect.top) * scale,
+            hr.width * scale,
+            hr.height * scale
+          );
+          ctx.restore();
+        }
+
+        // 3. Draw crisp vector Trip Arcs & City Bubbles + Counts directly at high DPI
+        const p = getThemeProfile();
+        const home = settings.hometown_coords || [52.4064, 16.9252];
+        const groups = {};
+        filteredConcerts.forEach(c => {
+          if (!c.miasto) return;
+          if (!groups[c.miasto]) groups[c.miasto] = { city: c.miasto, items: [] };
+          groups[c.miasto].items.push(c);
+        });
+        const sorted = Object.values(groups).sort((a, b) => b.items.length - a.items.length);
+        const maxC = sorted[0] ? sorted[0].items.length : 1;
+
+        if (showArcs) {
+          sorted.forEach(g => {
+            const coords = getCityCoords(g.city);
+            if (!coords) return;
+            const distKm = Math.round(haversineKm(home[0], home[1], coords[0], coords[1]));
+            if (distKm <= 18) return;
+            const lRatio = maxC > 1 ? g.items.length / maxC : 1;
+            const col = interpolateColor(Math.pow(lRatio, 0.72), p.colorStops);
+            const pts = buildArcPoints(home, coords, 32);
+            ctx.save();
+            ctx.beginPath();
+            pts.forEach((ll, i) => {
+              const pt = map.latLngToContainerPoint(ll);
+              if (i === 0) ctx.moveTo(pt.x * scale, pt.y * scale);
+              else ctx.lineTo(pt.x * scale, pt.y * scale);
+            });
+            ctx.strokeStyle = col;
+            ctx.globalAlpha = 0.52;
+            ctx.lineWidth = (1.5 + lRatio * 1.4) * scale;
+            ctx.setLineDash([5 * scale, 7 * scale]);
+            ctx.stroke();
+            ctx.restore();
+          });
+        }
+
+        if (showMarkers) {
+          sorted.forEach(g => {
+            const coords = getCityCoords(g.city);
+            if (!coords) return;
+            const pt = map.latLngToContainerPoint(coords);
+            const lRatio = maxC > 1 ? g.items.length / maxC : 1;
+            const col = interpolateColor(Math.pow(lRatio, 0.72), p.colorStops);
+            const r = Math.round(7 + 21 * lRatio) * scale;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(pt.x * scale, pt.y * scale, r, 0, Math.PI * 2);
+            ctx.fillStyle = col;
+            ctx.globalAlpha = 0.78;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.lineWidth = 2 * scale;
+            ctx.strokeStyle = p.markerStroke;
+            ctx.stroke();
+
+            if (g.items.length >= 6) {
+              ctx.fillStyle = p.labelTextColor;
+              ctx.font = `700 ${11 * scale}px "JetBrains Mono", monospace`;
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText(String(g.items.length), pt.x * scale, pt.y * scale);
+            }
+            ctx.restore();
+          });
+        }
+
+        // 4. Draw crisp Legend + Stats badge in bottom-left
+        const pad = 16 * scale;
+        const boxW = Math.min(310 * scale, canvas.width - pad * 2);
+        const boxH = 74 * scale;
+        const bx = pad;
+        const by = canvas.height - boxH - pad;
+
+        ctx.save();
+        ctx.fillStyle = surfaceSolid;
+        ctx.globalAlpha = 0.90;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(bx, by, boxW, boxH, 13 * scale);
+        else ctx.rect(bx, by, boxW, boxH);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 1.2 * scale;
+        ctx.strokeStyle = borderStrong;
+        ctx.stroke();
+
+        const { totalKm } = computeDistances(filteredConcerts);
+        ctx.fillStyle = textCol;
+        ctx.font = `800 ${12 * scale}px "Syne", sans-serif`;
+        ctx.fillText("FESTIVAL'S LIFE", bx + 14 * scale, by + 22 * scale);
+
+        ctx.fillStyle = mutedCol;
+        ctx.font = `600 ${9.5 * scale}px "JetBrains Mono", monospace`;
+        ctx.fillText(
+          `${filteredConcerts.length} koncertów • ${sorted.length} miast • ${totalKm.toLocaleString("pl-PL")} km`,
+          bx + 14 * scale,
+          by + 39 * scale
+        );
+
+        const barX = bx + 14 * scale;
+        const barY = by + 50 * scale;
+        const barW = boxW - 28 * scale;
+        const barH = 8 * scale;
+        const grad = ctx.createLinearGradient(barX, barY, barX + barW, barY);
+        p.colorStops.forEach(([stop, color]) => grad.addColorStop(stop, color));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(barX, barY, barW, barH, 4 * scale);
+        else ctx.rect(barX, barY, barW, barH);
+        ctx.fill();
+        ctx.restore();
+
+        // 5. Trigger PNG download
+        const fname = `Festivals_life_HeatMap_${new Date().toISOString().slice(0, 10)}.png`;
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            const a = document.createElement("a");
+            a.href = canvas.toDataURL("image/png");
+            a.download = fname;
+            a.click();
+            showToast(`Zapisano ${fname} (${canvas.width}×${canvas.height}px)!`);
+            return;
+          }
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fname;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+          showToast(`Zapisano HeatMapę HD (${canvas.width}×${canvas.height}px)!`);
+        }, "image/png");
+      } catch (err) {
+        showToast("Błąd eksportu mapy: " + err.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = prevHtml; }
+      }
+    }
 
     function renderUpcoming() {
       const card = document.getElementById("startUpcomingCard");
