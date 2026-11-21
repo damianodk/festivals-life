@@ -153,9 +153,9 @@
     .hero-ego p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
     .hero-top-artist { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 15px; padding: 10px 14px; }
 
-    .artist-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border-strong); background: var(--grad-primary); color: var(--btn-primary-text); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 0.92rem; flex-shrink: 0; overflow: hidden; }
+    .artist-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--border-strong); background: var(--grad-primary); color: var(--btn-primary-text); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; flex-shrink: 0; overflow: hidden; }
     .artist-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .artist-avatar.sm { width: 32px; height: 32px; font-size: 0.72rem; border-width: 1.5px; }
+    .artist-avatar.sm { width: 34px; height: 34px; font-size: 0.74rem; border-width: 1.5px; }
 
     .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
     .kpi-card { background: var(--surface); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 17px; padding: 14px 15px; position: relative; overflow: hidden; min-width: 0; }
@@ -169,12 +169,13 @@
     .section-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.1rem, 2vw, 1.32rem); letter-spacing: -0.02em; }
     .section-sub { font-size: 0.81rem; color: var(--text-muted); margin-top: 2px; }
 
-    .artists-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 11px; }
-    .artist-tile { background: var(--input-bg); border: 1px solid var(--border); border-radius: 15px; padding: 13px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 7px; cursor: pointer; transition: transform 0.16s, border-color 0.16s; }
+    .artists-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
+    .artist-tile { background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; padding: 14px 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 7px; transition: transform 0.16s, border-color 0.16s; position: relative; }
     .artist-tile:hover { transform: translateY(-2px); border-color: var(--border-strong); }
-    .artist-tile .artist-avatar { width: 62px; height: 62px; font-size: 1.1rem; }
-    .artist-tile-name { font-weight: 700; font-size: 0.84rem; line-height: 1.2; }
+    .artist-tile .artist-avatar { width: 68px; height: 68px; font-size: 1.15rem; cursor: pointer; }
+    .artist-tile-name { font-weight: 700; font-size: 0.86rem; line-height: 1.2; cursor: pointer; }
     .artist-tile-meta { font-family: var(--font-mono); font-size: 0.71rem; color: var(--accent-coral); }
+    .artist-tile-actions { display: flex; gap: 5px; margin-top: 2px; }
 
     .hof-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 11px; }
     .hof-card { background: var(--grad-subtle); border: 1px solid var(--border); border-radius: 15px; padding: 13px 14px; }
@@ -196,11 +197,16 @@
     .pivot-row:hover { background: var(--grad-subtle); }
     .pivot-count { font-family: var(--font-mono); font-weight: 700; color: var(--accent-pink); white-space: nowrap; }
 
-    .upcoming-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 12px; }
+    .upcoming-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(295px, 1fr)); gap: 12px; }
     .upcoming-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
     .upcoming-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--grad-primary); }
     .countdown-pill { font-family: var(--font-mono); font-size: 0.71rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--grad-primary); color: var(--btn-primary-text); white-space: nowrap; }
     .ticket-status { font-family: var(--font-mono); font-size: 0.69rem; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--pill-bg); }
+    .travel-box { background: var(--pill-bg); border: 1px solid var(--border); border-radius: 11px; padding: 8px 10px; font-size: 0.76rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+
+    .crew-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 13px; }
+    .crew-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 17px; padding: 15px; display: flex; flex-direction: column; gap: 9px; }
+    .crew-card:hover { border-color: var(--border-strong); }
 
     .map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .seg-group { display: inline-flex; background: var(--input-bg); border: 1px solid var(--border); border-radius: 11px; padding: 3px; gap: 2px; }
@@ -317,7 +323,7 @@
       .kpi-value { font-size: clamp(1.25rem, 5.5vw, 1.65rem); }
       .card { padding: 15px 14px; border-radius: 18px; margin-bottom: 14px; }
       .form-grid, .wrapped-card { grid-template-columns: 1fr; }
-      .timeline-grid { grid-template-columns: 1fr; }
+      .timeline-grid, .crew-grid { grid-template-columns: 1fr; }
       .map-stage { height: 470px; }
       .top-cities-overlay { display: none; }
 
@@ -377,14 +383,14 @@
             Podsumowanie Wrapped
           </button>
 
-          <div class="ribbon-label">Spotify & Media</div>
-          <button class="btn btn-block" onclick="closeRibbonMenu(); syncAllArtistPhotos()">
+          <div class="ribbon-label">Muzyka & Baza zdjęć</div>
+          <button class="btn btn-block" onclick="closeRibbonMenu(); syncArtistsFromEdge(true)">
             <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14.5c2.5-1 5.5-1 8 0"/><path d="M7 11.5c3.5-1.2 7.5-1.2 11 0"/></svg>
-            Pobierz zdjęcia artystów
+            Synchronizuj bazę Spotify/Apple
           </button>
-          <button class="btn btn-block" onclick="closeRibbonMenu(); generateSpotifyPlaylist()">
+          <button class="btn btn-block" onclick="closeRibbonMenu(); openStreamingPlaylist()">
             <svg class="ico" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Playlista Spotify (filtr / event)
+            Playlista (<span class="sp-provider-label">Spotify</span>)
           </button>
 
           <div class="ribbon-label">Motyw kolorystyczny</div>
@@ -481,10 +487,10 @@
       <section class="card view-hidden" id="startUpcomingCard">
         <div class="section-head">
           <div>
-            <h2 class="section-title">Nadchodzące Koncerty</h2>
-            <p class="section-sub">Twoje najbliższe wyjazdy i odliczanie dni</p>
+            <h2 class="section-title">Nadchodzące Koncerty & Travel Wallet</h2>
+            <p class="section-sub">Odliczanie, bilety, noclegi i lista pakowania</p>
           </div>
-          <button class="btn btn-sm" onclick="setView('add'); switchAddSubTab('upcoming')">Zarządzaj</button>
+          <button class="btn btn-sm" onclick="setView('add'); switchAddSubTab('upcoming')">+ Zaplanuj</button>
         </div>
         <div class="upcoming-grid" id="upcomingGrid"></div>
       </section>
@@ -493,14 +499,14 @@
         <div class="section-head">
           <div>
             <h2 class="section-title">Twoi Top Artyści</h2>
-            <p class="section-sub" id="artistSourceSub">Kliknij artystę, aby filtrować • Zdjęcia z Spotify / muzycznej bazy (0 tokenów AI)</p>
+            <p class="section-sub">Zdjęcia HD ze Spotify & 30s odsłuch z Apple Music (dla każdego bez logowania)</p>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn btn-sm" onclick="generateSpotifyPlaylist()">
+            <button class="btn btn-sm btn-primary" onclick="openStreamingPlaylist()">
               <svg class="ico ico-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <span>Playlista Spotify</span>
+              <span>Playlista (<span class="sp-provider-label">Spotify</span>)</span>
             </button>
-            <button class="btn btn-sm" onclick="syncAllArtistPhotos()">Odśwież zdjęcia</button>
+            <button class="btn btn-sm" onclick="syncArtistsFromEdge(true)">Odśwież zdjęcia</button>
           </div>
         </div>
         <div class="artists-strip" id="topArtistsStrip"></div>
@@ -577,7 +583,7 @@
       <section class="card">
         <div class="sub-tabs" id="addSubTabs">
           <button class="sub-tab active" data-sub="concert" onclick="switchAddSubTab('concert')">Dodaj koncert</button>
-          <button class="sub-tab" data-sub="upcoming" onclick="switchAddSubTab('upcoming')">Nadchodzący & Bilet</button>
+          <button class="sub-tab" data-sub="upcoming" onclick="switchAddSubTab('upcoming')">Nadchodzący & Travel Wallet</button>
           <button class="sub-tab" data-sub="database" onclick="switchAddSubTab('database')">Pełna baza (<span id="dbCountLabel">0</span>)</button>
         </div>
 
@@ -594,7 +600,7 @@
                   <div class="artist-chips" id="modalLineupChips"></div>
                 </div>
               </div>
-              <div class="form-group"><label>Artysta *</label><input type="text" id="mArtysta" required list="dlArtysta" placeholder="np. Taco Hemingway" /></div>
+              <div class="form-group"><label>Artysta *</label><input type="text" id="mArtysta" required list="dlArtysta" placeholder="np. Taco Hemingway" onblur="autoFillGenreFromArtistCache()" /></div>
               <div class="form-group"><label>Data *</label><input type="date" id="mData" required onchange="autoFillDateFields('mData','mRok','mDzien'); updateModalLineupPicker();" /></div>
               <div class="form-group"><label>Dzień tygodnia</label><input type="text" id="mDzien" placeholder="piątek" /></div>
               <div class="form-group"><label>Godzina</label><input type="text" id="mGodzina" placeholder="21:00" /></div>
@@ -603,7 +609,7 @@
               <div class="form-group"><label>Miasto *</label><input type="text" id="mMiasto" required list="dlMiasto" placeholder="Poznań" /></div>
               <div class="form-group"><label>District / Województwo</label><input type="text" id="mDistrict" list="dlDistrict" placeholder="Wielkopolskie" /></div>
               <div class="form-group"><label>Kraj *</label><input type="text" id="mKraj" required list="dlKraj" value="Polska" /></div>
-              <div class="form-group"><label>Gatunek muzyczny</label><input type="text" id="mGatunek" list="dlGatunek" placeholder="Hip-Hop/Rap" /></div>
+              <div class="form-group"><label>Gatunek muzyczny (auto ze Spotify)</label><input type="text" id="mGatunek" list="dlGatunek" placeholder="Hip-Hop/Rap" /></div>
               <div class="form-group"><label>Podgatunek</label><input type="text" id="mPodgatunek" list="dlPodgatunek" placeholder="Polski rap" /></div>
               <div class="form-group"><label>Kto</label><input type="text" id="mKto" list="dlKto" value="Razem" /></div>
               <div class="form-group"><label>Z kim?</label><input type="text" id="mZKim" list="dlZKim" placeholder="Oliwki & Klopstegi" /></div>
@@ -622,7 +628,7 @@
         </div>
 
         <div id="add-pane-upcoming" class="view-hidden">
-          <h3 class="section-title" id="upFormTitle" style="margin-bottom:12px;">Zaplanuj nadchodzący koncert</h3>
+          <h3 class="section-title" id="upFormTitle" style="margin-bottom:12px;">Zaplanuj nadchodzący koncert & Travel Wallet</h3>
           <form id="upcomingForm" onsubmit="saveUpcoming(event)">
             <input type="hidden" id="uId" /><input type="hidden" id="uTicketPath" />
             <div class="form-grid">
@@ -643,9 +649,11 @@
               </div>
               <div class="form-group"><label>Cena biletu (PLN)</label><input type="number" id="uCena" min="0" step="1" /></div>
               <div class="form-group"><label>Plik biletu (PDF / QR obraz)</label><input type="file" id="uTicketFile" accept=".pdf,image/*" /></div>
-              <div class="form-group full"><label>Uwagi / Nocleg / Dojazd</label><input type="text" id="uUwagi" placeholder="Lot, hotel, ekipa..." /></div>
+              <div class="form-group"><label>Nocleg / Hotel (adres lub nazwa)</label><input type="text" id="uHotel" placeholder="np. Hotel Mercure Gdynia" /></div>
+              <div class="form-group"><label>Dojazd / Lot / Nr rezerwacji</label><input type="text" id="uTransport" placeholder="np. PKP EIP 14:20 / Lot FR1234" /></div>
+              <div class="form-group full"><label>Lista pakowania & Uwagi</label><input type="text" id="uUwagi" placeholder="Peleryna, powerbank, zatyczki, dowód..." /></div>
             </div>
-            <div class="modal-foot"><button type="button" class="btn" onclick="resetUpcomingForm()">Wyczyść</button><button type="submit" class="btn btn-primary">Zapisz plan</button></div>
+            <div class="modal-foot"><button type="button" class="btn" onclick="resetUpcomingForm()">Wyczyść</button><button type="submit" class="btn btn-primary">Zapisz wyjazd</button></div>
           </form>
         </div>
 
@@ -676,6 +684,7 @@
         <div class="sub-tabs" id="eventsSubTabs">
           <button class="sub-tab active" data-esub="cards" onclick="switchEventSubTab('cards')">Karty Eventów</button>
           <button class="sub-tab" data-esub="concerts" onclick="switchEventSubTab('concerts')">Baza koncertów eventu</button>
+          <button class="sub-tab" data-esub="crew" onclick="switchEventSubTab('crew')">Baza Ekipy</button>
           <button class="sub-tab" data-esub="clash" onclick="switchEventSubTab('clash')">Clashfinder</button>
         </div>
 
@@ -698,6 +707,11 @@
           </div>
         </div>
 
+        <div id="events-pane-crew" class="view-hidden">
+          <p class="section-sub" style="margin-bottom:12px;">Statystyki wspólnych koncertów, kilometrów oraz rozliczeń z każdą paczką i osobą.</p>
+          <div class="crew-grid" id="crewProfilesGrid"></div>
+        </div>
+
         <div id="events-pane-clash" class="view-hidden">
           <p class="section-sub" style="margin-bottom:12px;">Układaj godziny występów — nakładające się godziny zostaną automatycznie oznaczone jako konflikt.</p>
           <form onsubmit="addClashSlot(event)" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:14px;">
@@ -718,7 +732,7 @@
         <div class="section-head">
           <div>
             <h2 class="section-title">Mój Profil & Ustawienia</h2>
-            <p class="section-sub" id="profileEmailLabel">Zarządzaj kontem, miastem bazowym i wyglądem aplikacji</p>
+            <p class="section-sub" id="profileEmailLabel">Zarządzaj kontem, miastem bazowym, serwisem muzycznym i wyglądem</p>
           </div>
         </div>
         <div class="form-grid">
@@ -738,28 +752,19 @@
               <option value="nasa">NASA Space Grey</option>
             </select>
           </div>
-        </div>
-
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
-            <div>
-              <h3 class="section-title" style="font-size:1.02rem;">Integracja Spotify (Zdjęcia & Playlisty)</h3>
-              <p class="section-sub" id="spotifyConnStatus">Podaj Spotify Client ID (z developer.spotify.com) lub używaj darmowego katalogu zdjęć artystów</p>
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-sm btn-primary" id="spotifyConnectBtn" onclick="connectSpotifyOAuth()">Połącz ze Spotify</button>
-              <button class="btn btn-sm" onclick="generateSpotifyPlaylist()">Playlista Spotify</button>
-              <button class="btn btn-sm" onclick="syncAllArtistPhotos()">Synchronizuj zdjęcia</button>
-            </div>
+          <div class="form-group">
+            <label>Domyślna platforma streamingowa (linki & playlisty)</label>
+            <select id="streamingProviderSelect" onchange="saveStreamingProvider(this.value)">
+              <option value="spotify">Spotify</option>
+              <option value="apple">Apple Music</option>
+              <option value="youtube">YouTube Music</option>
+              <option value="tidal">Tidal</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>Spotify Client ID (opcjonalnie — do tworzenia playlist na koncie Spotify)</label>
-            <div style="display:flex;gap:8px;">
-              <input type="text" id="spotifyClientIdInput" style="flex:1" placeholder="Wklej Spotify Client ID..." />
-              <button class="btn btn-sm" onclick="saveSpotifyClientId()">Zapisz ID</button>
-            </div>
+            <label>Globalna baza zdjęć artystów (Supabase Edge + Spotify/Apple)</label>
+            <button class="btn" onclick="syncArtistsFromEdge(true)">Synchronizuj zdjęcia dla wszystkich artystów</button>
           </div>
-          <div id="lastPlaylistBox" style="margin-top:10px;"></div>
         </div>
 
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
@@ -783,6 +788,9 @@
       </section>
     </div>
   </div>
+
+  <!-- HIDDEN AUDIO PLAYER FOR 30s PREVIEW -->
+  <audio id="previewAudioPlayer" onended="stopAudioPreview()"></audio>
 
   <!-- HIDDEN INPUTS & MODALS -->
   <input type="file" id="eventPhotoInput" accept="image/*" multiple style="display:none" onchange="handleEventPhotosUpload(event)" />
@@ -872,19 +880,18 @@
     const SUPABASE_URL = "https://oxandbanjcrotsxckagy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_rc8Mp26K7r8w6tNNTDJ83w_RNMxZBeA";
 
-    const STORAGE_KEY = "festivals_life_concerts_v5";
-    const UPCOMING_KEY = "festivals_life_upcoming_v5";
-    const META_KEY = "festivals_life_events_meta_v5";
-    const BUCKET_KEY = "festivals_life_bucket_v5";
-    const EXPENSES_KEY = "festivals_life_expenses_v5";
-    const CLASH_KEY = "festivals_life_clash_v5";
-    const SETTINGS_KEY = "festivals_life_settings_v5";
-    const COORDS_KEY = "festivals_life_coords_v5";
-    const ARTIST_IMG_CACHE_KEY = "festivals_life_artist_imgs_v2";
-    const SPOTIFY_CID_KEY = "festivals_life_spotify_cid_v1";
-    const SPOTIFY_TOKEN_KEY = "festivals_life_spotify_token_v1";
-    const LAST_PLAYLIST_KEY = "festivals_life_last_playlist_v1";
-    const THEME_KEY = "festivals_life_theme_v5";
+    const STORAGE_KEY = "festivals_life_concerts_v6";
+    const UPCOMING_KEY = "festivals_life_upcoming_v6";
+    const META_KEY = "festivals_life_events_meta_v6";
+    const BUCKET_KEY = "festivals_life_bucket_v6";
+    const EXPENSES_KEY = "festivals_life_expenses_v6";
+    const CLASH_KEY = "festivals_life_clash_v6";
+    const TRAVEL_KEY = "festivals_life_travel_v6";
+    const SETTINGS_KEY = "festivals_life_settings_v6";
+    const COORDS_KEY = "festivals_life_coords_v6";
+    const ARTIST_META_CACHE_KEY = "festivals_life_artists_meta_v1";
+    const STREAMING_PROV_KEY = "festivals_life_streaming_prov_v1";
+    const THEME_KEY = "festivals_life_theme_v6";
 
     const THEME_PROFILES = {
       dark: { isDarkMap:true, heatGradient:{0.12:"#4B1D96",0.42:"#FF2A85",0.75:"#FF6B4A",1.0:"#FFF2EB"}, colorStops:[[0.0,"#6A24C8"],[0.42,"#FF2A85"],[0.76,"#FF6B4A"],[1.0,"#FFB86C"]], labelTextColor:"#FFF2EB", markerStroke:"#FFF2EB", chartText:"#B8A5C8", chartGrid:"rgba(255,255,255,0.07)", bar1:"rgba(255, 42, 133, 0.80)", bar1Border:"#FF6B4A", bar2:"rgba(255, 107, 74, 0.82)", bar3:"rgba(157, 78, 221, 0.82)", palette:["#FF2A85","#FF6B4A","#FFB86C","#9D4EDD","#2EE6D6","#F72585","#4CC9F0","#7209B7"] },
@@ -895,11 +902,12 @@
 
     let sbClient=null, currentUser=null, storageMode="offline";
     let allConcerts=[], filteredConcerts=[], upcomingConcerts=[], bucketList=[], tripExpenses=[], clashSlots=[];
+    let travelMeta=JSON.parse(localStorage.getItem(TRAVEL_KEY)||"{}");
     let eventsMeta={}, settings={hometown:"Poznań",hometown_coords:[52.4064,16.9252]};
     let cityCoords={...INITIAL_COORDS};
-    let artistImgCache=JSON.parse(localStorage.getItem(ARTIST_IMG_CACHE_KEY)||"{}");
-    let spotifyToken=localStorage.getItem(SPOTIFY_TOKEN_KEY)||"";
-    let lastPlaylist=JSON.parse(localStorage.getItem(LAST_PLAYLIST_KEY)||"null");
+    let artistsMetaCache=JSON.parse(localStorage.getItem(ARTIST_META_CACHE_KEY)||"{}");
+    let streamingProvider=localStorage.getItem(STREAMING_PROV_KEY)||"spotify";
+    let playingPreviewArtist="";
     let currentView="start", activeUploadEventKey=null, expandedLineups=new Set();
     let map=null, baseLayers=[], heatLayer=null, arcsLayer=null, markersLayer=null;
     let showMarkers=true, showArcs=true, currentMapStyle="auto", charts={}, sortCol="data", sortAsc=false;
@@ -915,293 +923,490 @@
 
     function setlistSearchUrl(c){const q=encodeURIComponent(`${c.artysta||""} ${c.miasto||""} ${c.rok||""}`.trim());return `https://www.setlist.fm/search?query=${q}`;}
 
-    function getSpotifyClientId(){const el=document.getElementById("spotifyClientIdInput");return(el&&el.value.trim())||localStorage.getItem(SPOTIFY_CID_KEY)||"";}
-    function saveSpotifyClientId(){localStorage.setItem(SPOTIFY_CID_KEY,document.getElementById("spotifyClientIdInput").value.trim());showToast("Zapisano Spotify Client ID!");}
-    function base64UrlEncode(buf){return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
-    async function sha256(p){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(p));}
-    async function connectSpotifyOAuth(){
-      const cid=getSpotifyClientId();if(!cid){showToast("Wklej Spotify Client ID w zakładce Ja.");setView("me");return;}
-      const verifier=base64UrlEncode(crypto.getRandomValues(new Uint8Array(32)));
-      const challenge=base64UrlEncode(await sha256(verifier));
-      sessionStorage.setItem("sp_pkce_verifier",verifier);
-      const redirectUri=location.origin+location.pathname;
-      location.href=`https://accounts.spotify.com/authorize?client_id=${encodeURIComponent(cid)}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&code_challenge_method=S256&code_challenge=${challenge}&scope=${encodeURIComponent("playlist-modify-private playlist-modify-public user-read-private")}`;
-    }
-    async function handleSpotifyCallbackIfPresent(){
-      const params=new URLSearchParams(location.search), code=params.get("code"), verifier=sessionStorage.getItem("sp_pkce_verifier"), cid=getSpotifyClientId();
-      if(!code||!verifier||!cid)return;
-      try{
-        const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:cid,grant_type:"authorization_code",code,redirect_uri:location.origin+location.pathname,code_verifier:verifier})});
-        const d=await r.json();
-        if(d.access_token){spotifyToken=d.access_token;localStorage.setItem(SPOTIFY_TOKEN_KEY,spotifyToken);history.replaceState({},"",location.pathname);updateSpotifyStatusUI();await syncAllArtistPhotos();}
-      }catch(e){}
-    }
-    function updateSpotifyStatusUI(){
-      const st=document.getElementById("spotifyConnStatus"), btn=document.getElementById("spotifyConnectBtn"), cidInp=document.getElementById("spotifyClientIdInput");
-      if(cidInp&&!cidInp.value)cidInp.value=localStorage.getItem(SPOTIFY_CID_KEY)||"";
-      if(spotifyToken){if(st)st.textContent="Połączono ze Spotify • Zdjęcia i playlisty aktywne";if(btn)btn.textContent="Spotify: Połączono";}
-      renderLastPlaylistBox();
-    }
-    function renderLastPlaylistBox(){
-      const box=document.getElementById("lastPlaylistBox");if(!box)return;
-      box.innerHTML=(lastPlaylist&&lastPlaylist.url)?`<div class="list-row"><div><strong>${escapeHtml(lastPlaylist.name)}</strong><div style="font-size:0.74rem;color:var(--text-muted);">${lastPlaylist.tracksCount} utworów</div></div><a class="btn btn-sm btn-primary" target="_blank" href="${escapeHtml(lastPlaylist.url)}">Otwórz na Spotify</a></div>`:"";
+    const PROVIDER_NAMES = { spotify: "Spotify", apple: "Apple Music", youtube: "YouTube Music", tidal: "Tidal" };
+
+    function saveStreamingProvider(val) {
+      streamingProvider = val || "spotify";
+      localStorage.setItem(STREAMING_PROV_KEY, streamingProvider);
+      updateStreamingUI();
+      renderTopArtists();
+      showToast(`Wybrano platformę: ${PROVIDER_NAMES[streamingProvider]}`);
     }
 
-    async function fetchArtistPhoto(artistName, forceRefresh=false){
-      if(!artistName)return null;
-      const key=artistName.trim().toLowerCase();
-      if(!forceRefresh&&artistImgCache[key])return artistImgCache[key];
-      let imgUrl="";
-      if(spotifyToken){
-        try{
-          const rs=await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(artistName)}&type=artist&limit=1`,{headers:{Authorization:`Bearer ${spotifyToken}`}});
-          if(rs.status===401){spotifyToken="";localStorage.removeItem(SPOTIFY_TOKEN_KEY);}
-          else if(rs.ok){const ds=await rs.json();const imgs=ds?.artists?.items?.[0]?.images||[];if(imgs.length)imgUrl=imgs[0].url;}
-        }catch(e){}
+    function updateStreamingUI() {
+      const sel = document.getElementById("streamingProviderSelect");
+      if (sel) sel.value = streamingProvider;
+      document.querySelectorAll(".sp-provider-label").forEach(el => el.textContent = PROVIDER_NAMES[streamingProvider] || "Spotify");
+    }
+
+    function getArtistStreamingUrl(name) {
+      const meta = artistsMetaCache[(name || "").trim().toLowerCase()] || {};
+      const q = encodeURIComponent(name || "");
+      if (streamingProvider === "spotify") return meta.spotify_url || `https://open.spotify.com/search/${q}`;
+      if (streamingProvider === "apple") return meta.apple_music_url || `https://music.apple.com/pl/search?term=${q}`;
+      if (streamingProvider === "youtube") return `https://music.youtube.com/search?q=${q}`;
+      if (streamingProvider === "tidal") return `https://listen.tidal.com/search?q=${q}`;
+      return meta.spotify_url || `https://open.spotify.com/search/${q}`;
+    }
+
+    function openStreamingPlaylist() {
+      const artists = [...new Set(filteredConcerts.map(c => c.artysta).filter(Boolean))].slice(0, 6);
+      const q = encodeURIComponent(artists.join(" "));
+      if (streamingProvider === "spotify") window.open(`https://open.spotify.com/search/${q}`, "_blank");
+      else if (streamingProvider === "apple") window.open(`https://music.apple.com/pl/search?term=${q}`, "_blank");
+      else if (streamingProvider === "youtube") window.open(`https://music.youtube.com/search?q=${q}`, "_blank");
+      else window.open(`https://listen.tidal.com/search?q=${q}`, "_blank");
+    }
+
+    function toggleAudioPreview(artistName, previewUrl) {
+      const player = document.getElementById("previewAudioPlayer");
+      if (!player || !previewUrl) return;
+      if (playingPreviewArtist === artistName && !player.paused) {
+        stopAudioPreview();
+        return;
       }
-      if(!imgUrl){try{const r1=await fetch(`https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(artistName)}`);if(r1.ok){const d1=await r1.json();if(d1?.artists?.[0]?.strArtistThumb)imgUrl=d1.artists[0].strArtistThumb+"/preview";}}catch(e){}}
-      if(!imgUrl){try{const r2=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(artistName.replace(/ /g,"_"))}`);if(r2.ok){const d2=await r2.json();if(d2?.thumbnail?.source)imgUrl=d2.thumbnail.source;}}catch(e){}}
-      if(imgUrl){artistImgCache[key]=imgUrl;try{localStorage.setItem(ARTIST_IMG_CACHE_KEY,JSON.stringify(artistImgCache));}catch(e){}}
-      return imgUrl;
+      playingPreviewArtist = artistName;
+      player.src = previewUrl;
+      player.play().catch(() => {});
+      renderTopArtists();
+      showToast(`Odtwarzam podgląd: ${artistName}`);
     }
 
-    async function syncAllArtistPhotos(){
-      const byArt={};allConcerts.forEach(c=>{if(c.artysta)byArt[c.artysta]=(byArt[c.artysta]||0)+1;});
-      const top=Object.entries(byArt).sort((a,b)=>b[1]-a[1]).slice(0,14).map(e=>e[0]);
-      showToast(`Synchronizuję zdjęcia dla ${top.length} artystów...`);
-      for(const name of top){await fetchArtistPhoto(name,true);}
-      document.querySelectorAll("[data-artist-avatar]").forEach(el=>el.removeAttribute("data-loaded"));
-      hydrateAvatarElements(); showToast("Zaktualizowano zdjęcia!");
+    function stopAudioPreview() {
+      const player = document.getElementById("previewAudioPlayer");
+      if (player) { player.pause(); player.currentTime = 0; }
+      playingPreviewArtist = "";
+      renderTopArtists();
     }
 
-    async function generateSpotifyPlaylist(){
-      const artists=[...new Set(filteredConcerts.map(c=>c.artysta).filter(Boolean))].slice(0,20);
-      if(!artists.length){showToast("Brak artystów w bieżącym widoku.");return;}
-      const yr=document.getElementById("fYear").value, qTxt=document.getElementById("fSearch").value.trim();
-      const title=`FESTIVAL'S LIFE ${qTxt?"• "+qTxt:(yr?"• "+yr:"• Historia")}`;
-      if(!spotifyToken){window.open(`https://open.spotify.com/search/${encodeURIComponent(artists.slice(0,5).join(" "))}`,"_blank");showToast("Otwarto Spotify (dodaj Client ID w zakładce Ja, aby zapisywać playlisty).");return;}
-      try{
-        showToast("Tworzę playlistę na Spotify...");
-        const me=await (await fetch("https://api.spotify.com/v1/me",{headers:{Authorization:`Bearer ${spotifyToken}`}})).json();
-        const pl=await (await fetch(`https://api.spotify.com/v1/users/${encodeURIComponent(me.id)}/playlists`,{method:"POST",headers:{Authorization:`Bearer ${spotifyToken}`,"Content-Type":"application/json"},body:JSON.stringify({name:title,description:"Wygenerowano z FESTIVAL'S LIFE",public:false})})).json();
-        const uris=[];
-        for(const art of artists){const trD=await(await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent("artist:"+art)}&type=track&limit=2`,{headers:{Authorization:`Bearer ${spotifyToken}`}})).json();(trD?.tracks?.items||[]).forEach(t=>{if(t.uri)uris.push(t.uri);});}
-        if(uris.length&&pl.id)await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks`,{method:"POST",headers:{Authorization:`Bearer ${spotifyToken}`,"Content-Type":"application/json"},body:JSON.stringify({uris:uris.slice(0,50)})});
-        lastPlaylist={name:title,url:pl.external_urls?.spotify||"",tracksCount:Math.min(uris.length,50)};
-        localStorage.setItem(LAST_PLAYLIST_KEY,JSON.stringify(lastPlaylist)); renderLastPlaylistBox();
-        if(lastPlaylist.url)window.open(lastPlaylist.url,"_blank");
-        showToast(`Utworzono playlistę: ${title}!`);
-      }catch(err){showToast("Błąd Spotify: "+err.message);}
+    async function syncArtistsFromEdge(manual = false) {
+      if (!isSupabaseConfigured() || !sbClient) return;
+      const byArt = {};
+      allConcerts.forEach(c => { if (c.artysta) byArt[c.artysta] = (byArt[c.artysta] || 0) + 1; });
+      const topNames = Object.entries(byArt).sort((a, b) => b[1] - a[1]).slice(0, 24).map(e => e[0]);
+      if (!topNames.length) return;
+
+      const missing = manual
+        ? topNames
+        : topNames.filter(n => !artistsMetaCache[n.trim().toLowerCase()]?.image_url);
+
+      if (!missing.length) return;
+      if (manual) showToast(`Pobieram zdjęcia ze Spotify i Apple Music (${missing.length} artystów)...`);
+
+      try {
+        const keys = missing.map(n => n.trim().toLowerCase());
+        const { data: cachedRows } = await sbClient.from("artists_cache").select("*").in("artist_key", keys);
+        (cachedRows || []).forEach(r => { if (r.image_url) artistsMetaCache[r.artist_key] = r; });
+
+        const stillMissing = missing.filter(n => !artistsMetaCache[n.trim().toLowerCase()]?.image_url);
+        if (stillMissing.length) {
+          const { data: fnData } = await sbClient.functions.invoke("fetch-artist-meta", {
+            body: { artists: stillMissing }
+          });
+          if (fnData && fnData.results) {
+            Object.entries(fnData.results).forEach(([k, val]) => {
+              artistsMetaCache[k] = val;
+            });
+          }
+        }
+        try { localStorage.setItem(ARTIST_META_CACHE_KEY, JSON.stringify(artistsMetaCache)); } catch (_) {}
+        renderStartEgo();
+        renderTopArtists();
+        renderHallOfFame();
+        renderBucketList();
+        if (manual) showToast("Zaktualizowano bazę zdjęć artystów!");
+      } catch (err) {
+        if (manual) showToast("Błąd synchronizacji: " + err.message);
+      }
     }
 
-    function artistInitials(name){return String(name||"?").split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();}
-    function hydrateAvatarElements(){document.querySelectorAll("[data-artist-avatar]").forEach(async(el)=>{const name=el.getAttribute("data-artist-avatar");if(!name||el.getAttribute("data-loaded")==="1")return;el.setAttribute("data-loaded","1");const url=await fetchArtistPhoto(name);if(url)el.innerHTML=`<img src="${escapeHtml(url)}" alt="${escapeHtml(name)}" loading="lazy" />`;});}
-
-    function setView(view){
-      currentView=view;
-      document.querySelectorAll("#desktopNav .nav-tab, #mobileBottomNav .m-nav-btn").forEach(b=>b.classList.toggle("active",b.getAttribute("data-view")===view));
-      ["start","map","add","events","me"].forEach(v=>document.getElementById("view-"+v).classList.toggle("view-hidden",v!==view));
-      document.getElementById("globalSearchArea").classList.toggle("view-hidden",view==="me");
-      window.scrollTo({top:0,behavior:"smooth"});
-      if(view==="map")setTimeout(()=>{if(!map)initMap();map.invalidateSize();updateHeatmap();},90);
-      if(view==="start")setTimeout(()=>renderCharts(),60);
+    function autoFillGenreFromArtistCache() {
+      const art = document.getElementById("mArtysta").value.trim().toLowerCase();
+      const gInp = document.getElementById("mGatunek");
+      if (!art || gInp.value.trim()) return;
+      const hit = artistsMetaCache[art];
+      if (hit && Array.isArray(hit.genres) && hit.genres.length) {
+        gInp.value = hit.genres[0];
+      }
     }
-    function switchAddSubTab(sub){document.querySelectorAll("#addSubTabs .sub-tab").forEach(b=>b.classList.toggle("active",b.getAttribute("data-sub")===sub));["concert","upcoming","database"].forEach(p=>document.getElementById("add-pane-"+p).classList.toggle("view-hidden",p!==sub));}
-    function switchEventSubTab(sub){document.querySelectorAll("#eventsSubTabs .sub-tab").forEach(b=>b.classList.toggle("active",b.getAttribute("data-esub")===sub));["cards","concerts","clash"].forEach(p=>document.getElementById("events-pane-"+p).classList.toggle("view-hidden",p!==sub));if(sub==="concerts")renderEventConcertsTable();if(sub==="clash")renderClashfinder();}
 
-    function isSupabaseConfigured(){return typeof window.supabase!=="undefined"&&SUPABASE_URL.startsWith("https://")&&SUPABASE_ANON_KEY&&!SUPABASE_ANON_KEY.includes("WKLEJ_TUTAJ");}
-    function initSupabaseClient(){if(!isSupabaseConfigured())return null;if(!sbClient)sbClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});return sbClient;}
-    async function resolveSignedUrl(bucket,pathOrUrl){if(!pathOrUrl)return"";if(pathOrUrl.startsWith("http")||pathOrUrl.startsWith("data:")||pathOrUrl.startsWith("/uploads/"))return pathOrUrl;if(storageMode==="supabase"&&sbClient){const{data}=await sbClient.storage.from(bucket).createSignedUrl(pathOrUrl,86400);if(data?.signedUrl)return data.signedUrl;}return pathOrUrl;}
+    function artistInitials(name) { return String(name || "?").split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase(); }
+    function renderAvatarInner(name) {
+      const meta = artistsMetaCache[(name || "").trim().toLowerCase()];
+      if (meta && meta.image_url) {
+        return `<img src="${escapeHtml(meta.image_url)}" alt="${escapeHtml(name)}" loading="lazy" />`;
+      }
+      return artistInitials(name);
+    }
 
-    async function loadFromSupabase(user){
-      currentUser=user;storageMode="supabase";
+    function setView(view) {
+      currentView = view;
+      document.querySelectorAll("#desktopNav .nav-tab, #mobileBottomNav .m-nav-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === view));
+      ["start", "map", "add", "events", "me"].forEach(v => document.getElementById("view-" + v).classList.toggle("view-hidden", v !== view));
+      document.getElementById("globalSearchArea").classList.toggle("view-hidden", view === "me");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (view === "map") setTimeout(() => { if (!map) initMap(); map.invalidateSize(); updateHeatmap(); }, 90);
+      if (view === "start") setTimeout(() => renderCharts(), 60);
+    }
+    function switchAddSubTab(sub) { document.querySelectorAll("#addSubTabs .sub-tab").forEach(b => b.classList.toggle("active", b.getAttribute("data-sub") === sub)); ["concert", "upcoming", "database"].forEach(p => document.getElementById("add-pane-" + p).classList.toggle("view-hidden", p !== sub)); }
+    function switchEventSubTab(sub) { document.querySelectorAll("#eventsSubTabs .sub-tab").forEach(b => b.classList.toggle("active", b.getAttribute("data-esub") === sub)); ["cards", "concerts", "crew", "clash"].forEach(p => document.getElementById("events-pane-" + p).classList.toggle("view-hidden", p !== sub)); if (sub === "concerts") renderEventConcertsTable(); if (sub === "crew") renderCrewProfiles(); if (sub === "clash") renderClashfinder(); }
+
+    function isSupabaseConfigured() { return typeof window.supabase !== "undefined" && SUPABASE_URL.startsWith("https://") && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("WKLEJ_TUTAJ"); }
+    function initSupabaseClient() { if (!isSupabaseConfigured()) return null; if (!sbClient) sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } }); return sbClient; }
+    async function resolveSignedUrl(bucket, pathOrUrl) { if (!pathOrUrl) return ""; if (pathOrUrl.startsWith("http") || pathOrUrl.startsWith("data:") || pathOrUrl.startsWith("/uploads/")) return pathOrUrl; if (storageMode === "supabase" && sbClient) { const { data } = await sbClient.storage.from(bucket).createSignedUrl(pathOrUrl, 86400); if (data?.signedUrl) return data.signedUrl; } return pathOrUrl; }
+
+    async function loadFromSupabase(user) {
+      currentUser = user; storageMode = "supabase";
       document.getElementById("statusDot").classList.remove("offline");
-      document.getElementById("serverStatusText").textContent=user.email;
-      document.getElementById("profileEmailLabel").textContent=`Zalogowano jako ${user.email}`;
-      document.getElementById("logoutBtn").style.display="inline-flex";document.getElementById("profileLogoutBtn").style.display="inline-flex";
-      const[profR,citiesR,conR,upR,metaR,blR,expR]=await Promise.all([sbClient.from("profiles").select("*").eq("id",user.id).maybeSingle(),sbClient.from("cities_cache").select("*"),sbClient.from("concerts").select("*").order("data",{ascending:true}),sbClient.from("upcoming_concerts").select("*").order("data",{ascending:true}),sbClient.from("events_meta").select("*"),sbClient.from("bucket_list").select("*").order("created_at",{ascending:false}),sbClient.from("trip_expenses").select("*").order("created_at",{ascending:false})]);
-      if(profR.data){settings={hometown:profR.data.hometown||"Poznań",hometown_coords:[profR.data.hometown_lat??52.4064,profR.data.hometown_lng??16.9252]};if(profR.data.theme&&THEME_PROFILES[profR.data.theme])applyTheme(profR.data.theme,false);}
-      (citiesR.data||[]).forEach(r=>{cityCoords[r.city]=[r.lat,r.lng];});
-      allConcerts=(conR.data||[]).map(r=>({...r,cena:r.cena!=null?String(r.cena):""}));
-      upcomingConcerts=(upR.data||[]).map(r=>({...r,cena:r.cena!=null?String(r.cena):""}));
-      bucketList=blR.data||[];tripExpenses=expR.data||[];
-      eventsMeta={...INITIAL_EVENTS_META};
-      for(const row of(metaR.data||[])){const poster=row.poster_path?await resolveSignedUrl("event-media",row.poster_path):"";const photos=Array.isArray(row.photos)?row.photos:[];for(const ph of photos){if(ph.path&&!ph.url)ph.url=await resolveSignedUrl("event-media",ph.path);}eventsMeta[row.event_key]={poster_path:row.poster_path||"",poster,photos,lineup:Array.isArray(row.lineup)?row.lineup:[]};}
+      document.getElementById("serverStatusText").textContent = user.email;
+      document.getElementById("profileEmailLabel").textContent = `Zalogowano jako ${user.email}`;
+      document.getElementById("logoutBtn").style.display = "inline-flex"; document.getElementById("profileLogoutBtn").style.display = "inline-flex";
+
+      const [profR, citiesR, conR, upR, metaR, blR, expR, artCacheR] = await Promise.all([
+        sbClient.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        sbClient.from("cities_cache").select("*"),
+        sbClient.from("concerts").select("*").order("data", { ascending: true }),
+        sbClient.from("upcoming_concerts").select("*").order("data", { ascending: true }),
+        sbClient.from("events_meta").select("*"),
+        sbClient.from("bucket_list").select("*").order("created_at", { ascending: false }),
+        sbClient.from("trip_expenses").select("*").order("created_at", { ascending: false }),
+        sbClient.from("artists_cache").select("*")
+      ]);
+
+      if (profR.data) { settings = { hometown: profR.data.hometown || "Poznań", hometown_coords: [profR.data.hometown_lat ?? 52.4064, profR.data.hometown_lng ?? 16.9252] }; if (profR.data.theme && THEME_PROFILES[profR.data.theme]) applyTheme(profR.data.theme, false); }
+      (citiesR.data || []).forEach(r => { cityCoords[r.city] = [r.lat, r.lng]; });
+      allConcerts = (conR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
+      upcomingConcerts = (upR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
+      bucketList = blR.data || []; tripExpenses = expR.data || [];
+      (artCacheR.data || []).forEach(r => { if (r.artist_key) artistsMetaCache[r.artist_key] = r; });
+      try { localStorage.setItem(ARTIST_META_CACHE_KEY, JSON.stringify(artistsMetaCache)); } catch (_) {}
+
+      eventsMeta = { ...INITIAL_EVENTS_META };
+      for (const row of (metaR.data || [])) {
+        const poster = row.poster_path ? await resolveSignedUrl("event-media", row.poster_path) : "";
+        const photos = Array.isArray(row.photos) ? row.photos : [];
+        for (const ph of photos) { if (ph.path && !ph.url) ph.url = await resolveSignedUrl("event-media", ph.path); }
+        eventsMeta[row.event_key] = { poster_path: row.poster_path || "", poster, photos, lineup: Array.isArray(row.lineup) ? row.lineup : [] };
+      }
     }
 
-    async function handleAuthSubmit(e){e.preventDefault();const errBox=document.getElementById("authError");errBox.style.display="none";const{data,error}=await initSupabaseClient().auth.signInWithPassword({email:document.getElementById("authEmail").value.trim(),password:document.getElementById("authPassword").value});if(error){errBox.textContent=error.message;errBox.style.display="block";return;}document.getElementById("authOverlay").classList.remove("open");await loadFromSupabase(data.user);finishBootstrap();}
-    async function handleSignUp(){const errBox=document.getElementById("authError");errBox.style.display="none";const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;const{data,error}=await initSupabaseClient().auth.signUp({email,password});if(error){errBox.textContent=error.message;errBox.style.display="block";return;}if(data.session&&data.user){document.getElementById("authOverlay").classList.remove("open");await loadFromSupabase(data.user);finishBootstrap();}else showToast("Konto utworzone! Zaloguj się.");}
-    async function handleLogout(){if(sbClient)await sbClient.auth.signOut();currentUser=null;document.getElementById("authOverlay").classList.add("open");}
+    async function handleAuthSubmit(e) { e.preventDefault(); const errBox = document.getElementById("authError"); errBox.style.display = "none"; const { data, error } = await initSupabaseClient().auth.signInWithPassword({ email: document.getElementById("authEmail").value.trim(), password: document.getElementById("authPassword").value }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); }
+    async function handleSignUp() { const errBox = document.getElementById("authError"); errBox.style.display = "none"; const email = document.getElementById("authEmail").value.trim(), password = document.getElementById("authPassword").value; const { data, error } = await initSupabaseClient().auth.signUp({ email, password }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } if (data.session && data.user) { document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); } else showToast("Konto utworzone! Zaloguj się."); }
+    async function handleLogout() { if (sbClient) await sbClient.auth.signOut(); currentUser = null; document.getElementById("authOverlay").classList.add("open"); }
 
-    function enterOfflineDemoMode(){
-      document.getElementById("authOverlay").classList.remove("open");storageMode="offline";
-      allConcerts=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||[...INITIAL_CONCERTS];
-      upcomingConcerts=JSON.parse(localStorage.getItem(UPCOMING_KEY)||"[]");
-      eventsMeta={...INITIAL_EVENTS_META,...JSON.parse(localStorage.getItem(META_KEY)||"{}")};
-      bucketList=JSON.parse(localStorage.getItem(BUCKET_KEY)||"[]");
-      tripExpenses=JSON.parse(localStorage.getItem(EXPENSES_KEY)||"[]");
-      clashSlots=JSON.parse(localStorage.getItem(CLASH_KEY)||"[]");
-      const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"null");if(s)settings=s;
-      document.getElementById("serverStatusText").textContent="Tryb lokalny";finishBootstrap();
+    function enterOfflineDemoMode() {
+      document.getElementById("authOverlay").classList.remove("open"); storageMode = "offline";
+      allConcerts = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [...INITIAL_CONCERTS];
+      upcomingConcerts = JSON.parse(localStorage.getItem(UPCOMING_KEY) || "[]");
+      eventsMeta = { ...INITIAL_EVENTS_META, ...JSON.parse(localStorage.getItem(META_KEY) || "{}") };
+      bucketList = JSON.parse(localStorage.getItem(BUCKET_KEY) || "[]");
+      tripExpenses = JSON.parse(localStorage.getItem(EXPENSES_KEY) || "[]");
+      clashSlots = JSON.parse(localStorage.getItem(CLASH_KEY) || "[]");
+      const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null"); if (s) settings = s;
+      document.getElementById("serverStatusText").textContent = "Tryb lokalny"; finishBootstrap();
     }
 
-    function finishBootstrap(){updateHometownUI();updateSpotifyStatusUI();populateFilterDropdowns();populateDatalists();populateEventFilterSelect();renderUpcoming();renderBucketList();renderClashfinder();applyFilters();}
-    async function initData(){applyTheme(localStorage.getItem(THEME_KEY)||"dark",false);if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1"))navigator.serviceWorker.register("./sw.js").catch(()=>{});await handleSpotifyCallbackIfPresent();if(isSupabaseConfigured()){const client=initSupabaseClient();const{data}=await client.auth.getSession();if(data?.session?.user){await loadFromSupabase(data.session.user);finishBootstrap();}else document.getElementById("authOverlay").classList.add("open");return;}enterOfflineDemoMode();}
+    function finishBootstrap() {
+      updateHometownUI();
+      updateStreamingUI();
+      populateFilterDropdowns();
+      populateDatalists();
+      populateEventFilterSelect();
+      renderUpcoming();
+      renderBucketList();
+      renderCrewProfiles();
+      renderClashfinder();
+      applyFilters();
+      syncArtistsFromEdge(false);
+    }
 
-    function applyTheme(theme,refresh=true){if(!THEME_PROFILES[theme])theme="dark";document.documentElement.setAttribute("data-theme",theme);localStorage.setItem(THEME_KEY,theme);["themeSelect","profileThemeSelect"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=theme;});if(refresh){if(map){loadBasemap();updateHeatmap();}renderCharts();if(storageMode==="supabase"&&sbClient&&currentUser)sbClient.from("profiles").update({theme}).eq("id",currentUser.id).then(()=>{});}}
-    function updateHometownUI(){document.querySelectorAll(".ht-inline").forEach(el=>el.textContent=settings.hometown||"Poznań");const inp=document.getElementById("profileHometownInput");if(inp)inp.value=settings.hometown||"Poznań";}
+    async function initData() {
+      applyTheme(localStorage.getItem(THEME_KEY) || "dark", false);
+      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+      if (isSupabaseConfigured()) {
+        const client = initSupabaseClient();
+        const { data } = await client.auth.getSession();
+        if (data?.session?.user) { await loadFromSupabase(data.session.user); finishBootstrap(); }
+        else document.getElementById("authOverlay").classList.add("open");
+        return;
+      }
+      enterOfflineDemoMode();
+    }
 
-    function haversineKm(lat1,lon1,lat2,lon2){const R=6371,r=d=>d*Math.PI/180;const a=Math.sin(r(lat2-lat1)/2)**2+Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(r(lon2-lon1)/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-    function getCityCoords(city){if(!city)return null;if(cityCoords[city])return cityCoords[city];const k=Object.keys(cityCoords).find(x=>x.toLowerCase()===city.toLowerCase());return k?cityCoords[k]:null;}
-    async function geocodeCity(city,country=""){if(!city)return null;const ex=getCityCoords(city);if(ex)return ex;try{const res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city+(country?", "+country:""))}`);const data=await res.json();if(data?.[0]){const coords=[parseFloat(data[0].lat),parseFloat(data[0].lon)];cityCoords[city]=coords;localStorage.setItem(COORDS_KEY,JSON.stringify(cityCoords));if(storageMode==="supabase"&&sbClient)await sbClient.from("cities_cache").upsert({city,country:country||"",lat:coords[0],lng:coords[1]},{onConflict:"city"});return coords;}}catch(e){}return null;}
-    async function saveHometownInline(){const city=document.getElementById("profileHometownInput").value.trim();if(!city)return;showToast(`Szukam współrzędnych dla ${city}...`);const coords=await geocodeCity(city);if(!coords){showToast("Nie znaleziono miasta.");return;}settings={hometown:city,hometown_coords:coords};if(storageMode==="supabase"&&sbClient&&currentUser)await sbClient.from("profiles").upsert({id:currentUser.id,hometown:city,hometown_lat:coords[0],hometown_lng:coords[1],updated_at:new Date().toISOString()});else localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));updateHometownUI();applyFilters();showToast(`Hometown: ${city}!`);}
+    function applyTheme(theme, refresh = true) { if (!THEME_PROFILES[theme]) theme = "dark"; document.documentElement.setAttribute("data-theme", theme); localStorage.setItem(THEME_KEY, theme); ["themeSelect", "profileThemeSelect"].forEach(id => { const el = document.getElementById(id); if (el) el.value = theme; }); if (refresh) { if (map) { loadBasemap(); updateHeatmap(); } renderCharts(); if (storageMode === "supabase" && sbClient && currentUser) sbClient.from("profiles").update({ theme }).eq("id", currentUser.id).then(() => {}); } }
+    function updateHometownUI() { document.querySelectorAll(".ht-inline").forEach(el => el.textContent = settings.hometown || "Poznań"); const inp = document.getElementById("profileHometownInput"); if (inp) inp.value = settings.hometown || "Poznań"; }
 
-    function computeDistances(list){const home=settings.hometown_coords||[52.4064,16.9252];const seenTrips=new Set(),artistKm={},artistSeen={};let totalKm=0,farthest={city:"—",country:"",artist:"",km:0};list.forEach(c=>{const coords=getCityCoords(c.miasto);if(!coords)return;const d=haversineKm(home[0],home[1],coords[0],coords[1]);if(d>farthest.km)farthest={city:c.miasto,country:c.kraj,artist:c.artysta,km:Math.round(d)};const tk=`${c.rok}|${c.event}|${c.miasto}`;if(!seenTrips.has(tk)&&d>15){seenTrips.add(tk);totalKm+=d*2;}if(c.artysta&&d>15){if(!artistSeen[c.artysta])artistSeen[c.artysta]=new Set();if(!artistSeen[c.artysta].has(tk)){artistSeen[c.artysta].add(tk);artistKm[c.artysta]=(artistKm[c.artysta]||0)+Math.round(d*2);}}});return{totalKm:Math.round(totalKm),farthest,artistKmSorted:Object.entries(artistKm).sort((a,b)=>b[1]-a[1])};}
+    function haversineKm(lat1, lon1, lat2, lon2) { const R = 6371, r = d => d * Math.PI / 180; const a = Math.sin(r(lat2 - lat1) / 2) ** 2 + Math.cos(r(lat1)) * Math.cos(r(lat2)) * Math.sin(r(lon2 - lon1) / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); }
+    function getCityCoords(city) { if (!city) return null; if (cityCoords[city]) return cityCoords[city]; const k = Object.keys(cityCoords).find(x => x.toLowerCase() === city.toLowerCase()); return k ? cityCoords[k] : null; }
+    async function geocodeCity(city, country = "") { if (!city) return null; const ex = getCityCoords(city); if (ex) return ex; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city + (country ? ", " + country : ""))}`); const data = await res.json(); if (data?.[0]) { const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)]; cityCoords[city] = coords; localStorage.setItem(COORDS_KEY, JSON.stringify(cityCoords)); if (storageMode === "supabase" && sbClient) await sbClient.from("cities_cache").upsert({ city, country: country || "", lat: coords[0], lng: coords[1] }, { onConflict: "city" }); return coords; } } catch (e) {} return null; }
+    async function saveHometownInline() { const city = document.getElementById("profileHometownInput").value.trim(); if (!city) return; showToast(`Szukam współrzędnych dla ${city}...`); const coords = await geocodeCity(city); if (!coords) { showToast("Nie znaleziono miasta."); return; } settings = { hometown: city, hometown_coords: coords }; if (storageMode === "supabase" && sbClient && currentUser) await sbClient.from("profiles").upsert({ id: currentUser.id, hometown: city, hometown_lat: coords[0], hometown_lng: coords[1], updated_at: new Date().toISOString() }); else localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); updateHometownUI(); applyFilters(); showToast(`Hometown: ${city}!`); }
 
-    function populateFilterDropdowns(){const fill=(id,vals,def)=>{const sel=document.getElementById(id),cur=sel.value;sel.innerHTML=`<option value="">${def}</option>`+vals.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");if(vals.map(String).includes(cur))sel.value=cur;};fill("fYear",[...new Set(allConcerts.map(c=>c.rok).filter(Boolean))].sort((a,b)=>b-a),"Wszystkie lata");fill("fGenre",[...new Set(allConcerts.map(c=>c.gatunek).filter(Boolean))].sort(),"Wszystkie gatunki");fill("fWho",[...new Set(allConcerts.map(c=>c.kto).filter(Boolean))].sort(),"Kto: Wszyscy");fill("fCrew",[...new Set(allConcerts.map(c=>c.z_kim).filter(Boolean))].sort(),"Z kim: Wszyscy");}
-    function populateDatalists(){const mapF={dlArtysta:"artysta",dlEvent:"event",dlScena:"scena",dlMiejsce:"miejsce",dlMiasto:"miasto",dlDistrict:"district",dlKraj:"kraj",dlGatunek:"gatunek",dlPodgatunek:"podgatunek",dlKto:"kto",dlZKim:"z_kim"};Object.entries(mapF).forEach(([id,k])=>{const vals=[...new Set(allConcerts.map(c=>c[k]).filter(Boolean))].sort();document.getElementById(id).innerHTML=vals.map(v=>`<option value="${escapeHtml(v)}"></option>`).join("");});}
-    function clearSearchPhrase(){document.getElementById("fSearch").value="";applyFilters();}
+    function computeDistances(list) { const home = settings.hometown_coords || [52.4064, 16.9252]; const seenTrips = new Set(), artistKm = {}, artistSeen = {}; let totalKm = 0, farthest = { city: "—", country: "", artist: "", km: 0 }; list.forEach(c => { const coords = getCityCoords(c.miasto); if (!coords) return; const d = haversineKm(home[0], home[1], coords[0], coords[1]); if (d > farthest.km) farthest = { city: c.miasto, country: c.kraj, artist: c.artysta, km: Math.round(d) }; const tk = `${c.rok}|${c.event}|${c.miasto}`; if (!seenTrips.has(tk) && d > 15) { seenTrips.add(tk); totalKm += d * 2; } if (c.artysta && d > 15) { if (!artistSeen[c.artysta]) artistSeen[c.artysta] = new Set(); if (!artistSeen[c.artysta].has(tk)) { artistSeen[c.artysta].add(tk); artistKm[c.artysta] = (artistKm[c.artysta] || 0) + Math.round(d * 2); } } }); return { totalKm: Math.round(totalKm), farthest, artistKmSorted: Object.entries(artistKm).sort((a, b) => b[1] - a[1]) }; }
 
-    function applyFilters(){
-      const qRaw=document.getElementById("fSearch").value.trim(), q=qRaw.toLowerCase();
-      const yr=document.getElementById("fYear").value, gn=document.getElementById("fGenre").value, wh=document.getElementById("fWho").value, cr=document.getElementById("fCrew").value;
-      document.getElementById("clearSearchBtn").classList.toggle("visible",qRaw.length>0);
-      const parts=[];if(qRaw)parts.push(`Fraza: "${qRaw}"`);if(yr)parts.push(`Rok: ${yr}`);if(gn)parts.push(`Gatunek: ${gn}`);if(wh)parts.push(`Kto: ${wh}`);if(cr)parts.push(`Ekipa: ${cr}`);
-      document.getElementById("activeFilterCount").textContent=parts.length?`(${parts.length})`:"";
-      document.getElementById("activeFilterBar").classList.toggle("visible",parts.length>0);
-      document.getElementById("activeFilterSummary").textContent=parts.join(" • ");
+    function populateFilterDropdowns() { const fill = (id, vals, def) => { const sel = document.getElementById(id), cur = sel.value; sel.innerHTML = `<option value="">${def}</option>` + vals.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(""); if (vals.map(String).includes(cur)) sel.value = cur; }; fill("fYear", [...new Set(allConcerts.map(c => c.rok).filter(Boolean))].sort((a, b) => b - a), "Wszystkie lata"); fill("fGenre", [...new Set(allConcerts.map(c => c.gatunek).filter(Boolean))].sort(), "Wszystkie gatunki"); fill("fWho", [...new Set(allConcerts.map(c => c.kto).filter(Boolean))].sort(), "Kto: Wszyscy"); fill("fCrew", [...new Set(allConcerts.map(c => c.z_kim).filter(Boolean))].sort(), "Z kim: Wszyscy"); }
+    function populateDatalists() { const mapF = { dlArtysta: "artysta", dlEvent: "event", dlScena: "scena", dlMiejsce: "miejsce", dlMiasto: "miasto", dlDistrict: "district", dlKraj: "kraj", dlGatunek: "gatunek", dlPodgatunek: "podgatunek", dlKto: "kto", dlZKim: "z_kim" }; Object.entries(mapF).forEach(([id, k]) => { const vals = [...new Set(allConcerts.map(c => c[k]).filter(Boolean))].sort(); document.getElementById(id).innerHTML = vals.map(v => `<option value="${escapeHtml(v)}"></option>`).join(""); }); }
+    function clearSearchPhrase() { document.getElementById("fSearch").value = ""; applyFilters(); }
 
-      filteredConcerts=allConcerts.filter(c=>{
-        if(yr&&String(c.rok)!==yr)return false;if(gn&&c.gatunek!==gn)return false;if(wh&&c.kto!==wh)return false;if(cr&&c.z_kim!==cr)return false;
-        if(q){const hay=`${c.artysta} ${c.event} ${c.miasto} ${c.kraj} ${c.miejsce} ${c.gatunek} ${c.z_kim} ${c.uwagi}`.toLowerCase();if(!hay.includes(q))return false;}
+    function applyFilters() {
+      const qRaw = document.getElementById("fSearch").value.trim(), q = qRaw.toLowerCase();
+      const yr = document.getElementById("fYear").value, gn = document.getElementById("fGenre").value, wh = document.getElementById("fWho").value, cr = document.getElementById("fCrew").value;
+      document.getElementById("clearSearchBtn").classList.toggle("visible", qRaw.length > 0);
+      const parts = []; if (qRaw) parts.push(`Fraza: "${qRaw}"`); if (yr) parts.push(`Rok: ${yr}`); if (gn) parts.push(`Gatunek: ${gn}`); if (wh) parts.push(`Kto: ${wh}`); if (cr) parts.push(`Ekipa: ${cr}`);
+      document.getElementById("activeFilterCount").textContent = parts.length ? `(${parts.length})` : "";
+      document.getElementById("activeFilterBar").classList.toggle("visible", parts.length > 0);
+      document.getElementById("activeFilterSummary").textContent = parts.join(" • ");
+
+      filteredConcerts = allConcerts.filter(c => {
+        if (yr && String(c.rok) !== yr) return false; if (gn && c.gatunek !== gn) return false; if (wh && c.kto !== wh) return false; if (cr && c.z_kim !== cr) return false;
+        if (q) { const hay = `${c.artysta} ${c.event} ${c.miasto} ${c.kraj} ${c.miejsce} ${c.gatunek} ${c.z_kim} ${c.uwagi}`.toLowerCase(); if (!hay.includes(q)) return false; }
         return true;
       });
-      document.getElementById("filteredCount").textContent=filteredConcerts.length;
-      document.getElementById("dbCountLabel").textContent=filteredConcerts.length;
-      renderStartEgo();renderKPIs();renderTopArtists();renderHallOfFame();renderCharts();renderPivots();renderTimeline();renderFullTable();renderEventConcertsTable();
-      if(map&&currentView==="map")updateHeatmap();
-      hydrateAvatarElements();
+      document.getElementById("filteredCount").textContent = filteredConcerts.length;
+      document.getElementById("dbCountLabel").textContent = filteredConcerts.length;
+      renderStartEgo(); renderKPIs(); renderTopArtists(); renderHallOfFame(); renderCharts(); renderPivots(); renderTimeline(); renderFullTable(); renderEventConcertsTable();
+      if (map && currentView === "map") updateHeatmap();
     }
 
-    function resetFilters(){["fSearch","fYear","fGenre","fWho","fCrew"].forEach(id=>document.getElementById(id).value="");applyFilters();}
-    function topEntry(obj){return Object.entries(obj).sort((a,b)=>b[1]-a[1])[0]||["—",0];}
+    function resetFilters() { ["fSearch", "fYear", "fGenre", "fWho", "fCrew"].forEach(id => document.getElementById(id).value = ""); applyFilters(); }
+    function topEntry(obj) { return Object.entries(obj).sort((a, b) => b[1] - a[1])[0] || ["—", 0]; }
 
-    function renderStartEgo(){
-      const n=filteredConcerts.length, countries=new Set(filteredConcerts.map(c=>c.kraj).filter(Boolean)).size,{totalKm}=computeDistances(filteredConcerts);
-      const byArt={};filteredConcerts.forEach(c=>{if(c.artysta)byArt[c.artysta]=(byArt[c.artysta]||0)+1;});const[topArt,topCnt]=topEntry(byArt);
-      let rank="Koncertowy Odkrywca";if(n>=150)rank="Legenda Sceny • Top 1% Fanów";else if(n>=100)rank="Weteran Festiwali • Klub 100+";else if(n>=50)rank="Stały Bywalec Pod Sceną";
-      document.getElementById("heroEgo").innerHTML=`<div><div class="hero-rank-tag">${rank}</div><h2>${n} koncertów w ${countries} krajach</h2><p>Przejechałeś już <strong>${totalKm.toLocaleString("pl-PL")} km</strong> za muzyką z ${escapeHtml(settings.hometown)}. Niewielu fanów ma taką historię.</p></div><div class="hero-top-artist"><div class="artist-avatar" data-artist-avatar="${escapeHtml(topArt)}">${artistInitials(topArt)}</div><div><div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:700;">Twój Numer #1</div><div style="font-family:var(--font-display);font-weight:800;font-size:1.05rem;">${escapeHtml(topArt)}</div><div style="font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-coral);">Widziany ${topCnt}× na żywo</div></div></div>`;
+    function renderStartEgo() {
+      const n = filteredConcerts.length, countries = new Set(filteredConcerts.map(c => c.kraj).filter(Boolean)).size, { totalKm } = computeDistances(filteredConcerts);
+      const byArt = {}; filteredConcerts.forEach(c => { if (c.artysta) byArt[c.artysta] = (byArt[c.artysta] || 0) + 1; }); const [topArt, topCnt] = topEntry(byArt);
+      let rank = "Koncertowy Odkrywca"; if (n >= 150) rank = "Legenda Sceny • Top 1% Fanów"; else if (n >= 100) rank = "Weteran Festiwali • Klub 100+"; else if (n >= 50) rank = "Stały Bywalec Pod Sceną";
+      document.getElementById("heroEgo").innerHTML = `<div><div class="hero-rank-tag">${rank}</div><h2>${n} koncertów w ${countries} krajach</h2><p>Przejechałeś już <strong>${totalKm.toLocaleString("pl-PL")} km</strong> za muzyką z ${escapeHtml(settings.hometown)}. Niewielu fanów ma taką historię.</p></div><div class="hero-top-artist"><div class="artist-avatar">${renderAvatarInner(topArt)}</div><div><div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:700;">Twój Numer #1</div><div style="font-family:var(--font-display);font-weight:800;font-size:1.05rem;">${escapeHtml(topArt)}</div><div style="font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-coral);">Widziany ${topCnt}× na żywo</div></div></div>`;
     }
 
-    function renderKPIs(){
-      const n=filteredConcerts.length,artists=new Set(filteredConcerts.map(c=>c.artysta).filter(Boolean)).size,events=new Set(filteredConcerts.map(c=>`${c.event}|${c.rok}`).filter(Boolean)).size,cities=new Set(filteredConcerts.map(c=>c.miasto).filter(Boolean)).size,countries=new Set(filteredConcerts.map(c=>c.kraj).filter(Boolean)).size,{totalKm}=computeDistances(filteredConcerts);
-      document.getElementById("secKpi").innerHTML=`<div class="kpi-card"><div class="kpi-label">Przeżyte koncerty</div><div class="kpi-value">${n}</div><div class="kpi-sub">z ${allConcerts.length} w bazie</div></div><div class="kpi-card"><div class="kpi-label">Unikalni artyści</div><div class="kpi-value">${artists}</div><div class="kpi-sub">${n?(n/Math.max(1,artists)).toFixed(2):0} / artystę</div></div><div class="kpi-card"><div class="kpi-label">Eventy i festiwale</div><div class="kpi-value">${events}</div><div class="kpi-sub">edycji wydarzeń</div></div><div class="kpi-card"><div class="kpi-label">Miasta / Kraje</div><div class="kpi-value">${cities} / ${countries}</div><div class="kpi-sub">lokalizacji</div></div><div class="kpi-card kpi-wide"><div class="kpi-label">Muzyczne kilometry</div><div class="kpi-value">${totalKm.toLocaleString("pl-PL")} km</div><div class="kpi-sub">w obie strony z ${escapeHtml(settings.hometown)}</div></div>`;
+    function renderKPIs() {
+      const n = filteredConcerts.length, artists = new Set(filteredConcerts.map(c => c.artysta).filter(Boolean)).size, events = new Set(filteredConcerts.map(c => `${c.event}|${c.rok}`).filter(Boolean)).size, cities = new Set(filteredConcerts.map(c => c.miasto).filter(Boolean)).size, countries = new Set(filteredConcerts.map(c => c.kraj).filter(Boolean)).size, { totalKm } = computeDistances(filteredConcerts);
+      document.getElementById("secKpi").innerHTML = `<div class="kpi-card"><div class="kpi-label">Przeżyte koncerty</div><div class="kpi-value">${n}</div><div class="kpi-sub">z ${allConcerts.length} w bazie</div></div><div class="kpi-card"><div class="kpi-label">Unikalni artyści</div><div class="kpi-value">${artists}</div><div class="kpi-sub">${n ? (n / Math.max(1, artists)).toFixed(2) : 0} / artystę</div></div><div class="kpi-card"><div class="kpi-label">Eventy i festiwale</div><div class="kpi-value">${events}</div><div class="kpi-sub">edycji wydarzeń</div></div><div class="kpi-card"><div class="kpi-label">Miasta / Kraje</div><div class="kpi-value">${cities} / ${countries}</div><div class="kpi-sub">lokalizacji</div></div><div class="kpi-card kpi-wide"><div class="kpi-label">Muzyczne kilometry</div><div class="kpi-value">${totalKm.toLocaleString("pl-PL")} km</div><div class="kpi-sub">w obie strony z ${escapeHtml(settings.hometown)}</div></div>`;
     }
 
-    function renderTopArtists(){const byArt={};filteredConcerts.forEach(c=>{if(c.artysta)byArt[c.artysta]=(byArt[c.artysta]||0)+1;});const top=Object.entries(byArt).sort((a,b)=>b[1]-a[1]).slice(0,8);document.getElementById("topArtistsStrip").innerHTML=top.map(([name,cnt])=>`<div class="artist-tile" onclick="document.getElementById('fSearch').value='${escapeHtml(name).replace(/'/g,"\\'")}';applyFilters();"><div class="artist-avatar" data-artist-avatar="${escapeHtml(name)}">${artistInitials(name)}</div><div class="artist-tile-name">${escapeHtml(name)}</div><div class="artist-tile-meta">${cnt}× na żywo</div></div>`).join("");}
-
-    function renderHallOfFame(){
-      const byArt={},byYr={},byDay={},byCrew={};let rain=0,night=0;
-      filteredConcerts.forEach(c=>{if(c.artysta)byArt[c.artysta]=(byArt[c.artysta]||0)+1;if(c.rok)byYr[c.rok]=(byYr[c.rok]||0)+1;if(c.data)byDay[`${c.data} (${c.event})`]=(byDay[`${c.data} (${c.event})`]||0)+1;if(c.z_kim)byCrew[c.z_kim]=(byCrew[c.z_kim]||0)+1;if((c.uwagi||"").toLowerCase().includes("deszcz"))rain++;const hh=parseInt((c.godzina||"").split(":")[0],10);if(!isNaN(hh)&&hh>=0&&hh<=4)night++;});
-      const[tA,tAC]=topEntry(byArt),[tY,tYC]=topEntry(byYr),[tD,tDC]=topEntry(byDay),[tC,tCC]=topEntry(byCrew);const{farthest,artistKmSorted}=computeDistances(filteredConcerts);const topKm=artistKmSorted[0]||["—",0];
-      document.getElementById("hofGrid").innerHTML=`<div class="hof-card"><div class="hof-tag">Król Sceny</div><div class="hof-val">${escapeHtml(tA)}</div><div class="hof-desc">${tAC}× na żywo</div></div><div class="hof-card"><div class="hof-tag">Najwięcej KM za Artystą</div><div class="hof-val">${escapeHtml(topKm[0])}</div><div class="hof-desc">${Number(topKm[1]).toLocaleString("pl-PL")} km z ${escapeHtml(settings.hometown)}</div></div><div class="hof-card"><div class="hof-tag">Najdalsza Podróż</div><div class="hof-val">${escapeHtml(farthest.city)}</div><div class="hof-desc">${farthest.km.toLocaleString("pl-PL")} km (${escapeHtml(farthest.artist)})</div></div><div class="hof-card"><div class="hof-tag">Rekordowy Rok</div><div class="hof-val">${escapeHtml(tY)}</div><div class="hof-desc">${tYC} koncertów</div></div><div class="hof-card"><div class="hof-tag">Największy Maraton</div><div class="hof-val">${tDC} / dzień</div><div class="hof-desc">${escapeHtml(tD)}</div></div><div class="hof-card"><div class="hof-tag">Nocne Marki</div><div class="hof-val">${night} setów</div><div class="hof-desc">Po północy (00:00–04:59)</div></div><div class="hof-card"><div class="hof-tag">Deszczowe Legendy</div><div class="hof-val">${rain} koncertów</div><div class="hof-desc">W deszczu</div></div><div class="hof-card"><div class="hof-tag">Najwierniejsza Ekipa</div><div class="hof-val">${escapeHtml(tC)}</div><div class="hof-desc">${tCC} wspólnych koncertów</div></div>`;
-      const countriesCount=new Set(allConcerts.map(c=>c.kraj).filter(Boolean)).size;const checkIco=`<svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
-      const badges=[{name:"Klub 100+",ok:allConcerts.length>=100},{name:"Globetrotter (5+ krajów)",ok:countriesCount>=5},{name:"Międzykontynentalny (5000+ km)",ok:farthest.km>=5000},{name:"Deszczowy Wojownik",ok:rain>=3},{name:"Nocny Marek (20+)",ok:night>=20},{name:"Superfan (5× artysta)",ok:tAC>=5},{name:"Maratończyk (6+/dzień)",ok:tDC>=6}];
-      document.getElementById("badgesRow").innerHTML=badges.map(b=>`<div class="badge-item ${b.ok?"":"locked"}">${checkIco}<span>${b.name}</span></div>`).join("");
-    }
-
-    function renderCharts(){const p=getThemeProfile();const mk=(id,cfg)=>{if(charts[id])charts[id].destroy();const el=document.getElementById(id);if(el)charts[id]=new Chart(el.getContext("2d"),cfg);};const byYr={};filteredConcerts.forEach(c=>{if(c.rok)byYr[c.rok]=(byYr[c.rok]||0)+1;});const yrs=Object.keys(byYr).sort();mk("chartYears",{type:"bar",data:{labels:yrs,datasets:[{data:yrs.map(y=>byYr[y]),backgroundColor:p.bar1,borderColor:p.bar1Border,borderWidth:1.2,borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:p.chartText},grid:{display:false}},y:{ticks:{color:p.chartText},grid:{color:p.chartGrid}}}}});const byG={};filteredConcerts.forEach(c=>{const g=c.gatunek||"Inne";byG[g]=(byG[g]||0)+1;});const gE=Object.entries(byG).sort((a,b)=>b[1]-a[1]);mk("chartGenres",{type:"doughnut",data:{labels:gE.map(e=>e[0]),datasets:[{data:gE.map(e=>e[1]),backgroundColor:p.palette,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"62%",plugins:{legend:{position:"right",labels:{color:p.chartText,boxWidth:11,font:{size:11}}}}}});const byC={};filteredConcerts.forEach(c=>{if(c.z_kim)byC[c.z_kim]=(byC[c.z_kim]||0)+1;});const cE=Object.entries(byC).sort((a,b)=>b[1]-a[1]).slice(0,8);mk("chartCrew",{type:"bar",data:{labels:cE.map(e=>e[0]),datasets:[{data:cE.map(e=>e[1]),backgroundColor:p.bar2,borderRadius:7}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:p.chartText},grid:{color:p.chartGrid}},y:{ticks:{color:p.chartText,font:{size:11}},grid:{display:false}}}}});const dOrd=["poniedziałek","wtorek","środa","czwartek","piątek","sobota","niedziela"];const byD={};filteredConcerts.forEach(c=>{const d=(c.dzien||"").toLowerCase();if(d)byD[d]=(byD[d]||0)+1;});mk("chartDays",{type:"bar",data:{labels:dOrd.map(d=>d[0].toUpperCase()+d.slice(1)),datasets:[{data:dOrd.map(d=>byD[d]||0),backgroundColor:p.bar3,borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:p.chartText},grid:{display:false}},y:{ticks:{color:p.chartText},grid:{color:p.chartGrid}}}}});}
-
-    function renderPivots(){const mkBox=(title,field,fId)=>{const cnt={};filteredConcerts.forEach(c=>{const v=c[field]||"(puste)";cnt[v]=(cnt[v]||0)+1;});const rows=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,20);return `<div class="pivot-box"><h4>${title}</h4>${rows.map(([k,v])=>`<div class="pivot-row" onclick="quickFilter('${fId}','${escapeHtml(k).replace(/'/g,"\\'")}')"><span>${escapeHtml(k)}</span><span class="pivot-count">${v}</span></div>`).join("")}</div>`;};const{artistKmSorted}=computeDistances(filteredConcerts);const kmBox=`<div class="pivot-box"><h4>Kilometry za Artystą (z ${escapeHtml(settings.hometown)})</h4>${artistKmSorted.slice(0,20).map(([a,km])=>`<div class="pivot-row" onclick="quickFilter('fSearch','${escapeHtml(a).replace(/'/g,"\\'")}')"><span>${escapeHtml(a)}</span><span class="pivot-count">${km.toLocaleString("pl-PL")} km</span></div>`).join("")}</div>`;document.getElementById("pivotGrid").innerHTML=kmBox+mkBox("Artysta (Top 20)","artysta","fSearch")+mkBox("Rok","rok","fYear")+mkBox("Gatunek","gatunek","fGenre");}
-    function quickFilter(id,val){if(val==="(puste)")return;const el=document.getElementById(id);if(el){el.value=el.value===val?"":val;applyFilters();}}
-
-    function initMap(){map=L.map("heatmap",{center:[50.2,17.5],zoom:5,zoomControl:true,minZoom:2,maxZoom:16});arcsLayer=L.layerGroup().addTo(map);markersLayer=L.layerGroup().addTo(map);loadBasemap();}
-    function hexToRgb(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
-    function interpolateColor(ratio,stops){const t=Math.max(0,Math.min(1,ratio));for(let i=0;i<stops.length-1;i++){const[p1,c1]=stops[i],[p2,c2]=stops[i+1];if(t>=p1&&t<=p2){const l=p2===p1?0:(t-p1)/(p2-p1);const[r1,g1,b1]=hexToRgb(c1),[r2,g2,b2]=hexToRgb(c2);return`rgb(${Math.round(r1+(r2-r1)*l)},${Math.round(g1+(g2-g1)*l)},${Math.round(b1+(b2-b1)*l)})`;}}return stops[stops.length-1][1];}
-    function buildArcPoints(from,to,steps=26){const[lat1,lng1]=from,[lat2,lng2]=to,dLat=lat2-lat1,dLng=lng2-lng1;const bend=Math.min(14,Math.hypot(dLat,dLng)*0.22);const midLat=(lat1+lat2)/2+bend*0.55,midLng=(lng1+lng2)/2-dLat*0.12,pts=[];for(let i=0;i<=steps;i++){const t=i/steps;pts.push([(1-t)*(1-t)*lat1+2*(1-t)*t*midLat+t*t*lat2,(1-t)*(1-t)*lng1+2*(1-t)*t*midLng+t*t*lng2]);}return pts;}
-    function loadBasemap(){if(!map)return;baseLayers.forEach(l=>map.removeLayer(l));baseLayers=[];const p=getThemeProfile();const add=(u,o)=>{const l=L.tileLayer(u,o).addTo(map);baseLayers.push(l);};if(currentMapStyle==="sat")add("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"&copy; Esri",maxZoom:18});else if(currentMapStyle==="osm")add("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OSM",className:"themed-basemap",maxZoom:18});else if(p.isDarkMap){add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",{attribution:"&copy; Esri",className:"themed-basemap",maxZoom:16});add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",{attribution:"&copy; Esri",className:"themed-basemap",opacity:0.78,maxZoom:16});}else{add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{attribution:"&copy; Esri",className:"themed-basemap",maxZoom:16});add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",{attribution:"&copy; Esri",className:"themed-basemap",opacity:0.82,maxZoom:16});}}
-    function setMapStyle(s,btn){currentMapStyle=s;document.querySelectorAll("#styleGroup .seg-btn").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");loadBasemap();}
-    function zoomPreset(pr,btn){document.querySelectorAll("#zoomGroup .seg-btn").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");if(pr==="pl")map.flyTo([52.1,19.0],6,{duration:0.8});else if(pr==="eu")map.flyTo([49.8,17.5],5,{duration:0.8});else map.flyTo([30,52],3,{duration:0.9});}
-    function toggleMarkers(){showMarkers=!showMarkers;document.getElementById("toggleMarkersBtn").textContent=showMarkers?"Punkty: WŁ":"Punkty: WYŁ";updateHeatmap();}
-    function toggleArcs(){showArcs=!showArcs;document.getElementById("toggleArcsBtn").textContent=showArcs?"Trasy: WŁ":"Trasy: WYŁ";updateHeatmap();}
-
-    function updateHeatmap(){if(!map)return;if(heatLayer)map.removeLayer(heatLayer);arcsLayer.clearLayers();markersLayer.clearLayers();const p=getThemeProfile(),home=settings.hometown_coords||[52.4064,16.9252],groups={};filteredConcerts.forEach(c=>{if(!c.miasto)return;if(!groups[c.miasto])groups[c.miasto]={city:c.miasto,country:c.kraj,items:[]};groups[c.miasto].items.push(c);});const radius=parseInt(document.getElementById("heatRadius").value,10),moc=parseInt(document.getElementById("heatIntensity").value,10);document.getElementById("heatRadiusVal").textContent=radius;document.getElementById("heatIntensityVal").textContent=moc;const sorted=Object.values(groups).sort((a,b)=>b.items.length-a.items.length),maxC=sorted[0]?sorted[0].items.length:1,heatPts=[];sorted.forEach(g=>{const coords=getCityCoords(g.city);if(!coords)return;const lRatio=maxC>1?g.items.length/maxC:1,col=interpolateColor(Math.pow(lRatio,0.72),p.colorStops);const reps=Math.max(1,Math.min(6,Math.round(1+lRatio*5)));for(let k=0;k<reps;k++)heatPts.push([coords[0],coords[1],0.22+0.78*lRatio]);const distKm=Math.round(haversineKm(home[0],home[1],coords[0],coords[1]));if(showArcs&&distKm>18){L.polyline(buildArcPoints(home,coords),{color:col,weight:1.5+lRatio*1.4,opacity:0.46,dashArray:"5 7"}).bindTooltip(`${escapeHtml(settings.hometown)} → ${escapeHtml(g.city)}: ${distKm.toLocaleString("pl-PL")} km`,{sticky:true}).addTo(arcsLayer);}if(showMarkers){const r=Math.round(7+21*lRatio);L.circleMarker(coords,{radius:r,color:p.markerStroke,weight:2,fillColor:col,fillOpacity:0.76}).bindPopup(`<div style="font-family:var(--font-display);font-weight:800;font-size:15px;">${escapeHtml(g.city)}</div><div style="font-family:var(--font-mono);font-size:12px;color:${col};font-weight:700;margin:2px 0 6px;">${g.items.length} koncertów • ${distKm.toLocaleString("pl-PL")} km</div><div style="font-size:11px;color:var(--text-muted);">${escapeHtml([...new Set(g.items.map(i=>i.artysta))].slice(0,8).join(", "))}</div>`).addTo(markersLayer);if(g.items.length>=6)L.marker(coords,{interactive:false,icon:L.divIcon({className:"city-count-label",html:`<div style="color:${p.labelTextColor};line-height:${r*2}px;">${g.items.length}</div>`,iconSize:[r*2,r*2],iconAnchor:[r,r]})}).addTo(markersLayer);}});heatLayer=L.heatLayer(heatPts,{radius,blur:Math.max(12,Math.round(radius*0.68)),maxZoom:11,max:Math.max(0.45,5.2-moc*0.46),minOpacity:Math.min(0.85,0.16+moc*0.062),gradient:p.heatGradient}).addTo(map);document.getElementById("topCitiesList").innerHTML=sorted.slice(0,10).map(g=>{const cCol=interpolateColor(Math.pow(maxC>1?g.items.length/maxC:1,0.72),p.colorStops);return`<button class="city-jump" onclick="map.flyTo([${getCityCoords(g.city)}],9,{duration:0.8})"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${cCol};"></span>${escapeHtml(g.city)}</span><span class="cnt">${g.items.length}</span></button>`;}).join("");}
-
-    function renderUpcoming(){const card=document.getElementById("startUpcomingCard");card.classList.toggle("view-hidden",upcomingConcerts.length===0);const today=new Date();today.setHours(0,0,0,0);const sorted=[...upcomingConcerts].sort((a,b)=>(a.data||"9999").localeCompare(b.data||"9999"));document.getElementById("upcomingGrid").innerHTML=sorted.map(u=>{let cd="Wkrótce";if(u.data){const diff=Math.round((new Date(u.data+"T00:00:00")-today)/86400000);cd=diff>0?`Za ${diff} dni`:(diff===0?"DZIŚ":`${Math.abs(diff)} dni temu`);}return`<div class="upcoming-card"><div class="event-head"><div><div class="event-title">${escapeHtml(u.artysta)}</div><div style="font-size:0.82rem;color:var(--accent-coral);font-weight:600;">${escapeHtml(u.event)}</div></div><span class="countdown-pill">${cd}</span></div><div class="event-meta">${escapeHtml(u.data)} ${u.godzina?"• "+escapeHtml(u.godzina):""} • ${escapeHtml(u.miasto)}, ${escapeHtml(u.kraj)}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;"><span class="ticket-status">${escapeHtml(u.status_biletu||"Kupiony")}${u.cena?` • ${u.cena} PLN`:""}</span><div style="display:flex;gap:5px;">${u.ticket_file_path?`<button class="btn btn-sm" onclick="openTicketFile('${escapeHtml(u.ticket_file_path)}')">Bilet</button>`:""}<button class="btn btn-sm btn-primary" onclick="completeUpcoming(${u.id})">Byłem</button><button class="btn btn-sm btn-danger" onclick="deleteUpcoming(${u.id})">Usuń</button></div></div></div>`;}).join("");}
-    async function openTicketFile(p){const u=await resolveSignedUrl("tickets",p);if(u)window.open(u,"_blank");}
-    function resetUpcomingForm(){document.getElementById("upcomingForm").reset();document.getElementById("uId").value="";document.getElementById("uKraj").value="Polska";}
-    async function saveUpcoming(e){e.preventDefault();let ticketPath=document.getElementById("uTicketPath").value||"";const file=(document.getElementById("uTicketFile").files||[])[0];if(file&&storageMode==="supabase"&&sbClient&&currentUser){const ext=(file.name.split(".").pop()||"pdf").toLowerCase();ticketPath=`${currentUser.id}/ticket_${Date.now()}.${ext}`;await sbClient.storage.from("tickets").upload(ticketPath,file);}const item={rok:parseInt(document.getElementById("uRok").value,10)||null,event:document.getElementById("uEvent").value.trim(),artysta:document.getElementById("uArtysta").value.trim(),data:document.getElementById("uData").value||null,dzien:document.getElementById("uDzien").value.trim(),godzina:document.getElementById("uGodzina").value.trim(),miejsce:document.getElementById("uMiejsce").value.trim(),miasto:document.getElementById("uMiasto").value.trim(),kraj:document.getElementById("uKraj").value.trim(),gatunek:document.getElementById("uGatunek").value.trim(),z_kim:document.getElementById("uZKim").value.trim(),status_biletu:document.getElementById("uStatus").value,cena:document.getElementById("uCena").value!==""?Number(document.getElementById("uCena").value):null,ticket_file_path:ticketPath,uwagi:document.getElementById("uUwagi").value.trim()};if(item.miasto&&!getCityCoords(item.miasto))await geocodeCity(item.miasto,item.kraj);if(storageMode==="supabase"&&sbClient&&currentUser){const{data,error}=await sbClient.from("upcoming_concerts").insert({...item,user_id:currentUser.id}).select().single();if(error){showToast("Błąd: "+error.message);return;}item.id=data.id;}else{item.id=Math.max(0,...upcomingConcerts.map(x=>x.id||0))+1;localStorage.setItem(UPCOMING_KEY,JSON.stringify([...upcomingConcerts,item]));}upcomingConcerts.push(item);resetUpcomingForm();renderUpcoming();showToast("Dodano nadchodzący koncert!");setView("start");}
-    async function completeUpcoming(id){const u=upcomingConcerts.find(x=>x.id===id);if(!u||!confirm(`Przenieść „${u.artysta}” do historii?`))return;const payload={rok:u.rok,event:u.event,artysta:u.artysta,data:u.data,dzien:u.dzien,godzina:u.godzina,scena:"",miejsce:u.miejsce,miasto:u.miasto,district:"",kraj:u.kraj,gatunek:u.gatunek,podgatunek:"",kto:"Razem",z_kim:u.z_kim,ocena:0,cena:u.cena!==""&&u.cena!=null?Number(u.cena):null,uwagi:u.uwagi};if(storageMode==="supabase"&&sbClient&&currentUser){const{data}=await sbClient.from("concerts").insert({...payload,user_id:currentUser.id}).select().single();await sbClient.from("upcoming_concerts").delete().eq("id",id);if(data)allConcerts.push(data);}else{allConcerts.push({...payload,id:Math.max(0,...allConcerts.map(c=>c.id||0))+1});localStorage.setItem(STORAGE_KEY,JSON.stringify(allConcerts));}upcomingConcerts=upcomingConcerts.filter(x=>x.id!==id);if(storageMode==="offline")localStorage.setItem(UPCOMING_KEY,JSON.stringify(upcomingConcerts));renderUpcoming();populateFilterDropdowns();applyFilters();showToast("Przeniesiono do historii!");}
-    async function deleteUpcoming(id){if(!confirm("Usunąć z planów?"))return;if(storageMode==="supabase"&&sbClient)await sbClient.from("upcoming_concerts").delete().eq("id",id);upcomingConcerts=upcomingConcerts.filter(x=>x.id!==id);if(storageMode==="offline")localStorage.setItem(UPCOMING_KEY,JSON.stringify(upcomingConcerts));renderUpcoming();}
-
-    function getEventMeta(k){if(!eventsMeta[k])eventsMeta[k]={poster:"",poster_path:"",photos:[],lineup:[]};return eventsMeta[k];}
-    async function saveEventMetaToStore(key){const m=getEventMeta(key);if(storageMode==="supabase"&&sbClient&&currentUser){await sbClient.from("events_meta").upsert({user_id:currentUser.id,event_key:key,poster_path:m.poster_path||"",photos:(m.photos||[]).map(p=>({path:p.path||"",url:p.path?"":(p.url||""),added_at:p.added_at})),lineup:m.lineup||[],updated_at:new Date().toISOString()},{onConflict:"user_id,event_key"});}else localStorage.setItem(META_KEY,JSON.stringify(eventsMeta));}
-
-    function populateEventFilterSelect(){const sel=document.getElementById("eventFilterSelect");if(!sel)return;const cur=sel.value;const keys=[...new Set(allConcerts.map(c=>`${c.event||"Koncert"}|${c.rok||"?"}`))].sort();sel.innerHTML=`<option value="">Wszystkie eventy (${keys.length})</option>`+keys.map(k=>{const[ev,yr]=k.split("|");return`<option value="${escapeHtml(k)}">${escapeHtml(ev)} (${escapeHtml(yr)})</option>`;}).join("");if(keys.includes(cur))sel.value=cur;}
-    function openEventInConcertsDb(eventKey){switchEventSubTab("concerts");const sel=document.getElementById("eventFilterSelect");if(sel)sel.value=eventKey||"";renderEventConcertsTable();}
-
-    function renderEventConcertsTable(){
-      const tb=document.getElementById("eventConcertsBody");if(!tb)return;
-      const selVal=document.getElementById("eventFilterSelect")?.value||"";
-      const list=filteredConcerts.filter(c=>!selVal||`${c.event||"Koncert"}|${c.rok||"?"}`===selVal);
-      tb.innerHTML=list.map(c=>`<tr><td style="font-family:var(--font-mono);white-space:nowrap;">${escapeHtml(c.data)} ${escapeHtml(c.godzina)}</td><td><strong>${escapeHtml(c.artysta)}</strong></td><td>${escapeHtml(c.event)} (${escapeHtml(c.rok)})</td><td>${escapeHtml(c.scena?c.scena+" • ":"")}${escapeHtml(c.miejsce)}</td><td>${escapeHtml(c.z_kim||c.kto||"—")}</td><td style="white-space:nowrap;"><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(c)}">Setlist.fm</a><button class="btn btn-sm" onclick="editConcertInTab(${c.id})">Edytuj</button><button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">Usuń</button></td></tr>`).join("")||`<tr><td colspan="6" style="color:var(--text-muted)">Brak koncertów dla wybranego eventu.</td></tr>`;
-    }
-
-    function renderTimeline(){
-      const groups={};
-      filteredConcerts.forEach(c=>{const key=`${c.event||"Koncert"}|${c.rok||"?"}`;if(!groups[key])groups[key]={key,rok:c.rok||0,data:c.data||"",event:c.event||"Koncert",miasto:c.miasto,kraj:c.kraj,miejsce:c.miejsce,crews:new Set(),artists:[],sample:c};if(c.z_kim)groups[key].crews.add(c.z_kim);groups[key].artists.push(c.artysta);});
-      const sorted=Object.values(groups).sort((a,b)=>(b.data||"").localeCompare(a.data||""));
-      document.getElementById("timelineGrid").innerHTML=sorted.map(g=>{
-        const meta=getEventMeta(g.key),sk=escapeHtml(g.key).replace(/'/g,"\\'");
-        const seenL=new Set(g.artists.map(a=>a.toLowerCase())),fullL=meta.lineup||[],unseen=fullL.filter(a=>!seenL.has(a.toLowerCase()));
-        const isExp=expandedLineups.has(g.key);
-        const expSum=tripExpenses.filter(x=>x.event_key===g.key).reduce((s,x)=>s+Number(x.amount_pln||0),0);
-        return `<div class="event-card"><div class="event-head"><div class="event-title">${escapeHtml(g.event)}</div><span class="event-year">${escapeHtml(g.rok)}</span></div><div class="event-meta">${escapeHtml(g.miejsce||"—")} • ${escapeHtml(g.miasto||"—")}, ${escapeHtml(g.kraj||"")}${g.crews.size?`<br/>Ekipa: <strong>${escapeHtml([...g.crews].join(", "))}</strong>`:""}</div>${meta.poster?`<div class="poster-preview-bar" onclick="openLightbox('${escapeHtml(meta.poster)}','Plakat: ${escapeHtml(g.event)}')"><img src="${escapeHtml(meta.poster)}" /><div style="flex:1;font-size:0.76rem;"><strong>Plakat z line-upem</strong><br/><span style="color:var(--text-muted)">Kliknij, aby powiększyć</span></div><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();removePoster('${sk}')">✕</button></div>`:""}${(meta.photos&&meta.photos.length)?`<div class="photo-strip">${meta.photos.map((ph,i)=>`<div class="photo-thumb-wrap"><img class="photo-thumb" src="${escapeHtml(ph.url)}" onclick="openGalleryLightbox('${sk}',${i})" /><button class="photo-del" onclick="removeEventPhoto('${sk}',${i})">✕</button></div>`).join("")}</div>`:""}<div><div class="lineup-progress"><span>Widziani: <strong>${g.artists.length}</strong>${fullL.length?` / ${fullL.length}`:""}</span>${unseen.length?`<a href="#" style="color:var(--accent-coral);text-decoration:none;" onclick="event.preventDefault();toggleLineupExpand('${sk}')">${isExp?"Zwiń":`Pełny line-up (+${unseen.length})`}</a>`:""}</div><div class="artist-chips">${g.artists.map(a=>`<span class="chip seen">${escapeHtml(a)}</span>`).join("")}${isExp?unseen.map(a=>`<span class="chip unseen" onclick="quickAddFromLineup('${sk}','${escapeHtml(a).replace(/'/g,"\\'")}')">+ ${escapeHtml(a)}</span>`).join(""):""}</div></div><div class="event-toolbar"><button class="btn btn-sm" onclick="openEventInConcertsDb('${sk}')">Koncerty (${g.artists.length})</button><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(g.sample)}">Setlist.fm</a><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPhotoInput').click()">Zdjęcia</button><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPosterInput').click()">${meta.poster?"Zmień plakat":"Plakat"}</button><button class="btn btn-sm" onclick="openLineupEditor('${sk}')">Line-up</button><button class="btn btn-sm" onclick="openSplitwise('${sk}')">Rozliczenie${expSum?` (${expSum} zł)`:""}</button></div></div>`;
+    function renderTopArtists() {
+      const byArt = {}; filteredConcerts.forEach(c => { if (c.artysta) byArt[c.artysta] = (byArt[c.artysta] || 0) + 1; });
+      const top = Object.entries(byArt).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      document.getElementById("topArtistsStrip").innerHTML = top.map(([name, cnt]) => {
+        const meta = artistsMetaCache[name.trim().toLowerCase()] || {};
+        const safeName = escapeHtml(name).replace(/'/g, "\\'");
+        const streamUrl = getArtistStreamingUrl(name);
+        const isPlaying = playingPreviewArtist === name;
+        return `
+          <div class="artist-tile">
+            <div class="artist-avatar" onclick="document.getElementById('fSearch').value='${safeName}';applyFilters();">${renderAvatarInner(name)}</div>
+            <div class="artist-tile-name" onclick="document.getElementById('fSearch').value='${safeName}';applyFilters();">${escapeHtml(name)}</div>
+            <div class="artist-tile-meta">${cnt}× na żywo${meta.popularity ? ` • Pop ${meta.popularity}` : ""}</div>
+            <div class="artist-tile-actions">
+              ${meta.preview_url ? `<button class="btn btn-sm ${isPlaying ? "btn-primary" : ""}" onclick="toggleAudioPreview('${safeName}','${escapeHtml(meta.preview_url)}')">${isPlaying ? "Stop" : "Odsłuch"}</button>` : ""}
+              <a class="btn btn-sm" target="_blank" href="${escapeHtml(streamUrl)}">${PROVIDER_NAMES[streamingProvider]}</a>
+            </div>
+          </div>`;
       }).join("");
     }
 
-    function timeToMins(t){const m=String(t||"").match(/(\d{1,2}):(\d{2})/);return m?parseInt(m[1],10)*60+parseInt(m[2],10):null;}
-    function renderClashfinder(){const box=document.getElementById("clashList");if(!box)return;const items=clashSlots.map((s,idx)=>({...s,idx,sMin:timeToMins(s.start),eMin:timeToMins(s.end)}));const clashIdxs=new Set();for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++)if(items[i].sMin!=null&&items[i].eMin!=null&&items[j].sMin!=null&&items[j].eMin!=null&&Math.max(items[i].sMin,items[j].sMin)<Math.min(items[i].eMin,items[j].eMin)){clashIdxs.add(items[i].idx);clashIdxs.add(items[j].idx);}box.innerHTML=items.map(it=>`<div class="list-row ${clashIdxs.has(it.idx)?"clash-alert":""}"><div><strong>${escapeHtml(it.artist)}</strong>${clashIdxs.has(it.idx)?`<span class="badge-genre" style="margin-left:6px;color:#EF4444;border-color:#EF4444;">KONFLIKT GODZIN</span>`:""}<div style="font-size:0.76rem;color:var(--text-muted);font-family:var(--font-mono);">${escapeHtml(it.start)} – ${escapeHtml(it.end)} • ${escapeHtml(it.stage||"Scena")}</div></div><button class="btn btn-sm btn-danger" onclick="deleteClashSlot(${it.idx})">Usuń</button></div>`).join("")||`<div style="font-size:0.82rem;color:var(--text-muted);">Dodaj występy, aby sprawdzić nakładające się godziny.</div>`;}
-    function addClashSlot(e){e.preventDefault();clashSlots.push({artist:document.getElementById("cfArtist").value.trim(),stage:document.getElementById("cfStage").value.trim(),start:document.getElementById("cfStart").value.trim(),end:document.getElementById("cfEnd").value.trim()});localStorage.setItem(CLASH_KEY,JSON.stringify(clashSlots));document.getElementById("cfArtist").value="";document.getElementById("cfStage").value="";renderClashfinder();}
-    function deleteClashSlot(idx){clashSlots.splice(idx,1);localStorage.setItem(CLASH_KEY,JSON.stringify(clashSlots));renderClashfinder();}
+    function renderHallOfFame() {
+      const byArt = {}, byYr = {}, byDay = {}, byCrew = {}; let rain = 0, night = 0;
+      filteredConcerts.forEach(c => {
+        if (c.artysta) byArt[c.artysta] = (byArt[c.artysta] || 0) + 1;
+        if (c.rok) byYr[c.rok] = (byYr[c.rok] || 0) + 1;
+        if (c.data) byDay[`${c.data} (${c.event})`] = (byDay[`${c.data} (${c.event})`] || 0) + 1;
+        if (c.z_kim) byCrew[c.z_kim] = (byCrew[c.z_kim] || 0) + 1;
+        if ((c.uwagi || "").toLowerCase().includes("deszcz")) rain++;
+        const hh = parseInt((c.godzina || "").split(":")[0], 10); if (!isNaN(hh) && hh >= 0 && hh <= 4) night++;
+      });
+      const [tA, tAC] = topEntry(byArt), [tY, tYC] = topEntry(byYr), [tD, tDC] = topEntry(byDay), [tC, tCC] = topEntry(byCrew);
+      const { farthest, artistKmSorted } = computeDistances(filteredConcerts); const topKm = artistKmSorted[0] || ["—", 0];
+      document.getElementById("hofGrid").innerHTML = `
+        <div class="hof-card"><div class="hof-tag">Król Sceny</div><div class="hof-val">${escapeHtml(tA)}</div><div class="hof-desc">${tAC}× na żywo</div></div>
+        <div class="hof-card"><div class="hof-tag">Najwięcej KM za Artystą</div><div class="hof-val">${escapeHtml(topKm[0])}</div><div class="hof-desc">${Number(topKm[1]).toLocaleString("pl-PL")} km z ${escapeHtml(settings.hometown)}</div></div>
+        <div class="hof-card"><div class="hof-tag">Najdalsza Podróż</div><div class="hof-val">${escapeHtml(farthest.city)}</div><div class="hof-desc">${farthest.km.toLocaleString("pl-PL")} km (${escapeHtml(farthest.artist)})</div></div>
+        <div class="hof-card"><div class="hof-tag">Rekordowy Rok</div><div class="hof-val">${escapeHtml(tY)}</div><div class="hof-desc">${tYC} koncertów</div></div>
+        <div class="hof-card"><div class="hof-tag">Największy Maraton</div><div class="hof-val">${tDC} / dzień</div><div class="hof-desc">${escapeHtml(tD)}</div></div>
+        <div class="hof-card"><div class="hof-tag">Nocne Marki</div><div class="hof-val">${night} setów</div><div class="hof-desc">Po północy (00:00–04:59)</div></div>
+        <div class="hof-card"><div class="hof-tag">Deszczowe Legendy</div><div class="hof-val">${rain} koncertów</div><div class="hof-desc">W deszczu</div></div>
+        <div class="hof-card"><div class="hof-tag">Najwierniejsza Ekipa</div><div class="hof-val">${escapeHtml(tC)}</div><div class="hof-desc">${tCC} wspólnych koncertów</div></div>
+      `;
+      const countriesCount = new Set(allConcerts.map(c => c.kraj).filter(Boolean)).size; const checkIco = `<svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+      const badges = [{ name: "Klub 100+", ok: allConcerts.length >= 100 }, { name: "Globetrotter (5+ krajów)", ok: countriesCount >= 5 }, { name: "Międzykontynentalny (5000+ km)", ok: farthest.km >= 5000 }, { name: "Deszczowy Wojownik", ok: rain >= 3 }, { name: "Nocny Marek (20+)", ok: night >= 20 }, { name: "Superfan (5× artysta)", ok: tAC >= 5 }, { name: "Maratończyk (6+/dzień)", ok: tDC >= 6 }];
+      document.getElementById("badgesRow").innerHTML = badges.map(b => `<div class="badge-item ${b.ok ? "" : "locked"}">${checkIco}<span>${b.name}</span></div>`).join("");
+    }
 
-    function toggleLineupExpand(k){expandedLineups.has(k)?expandedLineups.delete(k):expandedLineups.add(k);renderTimeline();}
-    function quickAddFromLineup(ek,artist){const[ev,yr]=ek.split("|");const sample=allConcerts.find(c=>`${c.event}|${c.rok}`===ek)||{};setView("add");switchAddSubTab("concert");resetConcertForm();document.getElementById("mEvent").value=ev;document.getElementById("mRok").value=yr||sample.rok||"";document.getElementById("mArtysta").value=artist;document.getElementById("mData").value=sample.data||"";document.getElementById("mDzien").value=sample.dzien||"";document.getElementById("mMiejsce").value=sample.miejsce||"";document.getElementById("mMiasto").value=sample.miasto||"";document.getElementById("mKraj").value=sample.kraj||"Polska";document.getElementById("mZKim").value=sample.z_kim||"";updateModalLineupPicker();}
+    function renderCharts() { const p = getThemeProfile(); const mk = (id, cfg) => { if (charts[id]) charts[id].destroy(); const el = document.getElementById(id); if (el) charts[id] = new Chart(el.getContext("2d"), cfg); }; const byYr = {}; filteredConcerts.forEach(c => { if (c.rok) byYr[c.rok] = (byYr[c.rok] || 0) + 1; }); const yrs = Object.keys(byYr).sort(); mk("chartYears", { type: "bar", data: { labels: yrs, datasets: [{ data: yrs.map(y => byYr[y]), backgroundColor: p.bar1, borderColor: p.bar1Border, borderWidth: 1.2, borderRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { display: false } }, y: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } } } } }); const byG = {}; filteredConcerts.forEach(c => { const g = c.gatunek || "Inne"; byG[g] = (byG[g] || 0) + 1; }); const gE = Object.entries(byG).sort((a, b) => b[1] - a[1]); mk("chartGenres", { type: "doughnut", data: { labels: gE.map(e => e[0]), datasets: [{ data: gE.map(e => e[1]), backgroundColor: p.palette, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "right", labels: { color: p.chartText, boxWidth: 11, font: { size: 11 } } } } } }); const byC = {}; filteredConcerts.forEach(c => { if (c.z_kim) byC[c.z_kim] = (byC[c.z_kim] || 0) + 1; }); const cE = Object.entries(byC).sort((a, b) => b[1] - a[1]).slice(0, 8); mk("chartCrew", { type: "bar", data: { labels: cE.map(e => e[0]), datasets: [{ data: cE.map(e => e[1]), backgroundColor: p.bar2, borderRadius: 7 }] }, options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } }, y: { ticks: { color: p.chartText, font: { size: 11 } }, grid: { display: false } } } } }); const dOrd = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]; const byD = {}; filteredConcerts.forEach(c => { const d = (c.dzien || "").toLowerCase(); if (d) byD[d] = (byD[d] || 0) + 1; }); mk("chartDays", { type: "bar", data: { labels: dOrd.map(d => d[0].toUpperCase() + d.slice(1)), datasets: [{ data: dOrd.map(d => byD[d] || 0), backgroundColor: p.bar3, borderRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { display: false } }, y: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } } } } }); }
 
-    async function uploadImageToStore(file,prefix){if(storageMode==="supabase"&&sbClient&&currentUser){const ext=(file.name.split(".").pop()||"jpg").toLowerCase();const path=`${currentUser.id}/${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;const{error}=await sbClient.storage.from("event-media").upload(path,file);if(error)throw error;return{path,url:await resolveSignedUrl("event-media",path)};}return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res({path:"",url:r.result});r.onerror=rej;r.readAsDataURL(file);});}
-    async function handleEventPhotosUpload(e){const files=Array.from(e.target.files||[]);if(!files.length||!activeUploadEventKey)return;const m=getEventMeta(activeUploadEventKey);if(!m.photos)m.photos=[];showToast(`Zapisuję ${files.length} zdjęć...`);for(const f of files){const u=await uploadImageToStore(f,"photo");m.photos.push({path:u.path,url:u.url,added_at:new Date().toISOString()});}await saveEventMetaToStore(activeUploadEventKey);renderTimeline();showToast("Zapisano zdjęcia!");e.target.value="";}
-    async function handleEventPosterUpload(e){const f=(e.target.files||[])[0];if(!f||!activeUploadEventKey)return;const m=getEventMeta(activeUploadEventKey);showToast("Zapisuję plakat...");const u=await uploadImageToStore(f,"poster");m.poster_path=u.path;m.poster=u.url;await saveEventMetaToStore(activeUploadEventKey);renderTimeline();showToast("Zapisano plakat!");e.target.value="";}
-    async function removePoster(k){if(!confirm("Usunąć plakat?"))return;const m=getEventMeta(k);m.poster="";m.poster_path="";await saveEventMetaToStore(k);renderTimeline();}
-    async function removeEventPhoto(k,i){if(!confirm("Usunąć zdjęcie?"))return;getEventMeta(k).photos.splice(i,1);await saveEventMetaToStore(k);renderTimeline();}
-    function openLightbox(url,title){document.getElementById("lightboxTitle").textContent=title;document.getElementById("lightboxImg").src=url;document.getElementById("lightboxNav").innerHTML="";document.getElementById("lightboxModal").classList.add("open");}
-    function openGalleryLightbox(k,i){const ph=getEventMeta(k).photos||[];if(!ph[i])return;const sk=escapeHtml(k).replace(/'/g,"\\'");document.getElementById("lightboxTitle").textContent=`Zdjęcie ${i+1} / ${ph.length}`;document.getElementById("lightboxImg").src=ph[i].url;document.getElementById("lightboxNav").innerHTML=ph.length>1?`<button class="btn btn-sm" onclick="openGalleryLightbox('${sk}',${(i-1+ph.length)%ph.length})">Poprzednie</button><button class="btn btn-sm" onclick="openGalleryLightbox('${sk}',${(i+1)%ph.length})">Następne</button>`:"";document.getElementById("lightboxModal").classList.add("open");}
-    function openLineupEditor(k){document.getElementById("luEventKey").value=k;document.getElementById("luTextarea").value=(getEventMeta(k).lineup||[]).join("\n");document.getElementById("lineupModal").classList.add("open");}
-    async function saveEventLineup(e){e.preventDefault();const k=document.getElementById("luEventKey").value;getEventMeta(k).lineup=[...new Set(document.getElementById("luTextarea").value.split(/[\n,;]+/).map(s=>s.trim()).filter(Boolean))];await saveEventMetaToStore(k);expandedLineups.add(k);closeModal("lineupModal");renderTimeline();showToast("Zapisano line-up!");}
+    function renderPivots() { const mkBox = (title, field, fId) => { const cnt = {}; filteredConcerts.forEach(c => { const v = c[field] || "(puste)"; cnt[v] = (cnt[v] || 0) + 1; }); const rows = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 20); return `<div class="pivot-box"><h4>${title}</h4>${rows.map(([k, v]) => `<div class="pivot-row" onclick="quickFilter('${fId}','${escapeHtml(k).replace(/'/g, "\\'")}')"><span>${escapeHtml(k)}</span><span class="pivot-count">${v}</span></div>`).join("")}</div>`; }; const { artistKmSorted } = computeDistances(filteredConcerts); const kmBox = `<div class="pivot-box"><h4>Kilometry za Artystą (z ${escapeHtml(settings.hometown)})</h4>${artistKmSorted.slice(0, 20).map(([a, km]) => `<div class="pivot-row" onclick="quickFilter('fSearch','${escapeHtml(a).replace(/'/g, "\\'")}')"><span>${escapeHtml(a)}</span><span class="pivot-count">${km.toLocaleString("pl-PL")} km</span></div>`).join("")}</div>`; document.getElementById("pivotGrid").innerHTML = kmBox + mkBox("Artysta (Top 20)", "artysta", "fSearch") + mkBox("Rok", "rok", "fYear") + mkBox("Gatunek", "gatunek", "fGenre"); }
+    function quickFilter(id, val) { if (val === "(puste)") return; const el = document.getElementById(id); if (el) { el.value = el.value === val ? "" : val; applyFilters(); } }
 
-    function openSplitwise(ek){const[ev,yr]=ek.split("|");document.getElementById("swEventKey").value=ek;document.getElementById("swModalTitle").textContent=`Rozliczenie: ${ev} (${yr})`;renderSplitwiseList();document.getElementById("splitwiseModal").classList.add("open");}
-    function renderSplitwiseList(){const ek=document.getElementById("swEventKey").value;const items=tripExpenses.filter(x=>x.event_key===ek);const sum=items.reduce((s,x)=>s+Number(x.amount_pln||0),0);document.getElementById("swList").innerHTML=`<div style="font-family:var(--font-mono);font-size:0.82rem;margin-bottom:10px;color:var(--accent-coral);">Łącznie: <strong>${sum.toFixed(2)} PLN</strong></div>`+items.map(x=>`<div class="list-row"><div><strong>${escapeHtml(x.title)}</strong><div style="font-size:0.75rem;color:var(--text-muted);">Płacił: ${escapeHtml(x.paid_by)}</div></div><div style="display:flex;align-items:center;gap:8px;"><strong style="font-family:var(--font-mono);">${Number(x.amount_pln).toFixed(2)} zł</strong><button class="btn btn-sm btn-danger" onclick="deleteExpense(${x.id})">Usuń</button></div></div>`).join("")||`<div style="font-size:0.82rem;color:var(--text-muted);">Brak wydatków dla tego wydarzenia.</div>`;}
-    async function addExpense(e){e.preventDefault();const row={event_key:document.getElementById("swEventKey").value,title:document.getElementById("swTitle").value.trim(),amount_pln:Number(document.getElementById("swAmount").value),paid_by:document.getElementById("swPaidBy").value.trim()};if(storageMode==="supabase"&&sbClient&&currentUser){const{data}=await sbClient.from("trip_expenses").insert({...row,user_id:currentUser.id}).select().single();if(data)tripExpenses.unshift(data);}else{tripExpenses.unshift({...row,id:Date.now()});localStorage.setItem(EXPENSES_KEY,JSON.stringify(tripExpenses));}document.getElementById("swTitle").value="";document.getElementById("swAmount").value="";renderSplitwiseList();renderTimeline();}
-    async function deleteExpense(id){if(storageMode==="supabase"&&sbClient)await sbClient.from("trip_expenses").delete().eq("id",id);tripExpenses=tripExpenses.filter(x=>x.id!==id);if(storageMode==="offline")localStorage.setItem(EXPENSES_KEY,JSON.stringify(tripExpenses));renderSplitwiseList();renderTimeline();}
+    function initMap() { map = L.map("heatmap", { center: [50.2, 17.5], zoom: 5, zoomControl: true, minZoom: 2, maxZoom: 16 }); arcsLayer = L.layerGroup().addTo(map); markersLayer = L.layerGroup().addTo(map); loadBasemap(); }
+    function hexToRgb(h) { h = h.replace("#", ""); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+    function interpolateColor(ratio, stops) { const t = Math.max(0, Math.min(1, ratio)); for (let i = 0; i < stops.length - 1; i++) { const [p1, c1] = stops[i], [p2, c2] = stops[i + 1]; if (t >= p1 && t <= p2) { const l = p2 === p1 ? 0 : (t - p1) / (p2 - p1); const [r1, g1, b1] = hexToRgb(c1), [r2, g2, b2] = hexToRgb(c2); return `rgb(${Math.round(r1 + (r2 - r1) * l)},${Math.round(g1 + (g2 - g1) * l)},${Math.round(b1 + (b2 - b1) * l)})`; } } return stops[stops.length - 1][1]; }
+    function buildArcPoints(from, to, steps = 26) { const [lat1, lng1] = from, [lat2, lng2] = to, dLat = lat2 - lat1, dLng = lng2 - lng1; const bend = Math.min(14, Math.hypot(dLat, dLng) * 0.22); const midLat = (lat1 + lat2) / 2 + bend * 0.55, midLng = (lng1 + lng2) / 2 - dLat * 0.12, pts = []; for (let i = 0; i <= steps; i++) { const t = i / steps; pts.push([(1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2, (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * midLng + t * t * lng2]); } return pts; }
+    function loadBasemap() { if (!map) return; baseLayers.forEach(l => map.removeLayer(l)); baseLayers = []; const p = getThemeProfile(); const add = (u, o) => { const l = L.tileLayer(u, o).addTo(map); baseLayers.push(l); }; if (currentMapStyle === "sat") add("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", maxZoom: 18 }); else if (currentMapStyle === "osm") add("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OSM", className: "themed-basemap", maxZoom: 18 }); else if (p.isDarkMap) { add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", maxZoom: 16 }); add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", opacity: 0.78, maxZoom: 16 }); } else { add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", maxZoom: 16 }); add("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { attribution: "&copy; Esri", className: "themed-basemap", opacity: 0.82, maxZoom: 16 }); } }
+    function setMapStyle(s, btn) { currentMapStyle = s; document.querySelectorAll("#styleGroup .seg-btn").forEach(b => b.classList.remove("active")); if (btn) btn.classList.add("active"); loadBasemap(); }
+    function zoomPreset(pr, btn) { document.querySelectorAll("#zoomGroup .seg-btn").forEach(b => b.classList.remove("active")); if (btn) btn.classList.add("active"); if (pr === "pl") map.flyTo([52.1, 19.0], 6, { duration: 0.8 }); else if (pr === "eu") map.flyTo([49.8, 17.5], 5, { duration: 0.8 }); else map.flyTo([30, 52], 3, { duration: 0.9 }); }
+    function toggleMarkers() { showMarkers = !showMarkers; document.getElementById("toggleMarkersBtn").textContent = showMarkers ? "Punkty: WŁ" : "Punkty: WYŁ"; updateHeatmap(); }
+    function toggleArcs() { showArcs = !showArcs; document.getElementById("toggleArcsBtn").textContent = showArcs ? "Trasy: WŁ" : "Trasy: WYŁ"; updateHeatmap(); }
 
-    function renderBucketList(){const seenSet=new Set(allConcerts.map(c=>(c.artysta||"").toLowerCase()));document.getElementById("bucketListContainer").innerHTML=bucketList.map(b=>{const isSeen=b.seen||seenSet.has((b.artist||"").toLowerCase());return`<div class="list-row"><div style="display:flex;align-items:center;gap:10px;"><div class="artist-avatar sm" data-artist-avatar="${escapeHtml(b.artist)}">${artistInitials(b.artist)}</div><div><strong style="${isSeen?"text-decoration:line-through;opacity:0.65;":""}">${escapeHtml(b.artist)}</strong>${isSeen?`<span class="badge-genre" style="margin-left:6px;color:var(--accent-cyan);">Zaliczony</span>`:""}${b.notes?`<div style="font-size:0.75rem;color:var(--text-muted);">${escapeHtml(b.notes)}</div>`:""}</div></div><button class="btn btn-sm btn-danger" onclick="deleteBucketItem(${b.id})">Usuń</button></div>`;}).join("")||`<div style="font-size:0.83rem;color:var(--text-muted);">Twoja lista marzeń jest pusta.</div>`;hydrateAvatarElements();}
-    async function addBucketItem(e){e.preventDefault();const artist=document.getElementById("blArtist").value.trim(),notes=document.getElementById("blNotes").value.trim();if(!artist)return;if(storageMode==="supabase"&&sbClient&&currentUser){const{data}=await sbClient.from("bucket_list").insert({user_id:currentUser.id,artist,notes}).select().single();if(data)bucketList.unshift(data);}else{bucketList.unshift({id:Date.now(),artist,notes,seen:false});localStorage.setItem(BUCKET_KEY,JSON.stringify(bucketList));}document.getElementById("blArtist").value="";document.getElementById("blNotes").value="";renderBucketList();showToast("Dodano do Bucket List!");}
-    async function deleteBucketItem(id){if(storageMode==="supabase"&&sbClient)await sbClient.from("bucket_list").delete().eq("id",id);bucketList=bucketList.filter(x=>x.id!==id);if(storageMode==="offline")localStorage.setItem(BUCKET_KEY,JSON.stringify(bucketList));renderBucketList();}
+    function updateHeatmap() { if (!map) return; if (heatLayer) map.removeLayer(heatLayer); arcsLayer.clearLayers(); markersLayer.clearLayers(); const p = getThemeProfile(), home = settings.hometown_coords || [52.4064, 16.9252], groups = {}; filteredConcerts.forEach(c => { if (!c.miasto) return; if (!groups[c.miasto]) groups[c.miasto] = { city: c.miasto, country: c.kraj, items: [] }; groups[c.miasto].items.push(c); }); const radius = parseInt(document.getElementById("heatRadius").value, 10), moc = parseInt(document.getElementById("heatIntensity").value, 10); document.getElementById("heatRadiusVal").textContent = radius; document.getElementById("heatIntensityVal").textContent = moc; const sorted = Object.values(groups).sort((a, b) => b.items.length - a.items.length), maxC = sorted[0] ? sorted[0].items.length : 1, heatPts = []; sorted.forEach(g => { const coords = getCityCoords(g.city); if (!coords) return; const lRatio = maxC > 1 ? g.items.length / maxC : 1, col = interpolateColor(Math.pow(lRatio, 0.72), p.colorStops); const reps = Math.max(1, Math.min(6, Math.round(1 + lRatio * 5))); for (let k = 0; k < reps; k++) heatPts.push([coords[0], coords[1], 0.22 + 0.78 * lRatio]); const distKm = Math.round(haversineKm(home[0], home[1], coords[0], coords[1])); if (showArcs && distKm > 18) { L.polyline(buildArcPoints(home, coords), { color: col, weight: 1.5 + lRatio * 1.4, opacity: 0.46, dashArray: "5 7" }).bindTooltip(`${escapeHtml(settings.hometown)} → ${escapeHtml(g.city)}: ${distKm.toLocaleString("pl-PL")} km`, { sticky: true }).addTo(arcsLayer); } if (showMarkers) { const r = Math.round(7 + 21 * lRatio); L.circleMarker(coords, { radius: r, color: p.markerStroke, weight: 2, fillColor: col, fillOpacity: 0.76 }).bindPopup(`<div style="font-family:var(--font-display);font-weight:800;font-size:15px;">${escapeHtml(g.city)}</div><div style="font-family:var(--font-mono);font-size:12px;color:${col};font-weight:700;margin:2px 0 6px;">${g.items.length} koncertów • ${distKm.toLocaleString("pl-PL")} km</div><div style="font-size:11px;color:var(--text-muted);">${escapeHtml([...new Set(g.items.map(i => i.artysta))].slice(0, 8).join(", "))}</div>`).addTo(markersLayer); if (g.items.length >= 6) L.marker(coords, { interactive: false, icon: L.divIcon({ className: "city-count-label", html: `<div style="color:${p.labelTextColor};line-height:${r * 2}px;">${g.items.length}</div>`, iconSize: [r * 2, r * 2], iconAnchor: [r, r] }) }).addTo(markersLayer); } }); heatLayer = L.heatLayer(heatPts, { radius, blur: Math.max(12, Math.round(radius * 0.68)), maxZoom: 11, max: Math.max(0.45, 5.2 - moc * 0.46), minOpacity: Math.min(0.85, 0.16 + moc * 0.062), gradient: p.heatGradient }).addTo(map); document.getElementById("topCitiesList").innerHTML = sorted.slice(0, 10).map(g => { const cCol = interpolateColor(Math.pow(maxC > 1 ? g.items.length / maxC : 1, 0.72), p.colorStops); return `<button class="city-jump" onclick="map.flyTo([${getCityCoords(g.city)}],9,{duration:0.8})"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${cCol};"></span>${escapeHtml(g.city)}</span><span class="cnt">${g.items.length}</span></button>`; }).join(""); }
 
-    function autoFillDateFields(dId,rId,dwId){const v=document.getElementById(dId).value;if(!v)return;const d=new Date(v+"T12:00:00");if(!isNaN(d.getTime())){document.getElementById(rId).value=d.getFullYear();document.getElementById(dwId).value=["niedziela","poniedziałek","wtorek","środa","czwartek","piątek","sobota"][d.getDay()];}}
-    function updateModalLineupPicker(){const ev=document.getElementById("mEvent").value.trim().toLowerCase(),yr=document.getElementById("mRok").value.trim();const wrap=document.getElementById("modalLineupPickerWrap");if(!ev){wrap.style.display="none";return;}let arts=[];const exact=Object.keys(eventsMeta).find(k=>k.toLowerCase()===`${ev}|${yr}`);if(exact&&eventsMeta[exact].lineup)arts=eventsMeta[exact].lineup;else{const s=new Set();Object.keys(eventsMeta).filter(k=>k.toLowerCase().startsWith(ev+"|")).forEach(k=>(eventsMeta[k].lineup||[]).forEach(a=>s.add(a)));arts=[...s];}if(!arts.length){wrap.style.display="none";return;}wrap.style.display="block";document.getElementById("modalLineupCount").textContent=`${arts.length} artystów`;document.getElementById("modalLineupChips").innerHTML=arts.map(a=>`<button type="button" class="pick-chip" onclick="document.getElementById('mArtysta').value='${escapeHtml(a).replace(/'/g,"\\'")}'">${escapeHtml(a)}</button>`).join("");}
-    function resetConcertForm(){document.getElementById("concertForm").reset();document.getElementById("mId").value="";document.getElementById("mKraj").value="Polska";document.getElementById("mKto").value="Razem";document.getElementById("formConcertTitle").textContent="Dodaj nowy koncert do historii";document.getElementById("modalLineupPickerWrap").style.display="none";}
-    function editConcertInTab(id){const c=allConcerts.find(x=>x.id===id);if(!c)return;setView("add");switchAddSubTab("concert");document.getElementById("formConcertTitle").textContent=`Edytuj: ${c.artysta}`;document.getElementById("mId").value=c.id;document.getElementById("mArtysta").value=c.artysta||"";document.getElementById("mEvent").value=c.event||"";document.getElementById("mData").value=c.data||"";document.getElementById("mGodzina").value=c.godzina||"";document.getElementById("mRok").value=c.rok||"";document.getElementById("mDzien").value=c.dzien||"";document.getElementById("mScena").value=c.scena||"";document.getElementById("mMiejsce").value=c.miejsce||"";document.getElementById("mMiasto").value=c.miasto||"";document.getElementById("mDistrict").value=c.district||"";document.getElementById("mKraj").value=c.kraj||"Polska";document.getElementById("mGatunek").value=c.gatunek||"";document.getElementById("mPodgatunek").value=c.podgatunek||"";document.getElementById("mKto").value=c.kto||"";document.getElementById("mZKim").value=c.z_kim||"";document.getElementById("mOcena").value=c.ocena||0;document.getElementById("mCena").value=c.cena||"";document.getElementById("mUwagi").value=c.uwagi||"";updateModalLineupPicker();}
+    function renderUpcoming() {
+      const card = document.getElementById("startUpcomingCard");
+      card.classList.toggle("view-hidden", upcomingConcerts.length === 0);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const sorted = [...upcomingConcerts].sort((a, b) => (a.data || "9999").localeCompare(b.data || "9999"));
+      document.getElementById("upcomingGrid").innerHTML = sorted.map(u => {
+        let cd = "Wkrótce";
+        if (u.data) { const diff = Math.round((new Date(u.data + "T00:00:00") - today) / 86400000); cd = diff > 0 ? `Za ${diff} dni` : (diff === 0 ? "DZIŚ" : `${Math.abs(diff)} dni temu`); }
+        const tm = travelMeta[u.id] || {};
+        const mapsUrl = tm.hotel ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tm.hotel + " " + (u.miasto || ""))}` : "";
+        return `
+          <div class="upcoming-card">
+            <div class="event-head">
+              <div><div class="event-title">${escapeHtml(u.artysta)}</div><div style="font-size:0.82rem;color:var(--accent-coral);font-weight:600;">${escapeHtml(u.event)}</div></div>
+              <span class="countdown-pill">${cd}</span>
+            </div>
+            <div class="event-meta">${escapeHtml(u.data)} ${u.godzina ? "• " + escapeHtml(u.godzina) : ""} • ${escapeHtml(u.miasto)}, ${escapeHtml(u.kraj)}</div>
+            ${(tm.hotel || tm.transport || u.uwagi) ? `
+              <div class="travel-box">
+                ${tm.hotel ? `<div>Nocleg: <strong>${escapeHtml(tm.hotel)}</strong> <a href="${mapsUrl}" target="_blank" style="color:var(--accent-coral);margin-left:4px;">Mapa</a></div>` : ""}
+                ${tm.transport ? `<div>Dojazd: <strong>${escapeHtml(tm.transport)}</strong></div>` : ""}
+                ${u.uwagi ? `<div>Pakowanie / Uwagi: ${escapeHtml(u.uwagi)}</div>` : ""}
+              </div>` : ""}
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;">
+              <span class="ticket-status">${escapeHtml(u.status_biletu || "Kupiony")}${u.cena ? ` • ${u.cena} PLN` : ""}</span>
+              <div style="display:flex;gap:5px;">
+                ${u.ticket_file_path ? `<button class="btn btn-sm" onclick="openTicketFile('${escapeHtml(u.ticket_file_path)}')">Bilet</button>` : ""}
+                <button class="btn btn-sm btn-primary" onclick="completeUpcoming(${u.id})">Byłem</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteUpcoming(${u.id})">Usuń</button>
+              </div>
+            </div>
+          </div>`;
+      }).join("");
+    }
+    async function openTicketFile(p) { const u = await resolveSignedUrl("tickets", p); if (u) window.open(u, "_blank"); }
+    function resetUpcomingForm() { document.getElementById("upcomingForm").reset(); document.getElementById("uId").value = ""; document.getElementById("uKraj").value = "Polska"; }
+    async function saveUpcoming(e) {
+      e.preventDefault(); let ticketPath = document.getElementById("uTicketPath").value || "";
+      const file = (document.getElementById("uTicketFile").files || [])[0];
+      if (file && storageMode === "supabase" && sbClient && currentUser) { const ext = (file.name.split(".").pop() || "pdf").toLowerCase(); ticketPath = `${currentUser.id}/ticket_${Date.now()}.${ext}`; await sbClient.storage.from("tickets").upload(ticketPath, file); }
+      const hotel = document.getElementById("uHotel").value.trim();
+      const transport = document.getElementById("uTransport").value.trim();
+      const item = { rok: parseInt(document.getElementById("uRok").value, 10) || null, event: document.getElementById("uEvent").value.trim(), artysta: document.getElementById("uArtysta").value.trim(), data: document.getElementById("uData").value || null, dzien: document.getElementById("uDzien").value.trim(), godzina: document.getElementById("uGodzina").value.trim(), miejsce: document.getElementById("uMiejsce").value.trim(), miasto: document.getElementById("uMiasto").value.trim(), kraj: document.getElementById("uKraj").value.trim(), gatunek: document.getElementById("uGatunek").value.trim(), z_kim: document.getElementById("uZKim").value.trim(), status_biletu: document.getElementById("uStatus").value, cena: document.getElementById("uCena").value !== "" ? Number(document.getElementById("uCena").value) : null, ticket_file_path: ticketPath, uwagi: document.getElementById("uUwagi").value.trim() };
+      if (item.miasto && !getCityCoords(item.miasto)) await geocodeCity(item.miasto, item.kraj);
+      if (storageMode === "supabase" && sbClient && currentUser) { const { data, error } = await sbClient.from("upcoming_concerts").insert({ ...item, user_id: currentUser.id }).select().single(); if (error) { showToast("Błąd: " + error.message); return; } item.id = data.id; }
+      else { item.id = Math.max(0, ...upcomingConcerts.map(x => x.id || 0)) + 1; localStorage.setItem(UPCOMING_KEY, JSON.stringify([...upcomingConcerts, item])); }
+      if (hotel || transport) { travelMeta[item.id] = { hotel, transport }; localStorage.setItem(TRAVEL_KEY, JSON.stringify(travelMeta)); }
+      upcomingConcerts.push(item); resetUpcomingForm(); renderUpcoming(); showToast("Dodano nadchodzący wyjazd!"); setView("start");
+    }
+    async function completeUpcoming(id) { const u = upcomingConcerts.find(x => x.id === id); if (!u || !confirm(`Przenieść „${u.artysta}” do historii?`)) return; const payload = { rok: u.rok, event: u.event, artysta: u.artysta, data: u.data, dzien: u.dzien, godzina: u.godzina, scena: "", miejsce: u.miejsce, miasto: u.miasto, district: "", kraj: u.kraj, gatunek: u.gatunek, podgatunek: "", kto: "Razem", z_kim: u.z_kim, ocena: 0, cena: u.cena !== "" && u.cena != null ? Number(u.cena) : null, uwagi: u.uwagi }; if (storageMode === "supabase" && sbClient && currentUser) { const { data } = await sbClient.from("concerts").insert({ ...payload, user_id: currentUser.id }).select().single(); await sbClient.from("upcoming_concerts").delete().eq("id", id); if (data) allConcerts.push(data); } else { allConcerts.push({ ...payload, id: Math.max(0, ...allConcerts.map(c => c.id || 0)) + 1 }); localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts)); } upcomingConcerts = upcomingConcerts.filter(x => x.id !== id); if (storageMode === "offline") localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts)); renderUpcoming(); populateFilterDropdowns(); applyFilters(); showToast("Przeniesiono do historii!"); }
+    async function deleteUpcoming(id) { if (!confirm("Usunąć z planów?")) return; if (storageMode === "supabase" && sbClient) await sbClient.from("upcoming_concerts").delete().eq("id", id); upcomingConcerts = upcomingConcerts.filter(x => x.id !== id); if (storageMode === "offline") localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts)); renderUpcoming(); }
 
-    async function saveConcert(e){e.preventDefault();const idVal=document.getElementById("mId").value;const rec={rok:parseInt(document.getElementById("mRok").value,10)||null,event:document.getElementById("mEvent").value.trim(),artysta:document.getElementById("mArtysta").value.trim(),data:document.getElementById("mData").value||null,dzien:document.getElementById("mDzien").value.trim(),godzina:document.getElementById("mGodzina").value.trim(),scena:document.getElementById("mScena").value.trim(),miejsce:document.getElementById("mMiejsce").value.trim(),miasto:document.getElementById("mMiasto").value.trim(),district:document.getElementById("mDistrict").value.trim(),kraj:document.getElementById("mKraj").value.trim(),gatunek:document.getElementById("mGatunek").value.trim(),podgatunek:document.getElementById("mPodgatunek").value.trim(),kto:document.getElementById("mKto").value.trim(),z_kim:document.getElementById("mZKim").value.trim(),ocena:parseInt(document.getElementById("mOcena").value,10)||0,cena:document.getElementById("mCena").value!==""?Number(document.getElementById("mCena").value):null,uwagi:document.getElementById("mUwagi").value.trim()};if(rec.miasto&&!getCityCoords(rec.miasto))await geocodeCity(rec.miasto,rec.kraj);if(idVal){const cid=parseInt(idVal,10);if(storageMode==="supabase"&&sbClient){const{error}=await sbClient.from("concerts").update(rec).eq("id",cid);if(error){showToast("Błąd: "+error.message);return;}}rec.id=cid;const idx=allConcerts.findIndex(c=>c.id===cid);if(idx>=0)allConcerts[idx]=rec;showToast("Zaktualizowano koncert!");}else{if(storageMode==="supabase"&&sbClient&&currentUser){const{data,error}=await sbClient.from("concerts").insert({...rec,user_id:currentUser.id}).select().single();if(error){showToast("Błąd: "+error.message);return;}rec.id=data.id;}else{rec.id=Math.max(0,...allConcerts.map(c=>c.id||0))+1;}allConcerts.push(rec);showToast("Dodano nowy koncert!");}if(storageMode==="offline")localStorage.setItem(STORAGE_KEY,JSON.stringify(allConcerts));resetConcertForm();populateFilterDropdowns();populateDatalists();populateEventFilterSelect();renderBucketList();applyFilters();}
-    async function deleteConcert(id){if(!confirm("Usunąć ten koncert?"))return;if(storageMode==="supabase"&&sbClient)await sbClient.from("concerts").delete().eq("id",id);allConcerts=allConcerts.filter(c=>c.id!==id);if(storageMode==="offline")localStorage.setItem(STORAGE_KEY,JSON.stringify(allConcerts));populateEventFilterSelect();applyFilters();showToast("Usunięto koncert.");}
+    function renderCrewProfiles() {
+      const box = document.getElementById("crewProfilesGrid"); if (!box) return;
+      const home = settings.hometown_coords || [52.4064, 16.9252];
+      const crews = {};
+      allConcerts.forEach(c => {
+        const name = (c.z_kim || "").trim();
+        if (!name) return;
+        if (!crews[name]) crews[name] = { name, count: 0, events: new Set(), genres: {}, trips: new Set(), km: 0 };
+        crews[name].count++;
+        const ek = `${c.event || "Koncert"}|${c.rok || "?"}`;
+        crews[name].events.add(ek);
+        if (c.gatunek) crews[name].genres[c.gatunek] = (crews[name].genres[c.gatunek] || 0) + 1;
+        const coords = getCityCoords(c.miasto);
+        const tk = `${c.rok}|${c.event}|${c.miasto}`;
+        if (coords && !crews[name].trips.has(tk)) {
+          crews[name].trips.add(tk);
+          const d = haversineKm(home[0], home[1], coords[0], coords[1]);
+          if (d > 15) crews[name].km += Math.round(d * 2);
+        }
+      });
 
-    function sortTable(col){if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}renderFullTable();}
-    function renderFullTable(){const sorted=[...filteredConcerts].sort((a,b)=>{const va=String(a[sortCol]||"").toLowerCase(),vb=String(b[sortCol]||"").toLowerCase();return sortAsc?va.localeCompare(vb,"pl"):vb.localeCompare(va,"pl");});document.getElementById("fullTableBody").innerHTML=sorted.map(c=>`<tr><td style="font-family:var(--font-mono);white-space:nowrap;">${escapeHtml(c.data)}</td><td><strong>${escapeHtml(c.artysta)}</strong></td><td>${escapeHtml(c.event)}</td><td>${escapeHtml(c.miasto)}</td><td><span class="badge-genre">${escapeHtml(c.gatunek||"—")}</span></td><td>${escapeHtml(c.z_kim||"—")}</td><td style="white-space:nowrap;"><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(c)}">Setlist.fm</a><button class="btn btn-sm" onclick="editConcertInTab(${c.id})">Edytuj</button><button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">Usuń</button></td></tr>`).join("");}
+      const sorted = Object.values(crews).sort((a, b) => b.count - a.count);
+      box.innerHTML = sorted.map(cr => {
+        const favGenre = topEntry(cr.genres)[0];
+        const relatedExpenses = tripExpenses.filter(ex => cr.events.has(ex.event_key));
+        const totalExp = relatedExpenses.reduce((s, x) => s + Number(x.amount_pln || 0), 0);
+        const safeCrew = escapeHtml(cr.name).replace(/'/g, "\\'");
+        return `
+          <div class="crew-card">
+            <div class="event-head">
+              <div class="event-title">${escapeHtml(cr.name)}</div>
+              <span class="event-year">${cr.count} konc.</span>
+            </div>
+            <div class="event-meta">
+              Eventy razem: <strong>${cr.events.size}</strong> • Wspólne km: <strong>${cr.km.toLocaleString("pl-PL")} km</strong><br/>
+              Ulubiony gatunek: <strong>${escapeHtml(favGenre)}</strong>
+              ${totalExp > 0 ? `<br/>Wydatki wyjazdowe (Splitwise): <strong>${totalExp.toFixed(2)} PLN</strong>` : ""}
+            </div>
+            <div class="event-toolbar">
+              <button class="btn btn-sm btn-primary" onclick="document.getElementById('fCrew').value='${safeCrew}';applyFilters();setView('start');">Pokaż wspólne koncerty</button>
+            </div>
+          </div>`;
+      }).join("") || `<div style="color:var(--text-muted);font-size:0.84rem;">Brak wpisów w kolumnie „Z kim?”.</div>`;
+    }
 
-    function openWrappedModal(){const yrs=[...new Set(allConcerts.map(c=>c.rok).filter(Boolean))].sort((a,b)=>b-a);document.getElementById("wrappedYearSelect").innerHTML=`<option value="all">Cała historia</option>`+yrs.map(y=>`<option value="${y}">Sezon ${y}</option>`).join("");renderWrapped();document.getElementById("wrappedModal").classList.add("open");}
-    function renderWrapped(){const yr=document.getElementById("wrappedYearSelect").value;const list=yr==="all"?allConcerts:allConcerts.filter(c=>String(c.rok)===yr);const byA={},byC={},byG={},byCr={};list.forEach(c=>{if(c.artysta)byA[c.artysta]=(byA[c.artysta]||0)+1;if(c.miasto)byC[c.miasto]=(byC[c.miasto]||0)+1;if(c.gatunek)byG[c.gatunek]=(byG[c.gatunek]||0)+1;if(c.z_kim)byCr[c.z_kim]=(byCr[c.z_kim]||0)+1;});const{totalKm,farthest,artistKmSorted}=computeDistances(list);const[tA,tAC]=topEntry(byA),[tC,tCC]=topEntry(byC),[tG,tGC]=topEntry(byG),[tCr,tCrC]=topEntry(byCr),topKm=artistKmSorted[0]||["—",0];document.getElementById("wrappedBody").innerHTML=`<div class="wrapped-card"><div class="wrapped-stat"><div class="lbl">Koncerty</div><div class="val">${list.length}</div></div><div class="wrapped-stat"><div class="lbl">Kilometry z ${escapeHtml(settings.hometown)}</div><div class="val">${totalKm.toLocaleString("pl-PL")} km</div></div><div class="wrapped-stat"><div class="lbl">Top Artysta</div><div class="val">${escapeHtml(tA)} (${tAC}×)</div></div><div class="wrapped-stat"><div class="lbl">Najwięcej KM za Artystą</div><div class="val">${escapeHtml(topKm[0])} (${Number(topKm[1]).toLocaleString("pl-PL")} km)</div></div><div class="wrapped-stat"><div class="lbl">Top Miasto</div><div class="val">${escapeHtml(tC)} (${tCC})</div></div><div class="wrapped-stat"><div class="lbl">Top Gatunek</div><div class="val">${escapeHtml(tG)} (${tGC})</div></div><div class="wrapped-stat"><div class="lbl">Najwierniejsza Ekipa</div><div class="val">${escapeHtml(tCr)} (${tCrC})</div></div><div class="wrapped-stat"><div class="lbl">Najdalszy Koncert</div><div class="val">${escapeHtml(farthest.city)} (${farthest.km.toLocaleString("pl-PL")} km)</div></div></div>`;}
-    function exportXLSX(){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(allConcerts),"Koncerty");XLSX.writeFile(wb,`Festivals_life_${new Date().toISOString().slice(0,10)}.xlsx`);showToast("Wyeksportowano Excel!");}
-    async function handleImport(event){const file=event.target.files[0];if(!file)return;try{const imported=file.name.toLowerCase().endsWith(".json")?JSON.parse(await file.text()):[];if(imported.length&&storageMode==="supabase"&&sbClient&&currentUser){const rows=imported.map(({id,...r})=>({...r,user_id:currentUser.id,data:r.data||null,cena:r.cena!==""&&r.cena!=null?Number(r.cena):null}));const{data}=await sbClient.from("concerts").insert(rows).select();allConcerts=[...allConcerts,...(data||[])];applyFilters();showToast(`Zaimportowano ${rows.length} koncertów!`);}}catch(err){showToast("Błąd importu: "+err.message);}event.target.value="";}
+    function getEventMeta(k) { if (!eventsMeta[k]) eventsMeta[k] = { poster: "", poster_path: "", photos: [], lineup: [] }; return eventsMeta[k]; }
+    async function saveEventMetaToStore(key) { const m = getEventMeta(key); if (storageMode === "supabase" && sbClient && currentUser) { await sbClient.from("events_meta").upsert({ user_id: currentUser.id, event_key: key, poster_path: m.poster_path || "", photos: (m.photos || []).map(p => ({ path: p.path || "", url: p.path ? "" : (p.url || ""), added_at: p.added_at })), lineup: m.lineup || [], updated_at: new Date().toISOString() }, { onConflict: "user_id,event_key" }); } else localStorage.setItem(META_KEY, JSON.stringify(eventsMeta)); }
+    function populateEventFilterSelect() { const sel = document.getElementById("eventFilterSelect"); if (!sel) return; const cur = sel.value; const keys = [...new Set(allConcerts.map(c => `${c.event || "Koncert"}|${c.rok || "?"}`))].sort(); sel.innerHTML = `<option value="">Wszystkie eventy (${keys.length})</option>` + keys.map(k => { const [ev, yr] = k.split("|"); return `<option value="${escapeHtml(k)}">${escapeHtml(ev)} (${escapeHtml(yr)})</option>`; }).join(""); if (keys.includes(cur)) sel.value = cur; }
+    function openEventInConcertsDb(eventKey) { switchEventSubTab("concerts"); const sel = document.getElementById("eventFilterSelect"); if (sel) sel.value = eventKey || ""; renderEventConcertsTable(); }
+    function renderEventConcertsTable() { const tb = document.getElementById("eventConcertsBody"); if (!tb) return; const selVal = document.getElementById("eventFilterSelect")?.value || ""; const list = filteredConcerts.filter(c => !selVal || `${c.event || "Koncert"}|${c.rok || "?"}` === selVal); tb.innerHTML = list.map(c => `<tr><td style="font-family:var(--font-mono);white-space:nowrap;">${escapeHtml(c.data)} ${escapeHtml(c.godzina)}</td><td><strong>${escapeHtml(c.artysta)}</strong></td><td>${escapeHtml(c.event)} (${escapeHtml(c.rok)})</td><td>${escapeHtml(c.scena ? c.scena + " • " : "")}${escapeHtml(c.miejsce)}</td><td>${escapeHtml(c.z_kim || c.kto || "—")}</td><td style="white-space:nowrap;"><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(c)}">Setlist.fm</a><button class="btn btn-sm" onclick="editConcertInTab(${c.id})">Edytuj</button><button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">Usuń</button></td></tr>`).join("") || `<tr><td colspan="6" style="color:var(--text-muted)">Brak koncertów dla wybranego eventu.</td></tr>`; }
+
+    function renderTimeline() {
+      const groups = {};
+      filteredConcerts.forEach(c => { const key = `${c.event || "Koncert"}|${c.rok || "?"}`; if (!groups[key]) groups[key] = { key, rok: c.rok || 0, data: c.data || "", event: c.event || "Koncert", miasto: c.miasto, kraj: c.kraj, miejsce: c.miejsce, crews: new Set(), artists: [], sample: c }; if (c.z_kim) groups[key].crews.add(c.z_kim); groups[key].artists.push(c.artysta); });
+      const sorted = Object.values(groups).sort((a, b) => (b.data || "").localeCompare(a.data || ""));
+      document.getElementById("timelineGrid").innerHTML = sorted.map(g => {
+        const meta = getEventMeta(g.key), sk = escapeHtml(g.key).replace(/'/g, "\\'");
+        const seenL = new Set(g.artists.map(a => a.toLowerCase())), fullL = meta.lineup || [], unseen = fullL.filter(a => !seenL.has(a.toLowerCase()));
+        const isExp = expandedLineups.has(g.key);
+        const expSum = tripExpenses.filter(x => x.event_key === g.key).reduce((s, x) => s + Number(x.amount_pln || 0), 0);
+        return `<div class="event-card"><div class="event-head"><div class="event-title">${escapeHtml(g.event)}</div><span class="event-year">${escapeHtml(g.rok)}</span></div><div class="event-meta">${escapeHtml(g.miejsce || "—")} • ${escapeHtml(g.miasto || "—")}, ${escapeHtml(g.kraj || "")}${g.crews.size ? `<br/>Ekipa: <strong>${escapeHtml([...g.crews].join(", "))}</strong>` : ""}</div>${meta.poster ? `<div class="poster-preview-bar" onclick="openLightbox('${escapeHtml(meta.poster)}','Plakat: ${escapeHtml(g.event)}')"><img src="${escapeHtml(meta.poster)}" /><div style="flex:1;font-size:0.76rem;"><strong>Plakat z line-upem</strong><br/><span style="color:var(--text-muted)">Kliknij, aby powiększyć</span></div><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();removePoster('${sk}')">✕</button></div>` : ""}${(meta.photos && meta.photos.length) ? `<div class="photo-strip">${meta.photos.map((ph, i) => `<div class="photo-thumb-wrap"><img class="photo-thumb" src="${escapeHtml(ph.url)}" onclick="openGalleryLightbox('${sk}',${i})" /><button class="photo-del" onclick="removeEventPhoto('${sk}',${i})">✕</button></div>`).join("")}</div>` : ""}<div><div class="lineup-progress"><span>Widziani: <strong>${g.artists.length}</strong>${fullL.length ? ` / ${fullL.length}` : ""}</span>${unseen.length ? `<a href="#" style="color:var(--accent-coral);text-decoration:none;" onclick="event.preventDefault();toggleLineupExpand('${sk}')">${isExp ? "Zwiń" : `Pełny line-up (+${unseen.length})`}</a>` : ""}</div><div class="artist-chips">${g.artists.map(a => `<span class="chip seen">${escapeHtml(a)}</span>`).join("")}${isExp ? unseen.map(a => `<span class="chip unseen" onclick="quickAddFromLineup('${sk}','${escapeHtml(a).replace(/'/g, "\\'")}')">+ ${escapeHtml(a)}</span>`).join("") : ""}</div></div><div class="event-toolbar"><button class="btn btn-sm" onclick="openEventInConcertsDb('${sk}')">Koncerty (${g.artists.length})</button><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(g.sample)}">Setlist.fm</a><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPhotoInput').click()">Zdjęcia</button><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPosterInput').click()">${meta.poster ? "Zmień plakat" : "Plakat"}</button><button class="btn btn-sm" onclick="openLineupEditor('${sk}')">Line-up</button><button class="btn btn-sm" onclick="openSplitwise('${sk}')">Rozliczenie${expSum ? ` (${expSum} zł)` : ""}</button></div></div>`;
+      }).join("");
+    }
+
+    function timeToMins(t) { const m = String(t || "").match(/(\d{1,2}):(\d{2})/); return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null; }
+    function renderClashfinder() { const box = document.getElementById("clashList"); if (!box) return; const items = clashSlots.map((s, idx) => ({ ...s, idx, sMin: timeToMins(s.start), eMin: timeToMins(s.end) })); const clashIdxs = new Set(); for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) if (items[i].sMin != null && items[i].eMin != null && items[j].sMin != null && items[j].eMin != null && Math.max(items[i].sMin, items[j].sMin) < Math.min(items[i].eMin, items[j].eMin)) { clashIdxs.add(items[i].idx); clashIdxs.add(items[j].idx); } box.innerHTML = items.map(it => `<div class="list-row ${clashIdxs.has(it.idx) ? "clash-alert" : ""}"><div><strong>${escapeHtml(it.artist)}</strong>${clashIdxs.has(it.idx) ? `<span class="badge-genre" style="margin-left:6px;color:#EF4444;border-color:#EF4444;">KONFLIKT GODZIN</span>` : ""}<div style="font-size:0.76rem;color:var(--text-muted);font-family:var(--font-mono);">${escapeHtml(it.start)} – ${escapeHtml(it.end)} • ${escapeHtml(it.stage || "Scena")}</div></div><button class="btn btn-sm btn-danger" onclick="deleteClashSlot(${it.idx})">Usuń</button></div>`).join("") || `<div style="font-size:0.82rem;color:var(--text-muted);">Dodaj występy, aby sprawdzić nakładające się godziny.</div>`; }
+    function addClashSlot(e) { e.preventDefault(); clashSlots.push({ artist: document.getElementById("cfArtist").value.trim(), stage: document.getElementById("cfStage").value.trim(), start: document.getElementById("cfStart").value.trim(), end: document.getElementById("cfEnd").value.trim() }); localStorage.setItem(CLASH_KEY, JSON.stringify(clashSlots)); document.getElementById("cfArtist").value = ""; document.getElementById("cfStage").value = ""; renderClashfinder(); }
+    function deleteClashSlot(idx) { clashSlots.splice(idx, 1); localStorage.setItem(CLASH_KEY, JSON.stringify(clashSlots)); renderClashfinder(); }
+
+    function toggleLineupExpand(k) { expandedLineups.has(k) ? expandedLineups.delete(k) : expandedLineups.add(k); renderTimeline(); }
+    function quickAddFromLineup(ek, artist) { const [ev, yr] = ek.split("|"); const sample = allConcerts.find(c => `${c.event}|${c.rok}` === ek) || {}; setView("add"); switchAddSubTab("concert"); resetConcertForm(); document.getElementById("mEvent").value = ev; document.getElementById("mRok").value = yr || sample.rok || ""; document.getElementById("mArtysta").value = artist; document.getElementById("mData").value = sample.data || ""; document.getElementById("mDzien").value = sample.dzien || ""; document.getElementById("mMiejsce").value = sample.miejsce || ""; document.getElementById("mMiasto").value = sample.miasto || ""; document.getElementById("mKraj").value = sample.kraj || "Polska"; document.getElementById("mZKim").value = sample.z_kim || ""; updateModalLineupPicker(); }
+
+    async function uploadImageToStore(file, prefix) { if (storageMode === "supabase" && sbClient && currentUser) { const ext = (file.name.split(".").pop() || "jpg").toLowerCase(); const path = `${currentUser.id}/${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`; const { error } = await sbClient.storage.from("event-media").upload(path, file); if (error) throw error; return { path, url: await resolveSignedUrl("event-media", path) }; } return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res({ path: "", url: r.result }); r.onerror = rej; r.readAsDataURL(file); }); }
+    async function handleEventPhotosUpload(e) { const files = Array.from(e.target.files || []); if (!files.length || !activeUploadEventKey) return; const m = getEventMeta(activeUploadEventKey); if (!m.photos) m.photos = []; showToast(`Zapisuję ${files.length} zdjęć...`); for (const f of files) { const u = await uploadImageToStore(f, "photo"); m.photos.push({ path: u.path, url: u.url, added_at: new Date().toISOString() }); } await saveEventMetaToStore(activeUploadEventKey); renderTimeline(); showToast("Zapisano zdjęcia!"); e.target.value = ""; }
+    async function handleEventPosterUpload(e) { const f = (e.target.files || [])[0]; if (!f || !activeUploadEventKey) return; const m = getEventMeta(activeUploadEventKey); showToast("Zapisuję plakat..."); const u = await uploadImageToStore(f, "poster"); m.poster_path = u.path; m.poster = u.url; await saveEventMetaToStore(activeUploadEventKey); renderTimeline(); showToast("Zapisano plakat!"); e.target.value = ""; }
+    async function removePoster(k) { if (!confirm("Usunąć plakat?")) return; const m = getEventMeta(k); m.poster = ""; m.poster_path = ""; await saveEventMetaToStore(k); renderTimeline(); }
+    async function removeEventPhoto(k, i) { if (!confirm("Usunąć zdjęcie?")) return; getEventMeta(k).photos.splice(i, 1); await saveEventMetaToStore(k); renderTimeline(); }
+    function openLightbox(url, title) { document.getElementById("lightboxTitle").textContent = title; document.getElementById("lightboxImg").src = url; document.getElementById("lightboxNav").innerHTML = ""; document.getElementById("lightboxModal").classList.add("open"); }
+    function openGalleryLightbox(k, i) { const ph = getEventMeta(k).photos || []; if (!ph[i]) return; const sk = escapeHtml(k).replace(/'/g, "\\'"); document.getElementById("lightboxTitle").textContent = `Zdjęcie ${i + 1} / ${ph.length}`; document.getElementById("lightboxImg").src = ph[i].url; document.getElementById("lightboxNav").innerHTML = ph.length > 1 ? `<button class="btn btn-sm" onclick="openGalleryLightbox('${sk}',${(i - 1 + ph.length) % ph.length})">Poprzednie</button><button class="btn btn-sm" onclick="openGalleryLightbox('${sk}',${(i + 1) % ph.length})">Następne</button>` : ""; document.getElementById("lightboxModal").classList.add("open"); }
+    function openLineupEditor(k) { document.getElementById("luEventKey").value = k; document.getElementById("luTextarea").value = (getEventMeta(k).lineup || []).join("\n"); document.getElementById("lineupModal").classList.add("open"); }
+    async function saveEventLineup(e) { e.preventDefault(); const k = document.getElementById("luEventKey").value; getEventMeta(k).lineup = [...new Set(document.getElementById("luTextarea").value.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean))]; await saveEventMetaToStore(k); expandedLineups.add(k); closeModal("lineupModal"); renderTimeline(); showToast("Zapisano line-up!"); }
+
+    function openSplitwise(ek) { const [ev, yr] = ek.split("|"); document.getElementById("swEventKey").value = ek; document.getElementById("swModalTitle").textContent = `Rozliczenie: ${ev} (${yr})`; renderSplitwiseList(); document.getElementById("splitwiseModal").classList.add("open"); }
+    function renderSplitwiseList() { const ek = document.getElementById("swEventKey").value; const items = tripExpenses.filter(x => x.event_key === ek); const sum = items.reduce((s, x) => s + Number(x.amount_pln || 0), 0); document.getElementById("swList").innerHTML = `<div style="font-family:var(--font-mono);font-size:0.82rem;margin-bottom:10px;color:var(--accent-coral);">Łącznie: <strong>${sum.toFixed(2)} PLN</strong></div>` + items.map(x => `<div class="list-row"><div><strong>${escapeHtml(x.title)}</strong><div style="font-size:0.75rem;color:var(--text-muted);">Płacił: ${escapeHtml(x.paid_by)}</div></div><div style="display:flex;align-items:center;gap:8px;"><strong style="font-family:var(--font-mono);">${Number(x.amount_pln).toFixed(2)} zł</strong><button class="btn btn-sm btn-danger" onclick="deleteExpense(${x.id})">Usuń</button></div></div>`).join("") || `<div style="font-size:0.82rem;color:var(--text-muted);">Brak wydatków dla tego wydarzenia.</div>`; }
+    async function addExpense(e) { e.preventDefault(); const row = { event_key: document.getElementById("swEventKey").value, title: document.getElementById("swTitle").value.trim(), amount_pln: Number(document.getElementById("swAmount").value), paid_by: document.getElementById("swPaidBy").value.trim() }; if (storageMode === "supabase" && sbClient && currentUser) { const { data } = await sbClient.from("trip_expenses").insert({ ...row, user_id: currentUser.id }).select().single(); if (data) tripExpenses.unshift(data); } else { tripExpenses.unshift({ ...row, id: Date.now() }); localStorage.setItem(EXPENSES_KEY, JSON.stringify(tripExpenses)); } document.getElementById("swTitle").value = ""; document.getElementById("swAmount").value = ""; renderSplitwiseList(); renderTimeline(); renderCrewProfiles(); }
+    async function deleteExpense(id) { if (storageMode === "supabase" && sbClient) await sbClient.from("trip_expenses").delete().eq("id", id); tripExpenses = tripExpenses.filter(x => x.id !== id); if (storageMode === "offline") localStorage.setItem(EXPENSES_KEY, JSON.stringify(tripExpenses)); renderSplitwiseList(); renderTimeline(); renderCrewProfiles(); }
+
+    function renderBucketList() { const seenSet = new Set(allConcerts.map(c => (c.artysta || "").toLowerCase())); document.getElementById("bucketListContainer").innerHTML = bucketList.map(b => { const isSeen = b.seen || seenSet.has((b.artist || "").toLowerCase()); return `<div class="list-row"><div style="display:flex;align-items:center;gap:10px;"><div class="artist-avatar sm">${renderAvatarInner(b.artist)}</div><div><strong style="${isSeen ? "text-decoration:line-through;opacity:0.65;" : ""}">${escapeHtml(b.artist)}</strong>${isSeen ? `<span class="badge-genre" style="margin-left:6px;color:var(--accent-cyan);">Zaliczony</span>` : ""}${b.notes ? `<div style="font-size:0.75rem;color:var(--text-muted);">${escapeHtml(b.notes)}</div>` : ""}</div></div><button class="btn btn-sm btn-danger" onclick="deleteBucketItem(${b.id})">Usuń</button></div>`; }).join("") || `<div style="font-size:0.83rem;color:var(--text-muted);">Twoja lista marzeń jest pusta.</div>`; }
+    async function addBucketItem(e) { e.preventDefault(); const artist = document.getElementById("blArtist").value.trim(), notes = document.getElementById("blNotes").value.trim(); if (!artist) return; if (storageMode === "supabase" && sbClient && currentUser) { const { data } = await sbClient.from("bucket_list").insert({ user_id: currentUser.id, artist, notes }).select().single(); if (data) bucketList.unshift(data); } else { bucketList.unshift({ id: Date.now(), artist, notes, seen: false }); localStorage.setItem(BUCKET_KEY, JSON.stringify(bucketList)); } document.getElementById("blArtist").value = ""; document.getElementById("blNotes").value = ""; renderBucketList(); showToast("Dodano do Bucket List!"); }
+    async function deleteBucketItem(id) { if (storageMode === "supabase" && sbClient) await sbClient.from("bucket_list").delete().eq("id", id); bucketList = bucketList.filter(x => x.id !== id); if (storageMode === "offline") localStorage.setItem(BUCKET_KEY, JSON.stringify(bucketList)); renderBucketList(); }
+
+    function autoFillDateFields(dId, rId, dwId) { const v = document.getElementById(dId).value; if (!v) return; const d = new Date(v + "T12:00:00"); if (!isNaN(d.getTime())) { document.getElementById(rId).value = d.getFullYear(); document.getElementById(dwId).value = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"][d.getDay()]; } }
+    function updateModalLineupPicker() { const ev = document.getElementById("mEvent").value.trim().toLowerCase(), yr = document.getElementById("mRok").value.trim(); const wrap = document.getElementById("modalLineupPickerWrap"); if (!ev) { wrap.style.display = "none"; return; } let arts = []; const exact = Object.keys(eventsMeta).find(k => k.toLowerCase() === `${ev}|${yr}`); if (exact && eventsMeta[exact].lineup) arts = eventsMeta[exact].lineup; else { const s = new Set(); Object.keys(eventsMeta).filter(k => k.toLowerCase().startsWith(ev + "|")).forEach(k => (eventsMeta[k].lineup || []).forEach(a => s.add(a))); arts = [...s]; } if (!arts.length) { wrap.style.display = "none"; return; } wrap.style.display = "block"; document.getElementById("modalLineupCount").textContent = `${arts.length} artystów`; document.getElementById("modalLineupChips").innerHTML = arts.map(a => `<button type="button" class="pick-chip" onclick="document.getElementById('mArtysta').value='${escapeHtml(a).replace(/'/g, "\\'")}';autoFillGenreFromArtistCache();">${escapeHtml(a)}</button>`).join(""); }
+    function resetConcertForm() { document.getElementById("concertForm").reset(); document.getElementById("mId").value = ""; document.getElementById("mKraj").value = "Polska"; document.getElementById("mKto").value = "Razem"; document.getElementById("formConcertTitle").textContent = "Dodaj nowy koncert do historii"; document.getElementById("modalLineupPickerWrap").style.display = "none"; }
+    function editConcertInTab(id) { const c = allConcerts.find(x => x.id === id); if (!c) return; setView("add"); switchAddSubTab("concert"); document.getElementById("formConcertTitle").textContent = `Edytuj: ${c.artysta}`; document.getElementById("mId").value = c.id; document.getElementById("mArtysta").value = c.artysta || ""; document.getElementById("mEvent").value = c.event || ""; document.getElementById("mData").value = c.data || ""; document.getElementById("mGodzina").value = c.godzina || ""; document.getElementById("mRok").value = c.rok || ""; document.getElementById("mDzien").value = c.dzien || ""; document.getElementById("mScena").value = c.scena || ""; document.getElementById("mMiejsce").value = c.miejsce || ""; document.getElementById("mMiasto").value = c.miasto || ""; document.getElementById("mDistrict").value = c.district || ""; document.getElementById("mKraj").value = c.kraj || "Polska"; document.getElementById("mGatunek").value = c.gatunek || ""; document.getElementById("mPodgatunek").value = c.podgatunek || ""; document.getElementById("mKto").value = c.kto || ""; document.getElementById("mZKim").value = c.z_kim || ""; document.getElementById("mOcena").value = c.ocena || 0; document.getElementById("mCena").value = c.cena || ""; document.getElementById("mUwagi").value = c.uwagi || ""; updateModalLineupPicker(); }
+
+    async function saveConcert(e) { e.preventDefault(); const idVal = document.getElementById("mId").value; const rec = { rok: parseInt(document.getElementById("mRok").value, 10) || null, event: document.getElementById("mEvent").value.trim(), artysta: document.getElementById("mArtysta").value.trim(), data: document.getElementById("mData").value || null, dzien: document.getElementById("mDzien").value.trim(), godzina: document.getElementById("mGodzina").value.trim(), scena: document.getElementById("mScena").value.trim(), miejsce: document.getElementById("mMiejsce").value.trim(), miasto: document.getElementById("mMiasto").value.trim(), district: document.getElementById("mDistrict").value.trim(), kraj: document.getElementById("mKraj").value.trim(), gatunek: document.getElementById("mGatunek").value.trim(), podgatunek: document.getElementById("mPodgatunek").value.trim(), kto: document.getElementById("mKto").value.trim(), z_kim: document.getElementById("mZKim").value.trim(), ocena: parseInt(document.getElementById("mOcena").value, 10) || 0, cena: document.getElementById("mCena").value !== "" ? Number(document.getElementById("mCena").value) : null, uwagi: document.getElementById("mUwagi").value.trim() }; if (rec.miasto && !getCityCoords(rec.miasto)) await geocodeCity(rec.miasto, rec.kraj); if (idVal) { const cid = parseInt(idVal, 10); if (storageMode === "supabase" && sbClient) { const { error } = await sbClient.from("concerts").update(rec).eq("id", cid); if (error) { showToast("Błąd: " + error.message); return; } } rec.id = cid; const idx = allConcerts.findIndex(c => c.id === cid); if (idx >= 0) allConcerts[idx] = rec; showToast("Zaktualizowano koncert!"); } else { if (storageMode === "supabase" && sbClient && currentUser) { const { data, error } = await sbClient.from("concerts").insert({ ...rec, user_id: currentUser.id }).select().single(); if (error) { showToast("Błąd: " + error.message); return; } rec.id = data.id; } else { rec.id = Math.max(0, ...allConcerts.map(c => c.id || 0)) + 1; } allConcerts.push(rec); showToast("Dodano nowy koncert!"); } if (storageMode === "offline") localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts)); resetConcertForm(); populateFilterDropdowns(); populateDatalists(); populateEventFilterSelect(); renderBucketList(); renderCrewProfiles(); applyFilters(); syncArtistsFromEdge(false); }
+    async function deleteConcert(id) { if (!confirm("Usunąć ten koncert?")) return; if (storageMode === "supabase" && sbClient) await sbClient.from("concerts").delete().eq("id", id); allConcerts = allConcerts.filter(c => c.id !== id); if (storageMode === "offline") localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts)); populateEventFilterSelect(); renderCrewProfiles(); applyFilters(); showToast("Usunięto koncert."); }
+
+    function sortTable(col) { if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; } renderFullTable(); }
+    function renderFullTable() { const sorted = [...filteredConcerts].sort((a, b) => { const va = String(a[sortCol] || "").toLowerCase(), vb = String(b[sortCol] || "").toLowerCase(); return sortAsc ? va.localeCompare(vb, "pl") : vb.localeCompare(va, "pl"); }); document.getElementById("fullTableBody").innerHTML = sorted.map(c => `<tr><td style="font-family:var(--font-mono);white-space:nowrap;">${escapeHtml(c.data)}</td><td><strong>${escapeHtml(c.artysta)}</strong></td><td>${escapeHtml(c.event)}</td><td>${escapeHtml(c.miasto)}</td><td><span class="badge-genre">${escapeHtml(c.gatunek || "—")}</span></td><td>${escapeHtml(c.z_kim || "—")}</td><td style="white-space:nowrap;"><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(c)}">Setlist.fm</a><button class="btn btn-sm" onclick="editConcertInTab(${c.id})">Edytuj</button><button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">Usuń</button></td></tr>`).join(""); }
+
+    function openWrappedModal() { const yrs = [...new Set(allConcerts.map(c => c.rok).filter(Boolean))].sort((a, b) => b - a); document.getElementById("wrappedYearSelect").innerHTML = `<option value="all">Cała historia</option>` + yrs.map(y => `<option value="${y}">Sezon ${y}</option>`).join(""); renderWrapped(); document.getElementById("wrappedModal").classList.add("open"); }
+    function renderWrapped() { const yr = document.getElementById("wrappedYearSelect").value; const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr); const byA = {}, byC = {}, byG = {}, byCr = {}; list.forEach(c => { if (c.artysta) byA[c.artysta] = (byA[c.artysta] || 0) + 1; if (c.miasto) byC[c.miasto] = (byC[c.miasto] || 0) + 1; if (c.gatunek) byG[c.gatunek] = (byG[c.gatunek] || 0) + 1; if (c.z_kim) byCr[c.z_kim] = (byCr[c.z_kim] || 0) + 1; }); const { totalKm, farthest, artistKmSorted } = computeDistances(list); const [tA, tAC] = topEntry(byA), [tC, tCC] = topEntry(byC), [tG, tGC] = topEntry(byG), [tCr, tCrC] = topEntry(byCr), topKm = artistKmSorted[0] || ["—", 0]; document.getElementById("wrappedBody").innerHTML = `<div class="wrapped-card"><div class="wrapped-stat"><div class="lbl">Koncerty</div><div class="val">${list.length}</div></div><div class="wrapped-stat"><div class="lbl">Kilometry z ${escapeHtml(settings.hometown)}</div><div class="val">${totalKm.toLocaleString("pl-PL")} km</div></div><div class="wrapped-stat"><div class="lbl">Top Artysta</div><div class="val">${escapeHtml(tA)} (${tAC}×)</div></div><div class="wrapped-stat"><div class="lbl">Najwięcej KM za Artystą</div><div class="val">${escapeHtml(topKm[0])} (${Number(topKm[1]).toLocaleString("pl-PL")} km)</div></div><div class="wrapped-stat"><div class="lbl">Top Miasto</div><div class="val">${escapeHtml(tC)} (${tCC})</div></div><div class="wrapped-stat"><div class="lbl">Top Gatunek</div><div class="val">${escapeHtml(tG)} (${tGC})</div></div><div class="wrapped-stat"><div class="lbl">Najwierniejsza Ekipa</div><div class="val">${escapeHtml(tCr)} (${tCrC})</div></div><div class="wrapped-stat"><div class="lbl">Najdalszy Koncert</div><div class="val">${escapeHtml(farthest.city)} (${farthest.km.toLocaleString("pl-PL")} km)</div></div></div>`; }
+    function exportXLSX() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allConcerts), "Koncerty"); XLSX.writeFile(wb, `Festivals_life_${new Date().toISOString().slice(0, 10)}.xlsx`); showToast("Wyeksportowano Excel!"); }
+    async function handleImport(event) { const file = event.target.files[0]; if (!file) return; try { const imported = file.name.toLowerCase().endsWith(".json") ? JSON.parse(await file.text()) : []; if (imported.length && storageMode === "supabase" && sbClient && currentUser) { const rows = imported.map(({ id, ...r }) => ({ ...r, user_id: currentUser.id, data: r.data || null, cena: r.cena !== "" && r.cena != null ? Number(r.cena) : null })); const { data } = await sbClient.from("concerts").insert(rows).select(); allConcerts = [...allConcerts, ...(data || [])]; applyFilters(); showToast(`Zaimportowano ${rows.length} koncertów!`); } } catch (err) { showToast("Błąd importu: " + err.message); } event.target.value = ""; }
 
     window.addEventListener("DOMContentLoaded", initData);
   </script>
