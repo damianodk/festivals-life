@@ -343,12 +343,28 @@
       .m-nav-btn.active { color: var(--accent-pink); background: var(--grad-subtle); }
       .m-nav-btn.add-cta { color: var(--btn-primary-text); background: var(--grad-primary); box-shadow: 0 4px 14px var(--btn-primary-shadow); }
     }
+
+    .brand { cursor: pointer; }
+    .modal-head h3 { word-break: break-word; min-width: 0; }
+    .sw-form { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; margin-bottom: 14px; }
+    .sw-form input, .sw-form button { min-width: 0; width: 100%; }
+    .cf-form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 14px; }
+    .cf-form input, .cf-form button { min-width: 0; width: 100%; }
+    @media (max-width: 768px) {
+      .sw-form { grid-template-columns: 1fr 1fr; }
+      .sw-form input:first-child { grid-column: 1 / -1; }
+      .sw-form button { grid-column: 1 / -1; }
+      .cf-form { grid-template-columns: 1fr 1fr; }
+      .cf-form input:first-child { grid-column: 1 / -1; }
+      .cf-form button { grid-column: 1 / -1; }
+      .modal { padding: 16px 14px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="topbar">
-      <div class="brand">
+      <div class="brand" onclick="goHomeReset()" title="Wróć na Start i wyczyść filtry">
         <div class="fl-logo" aria-label="FL">
           <span class="fl-logo-dot"></span>
           <span class="fl-logo-text">FL</span>
@@ -421,7 +437,7 @@
     </header>
 
     <nav class="desktop-nav" id="desktopNav">
-      <button class="nav-tab active" data-view="start" onclick="setView('start')">
+      <button class="nav-tab active" data-view="start" onclick="goHomeReset()">
         <svg class="ico" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg>
         Start
       </button>
@@ -499,14 +515,12 @@
         <div class="section-head">
           <div>
             <h2 class="section-title">Twoi Top Artyści</h2>
-            <p class="section-sub">Zdjęcia HD ze Spotify & 30s odsłuch z Apple Music (dla każdego bez logowania)</p>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="btn btn-sm btn-primary" onclick="openStreamingPlaylist()">
               <svg class="ico ico-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               <span>Playlista (<span class="sp-provider-label">Spotify</span>)</span>
             </button>
-            <button class="btn btn-sm" onclick="syncArtistsFromEdge(true)">Odśwież zdjęcia</button>
           </div>
         </div>
         <div class="artists-strip" id="topArtistsStrip"></div>
@@ -714,7 +728,7 @@
 
         <div id="events-pane-clash" class="view-hidden">
           <p class="section-sub" style="margin-bottom:12px;">Układaj godziny występów — nakładające się godziny zostaną automatycznie oznaczone jako konflikt.</p>
-          <form onsubmit="addClashSlot(event)" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:14px;">
+          <form onsubmit="addClashSlot(event)" class="cf-form">
             <input type="text" id="cfArtist" required placeholder="Artysta" />
             <input type="text" id="cfStage" placeholder="Scena" />
             <input type="text" id="cfStart" required placeholder="Start (21:00)" />
@@ -811,7 +825,7 @@
     <div class="modal">
       <div class="modal-head"><h3 id="swModalTitle">Rozliczenie wyjazdu</h3><button class="btn btn-sm" onclick="closeModal('splitwiseModal')">Zamknij</button></div>
       <input type="hidden" id="swEventKey" />
-      <form onsubmit="addExpense(event)" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:14px;">
+      <form onsubmit="addExpense(event)" class="sw-form">
         <input type="text" id="swTitle" required placeholder="Wydatek (np. Nocleg, Paliwo)" />
         <input type="number" id="swAmount" required min="1" step="0.01" placeholder="Kwota PLN" />
         <input type="text" id="swPaidBy" required placeholder="Kto płacił?" value="Damian" />
@@ -848,7 +862,7 @@
   <datalist id="dlKto"></datalist><datalist id="dlZKim"></datalist>
 
   <nav class="mobile-bottom-nav" id="mobileBottomNav">
-    <button class="m-nav-btn active" data-view="start" onclick="setView('start')"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>Start</span></button>
+    <button class="m-nav-btn active" data-view="start" onclick="goHomeReset()"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>Start</span></button>
     <button class="m-nav-btn" data-view="map" onclick="setView('map')"><svg class="ico ico-lg" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Mapa</span></button>
     <button class="m-nav-btn add-cta" data-view="add" onclick="setView('add')"><svg class="ico ico-lg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Dodaj</span></button>
     <button class="m-nav-btn" data-view="events" onclick="setView('events')"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg><span>Eventy</span></button>
@@ -889,7 +903,7 @@
     const TRAVEL_KEY = "festivals_life_travel_v6";
     const SETTINGS_KEY = "festivals_life_settings_v6";
     const COORDS_KEY = "festivals_life_coords_v6";
-    const ARTIST_META_CACHE_KEY = "festivals_life_artists_meta_v1";
+    const ARTIST_META_CACHE_KEY = "festivals_life_artists_meta_v2";
     const STREAMING_PROV_KEY = "festivals_life_streaming_prov_v1";
     const THEME_KEY = "festivals_life_theme_v6";
 
@@ -988,25 +1002,36 @@
 
       const missing = manual
         ? topNames
-        : topNames.filter(n => !artistsMetaCache[n.trim().toLowerCase()]?.image_url);
+        : topNames.filter(n => {
+            const url = artistsMetaCache[n.trim().toLowerCase()]?.image_url || "";
+            return !url || !url.includes("scdn.co");
+          });
 
       if (!missing.length) return;
-      if (manual) showToast(`Pobieram zdjęcia ze Spotify i Apple Music (${missing.length} artystów)...`);
+      if (manual) showToast(`Pobieram zdjęcia profilowe ze Spotify (${missing.length} artystów)...`);
 
       try {
-        const keys = missing.map(n => n.trim().toLowerCase());
-        const { data: cachedRows } = await sbClient.from("artists_cache").select("*").in("artist_key", keys);
-        (cachedRows || []).forEach(r => { if (r.image_url) artistsMetaCache[r.artist_key] = r; });
+        let toInvoke = missing;
+        if (!manual) {
+          const keys = missing.map(n => n.trim().toLowerCase());
+          const { data: cachedRows } = await sbClient.from("artists_cache").select("*").in("artist_key", keys);
+          (cachedRows || []).forEach(r => { if (r.image_url && r.image_url.includes("scdn.co")) artistsMetaCache[r.artist_key] = r; });
+          toInvoke = missing.filter(n => !(artistsMetaCache[n.trim().toLowerCase()]?.image_url || "").includes("scdn.co"));
+        }
 
-        const stillMissing = missing.filter(n => !artistsMetaCache[n.trim().toLowerCase()]?.image_url);
-        if (stillMissing.length) {
-          const { data: fnData } = await sbClient.functions.invoke("fetch-artist-meta", {
-            body: { artists: stillMissing }
+        if (toInvoke.length) {
+          const { data: fnData, error: fnErr } = await sbClient.functions.invoke("fetch-artist-meta", {
+            body: { artists: toInvoke, force: manual }
           });
+          if (fnErr) throw fnErr;
           if (fnData && fnData.results) {
             Object.entries(fnData.results).forEach(([k, val]) => {
               artistsMetaCache[k] = val;
             });
+          }
+          if (manual && fnData && fnData.spotify_ok === false) {
+            showToast("Brak połączenia ze Spotify API — sprawdź sekrety SPOTIFY_CLIENT_ID / SECRET w Supabase.");
+            return;
           }
         }
         try { localStorage.setItem(ARTIST_META_CACHE_KEY, JSON.stringify(artistsMetaCache)); } catch (_) {}
@@ -1014,7 +1039,7 @@
         renderTopArtists();
         renderHallOfFame();
         renderBucketList();
-        if (manual) showToast("Zaktualizowano bazę zdjęć artystów!");
+        if (manual) showToast("Zaktualizowano zdjęcia profilowe ze Spotify!");
       } catch (err) {
         if (manual) showToast("Błąd synchronizacji: " + err.message);
       }
@@ -1037,6 +1062,15 @@
         return `<img src="${escapeHtml(meta.image_url)}" alt="${escapeHtml(name)}" loading="lazy" />`;
       }
       return artistInitials(name);
+    }
+
+    function goHomeReset() {
+      const hasAny = ["fSearch", "fYear", "fGenre", "fWho", "fCrew"].some(id => {
+        const el = document.getElementById(id);
+        return el && el.value.trim() !== "";
+      });
+      if (hasAny) resetFilters();
+      setView("start");
     }
 
     function setView(view) {
@@ -1078,7 +1112,7 @@
       allConcerts = (conR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
       upcomingConcerts = (upR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
       bucketList = blR.data || []; tripExpenses = expR.data || [];
-      (artCacheR.data || []).forEach(r => { if (r.artist_key) artistsMetaCache[r.artist_key] = r; });
+      (artCacheR.data || []).forEach(r => { if (r.artist_key && (!r.image_url || r.image_url.includes("scdn.co"))) artistsMetaCache[r.artist_key] = r; });
       try { localStorage.setItem(ARTIST_META_CACHE_KEY, JSON.stringify(artistsMetaCache)); } catch (_) {}
 
       eventsMeta = { ...INITIAL_EVENTS_META };
@@ -1135,7 +1169,24 @@
       enterOfflineDemoMode();
     }
 
-    function applyTheme(theme, refresh = true) { if (!THEME_PROFILES[theme]) theme = "dark"; document.documentElement.setAttribute("data-theme", theme); localStorage.setItem(THEME_KEY, theme); ["themeSelect", "profileThemeSelect"].forEach(id => { const el = document.getElementById(id); if (el) el.value = theme; }); if (refresh) { if (map) { loadBasemap(); updateHeatmap(); } renderCharts(); if (storageMode === "supabase" && sbClient && currentUser) sbClient.from("profiles").update({ theme }).eq("id", currentUser.id).then(() => {}); } }
+    function applyTheme(theme, refresh = true) {
+      if (!THEME_PROFILES[theme]) theme = "dark";
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem(THEME_KEY, theme);
+      ["themeSelect", "profileThemeSelect"].forEach(id => { const el = document.getElementById(id); if (el) el.value = theme; });
+      if (refresh) {
+        try { renderCharts(); } catch (_) {}
+        try {
+          if (map) {
+            loadBasemap();
+            if (currentView === "map") updateHeatmap();
+          }
+        } catch (_) {}
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          sbClient.from("profiles").update({ theme }).eq("id", currentUser.id).then(() => {});
+        }
+      }
+    }
     function updateHometownUI() { document.querySelectorAll(".ht-inline").forEach(el => el.textContent = settings.hometown || "Poznań"); const inp = document.getElementById("profileHometownInput"); if (inp) inp.value = settings.hometown || "Poznań"; }
 
     function haversineKm(lat1, lon1, lat2, lon2) { const R = 6371, r = d => d * Math.PI / 180; const a = Math.sin(r(lat2 - lat1) / 2) ** 2 + Math.cos(r(lat1)) * Math.cos(r(lat2)) * Math.sin(r(lon2 - lon1) / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); }
@@ -1165,6 +1216,8 @@
       });
       document.getElementById("filteredCount").textContent = filteredConcerts.length;
       document.getElementById("dbCountLabel").textContent = filteredConcerts.length;
+      const upCard = document.getElementById("startUpcomingCard");
+      if (upCard) upCard.classList.toggle("view-hidden", upcomingConcerts.length === 0 || parts.length > 0);
       renderStartEgo(); renderKPIs(); renderTopArtists(); renderHallOfFame(); renderCharts(); renderPivots(); renderTimeline(); renderFullTable(); renderEventConcertsTable();
       if (map && currentView === "map") updateHeatmap();
     }
@@ -1219,7 +1272,7 @@
       const { farthest, artistKmSorted } = computeDistances(filteredConcerts); const topKm = artistKmSorted[0] || ["—", 0];
       document.getElementById("hofGrid").innerHTML = `
         <div class="hof-card"><div class="hof-tag">Król Sceny</div><div class="hof-val">${escapeHtml(tA)}</div><div class="hof-desc">${tAC}× na żywo</div></div>
-        <div class="hof-card"><div class="hof-tag">Najwięcej KM za Artystą</div><div class="hof-val">${escapeHtml(topKm[0])}</div><div class="hof-desc">${Number(topKm[1]).toLocaleString("pl-PL")} km z ${escapeHtml(settings.hometown)}</div></div>
+        <div class="hof-card"><div class="hof-tag">Liczba kilometrów za artystą</div><div class="hof-val">${escapeHtml(topKm[0])}</div><div class="hof-desc">${Number(topKm[1]).toLocaleString("pl-PL")} km z ${escapeHtml(settings.hometown)}</div></div>
         <div class="hof-card"><div class="hof-tag">Najdalsza Podróż</div><div class="hof-val">${escapeHtml(farthest.city)}</div><div class="hof-desc">${farthest.km.toLocaleString("pl-PL")} km (${escapeHtml(farthest.artist)})</div></div>
         <div class="hof-card"><div class="hof-tag">Rekordowy Rok</div><div class="hof-val">${escapeHtml(tY)}</div><div class="hof-desc">${tYC} koncertów</div></div>
         <div class="hof-card"><div class="hof-tag">Największy Maraton</div><div class="hof-val">${tDC} / dzień</div><div class="hof-desc">${escapeHtml(tD)}</div></div>
@@ -1232,7 +1285,7 @@
       document.getElementById("badgesRow").innerHTML = badges.map(b => `<div class="badge-item ${b.ok ? "" : "locked"}">${checkIco}<span>${b.name}</span></div>`).join("");
     }
 
-    function renderCharts() { const p = getThemeProfile(); const mk = (id, cfg) => { if (charts[id]) charts[id].destroy(); const el = document.getElementById(id); if (el) charts[id] = new Chart(el.getContext("2d"), cfg); }; const byYr = {}; filteredConcerts.forEach(c => { if (c.rok) byYr[c.rok] = (byYr[c.rok] || 0) + 1; }); const yrs = Object.keys(byYr).sort(); mk("chartYears", { type: "bar", data: { labels: yrs, datasets: [{ data: yrs.map(y => byYr[y]), backgroundColor: p.bar1, borderColor: p.bar1Border, borderWidth: 1.2, borderRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { display: false } }, y: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } } } } }); const byG = {}; filteredConcerts.forEach(c => { const g = c.gatunek || "Inne"; byG[g] = (byG[g] || 0) + 1; }); const gE = Object.entries(byG).sort((a, b) => b[1] - a[1]); mk("chartGenres", { type: "doughnut", data: { labels: gE.map(e => e[0]), datasets: [{ data: gE.map(e => e[1]), backgroundColor: p.palette, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "right", labels: { color: p.chartText, boxWidth: 11, font: { size: 11 } } } } } }); const byC = {}; filteredConcerts.forEach(c => { if (c.z_kim) byC[c.z_kim] = (byC[c.z_kim] || 0) + 1; }); const cE = Object.entries(byC).sort((a, b) => b[1] - a[1]).slice(0, 8); mk("chartCrew", { type: "bar", data: { labels: cE.map(e => e[0]), datasets: [{ data: cE.map(e => e[1]), backgroundColor: p.bar2, borderRadius: 7 }] }, options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } }, y: { ticks: { color: p.chartText, font: { size: 11 } }, grid: { display: false } } } } }); const dOrd = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]; const byD = {}; filteredConcerts.forEach(c => { const d = (c.dzien || "").toLowerCase(); if (d) byD[d] = (byD[d] || 0) + 1; }); mk("chartDays", { type: "bar", data: { labels: dOrd.map(d => d[0].toUpperCase() + d.slice(1)), datasets: [{ data: dOrd.map(d => byD[d] || 0), backgroundColor: p.bar3, borderRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { display: false } }, y: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } } } } }); }
+    function renderCharts() { const p = getThemeProfile(); const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return; if (charts[id]) { charts[id].destroy(); delete charts[id]; } const existing = Chart.getChart(el); if (existing) existing.destroy(); charts[id] = new Chart(el.getContext("2d"), cfg); }; const byYr = {}; filteredConcerts.forEach(c => { if (c.rok) byYr[c.rok] = (byYr[c.rok] || 0) + 1; }); const yrs = Object.keys(byYr).sort(); mk("chartYears", { type: "bar", data: { labels: yrs, datasets: [{ data: yrs.map(y => byYr[y]), backgroundColor: p.bar1, borderColor: p.bar1Border, borderWidth: 1.2, borderRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { display: false } }, y: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } } } } }); const byG = {}; filteredConcerts.forEach(c => { const g = c.gatunek || "Inne"; byG[g] = (byG[g] || 0) + 1; }); const gE = Object.entries(byG).sort((a, b) => b[1] - a[1]); mk("chartGenres", { type: "doughnut", data: { labels: gE.map(e => e[0]), datasets: [{ data: gE.map(e => e[1]), backgroundColor: p.palette, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "right", labels: { color: p.chartText, boxWidth: 11, font: { size: 11 } } } } } }); const byC = {}; filteredConcerts.forEach(c => { if (c.z_kim) byC[c.z_kim] = (byC[c.z_kim] || 0) + 1; }); const cE = Object.entries(byC).sort((a, b) => b[1] - a[1]).slice(0, 8); mk("chartCrew", { type: "bar", data: { labels: cE.map(e => e[0]), datasets: [{ data: cE.map(e => e[1]), backgroundColor: p.bar2, borderRadius: 7 }] }, options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } }, y: { ticks: { color: p.chartText, font: { size: 11 } }, grid: { display: false } } } } }); const dOrd = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]; const byD = {}; filteredConcerts.forEach(c => { const d = (c.dzien || "").toLowerCase(); if (d) byD[d] = (byD[d] || 0) + 1; }); mk("chartDays", { type: "bar", data: { labels: dOrd.map(d => d[0].toUpperCase() + d.slice(1)), datasets: [{ data: dOrd.map(d => byD[d] || 0), backgroundColor: p.bar3, borderRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: p.chartText }, grid: { display: false } }, y: { ticks: { color: p.chartText }, grid: { color: p.chartGrid } } } } }); }
 
     function renderPivots() { const mkBox = (title, field, fId) => { const cnt = {}; filteredConcerts.forEach(c => { const v = c[field] || "(puste)"; cnt[v] = (cnt[v] || 0) + 1; }); const rows = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 20); return `<div class="pivot-box"><h4>${title}</h4>${rows.map(([k, v]) => `<div class="pivot-row" onclick="quickFilter('${fId}','${escapeHtml(k).replace(/'/g, "\\'")}')"><span>${escapeHtml(k)}</span><span class="pivot-count">${v}</span></div>`).join("")}</div>`; }; const { artistKmSorted } = computeDistances(filteredConcerts); const kmBox = `<div class="pivot-box"><h4>Kilometry za Artystą (z ${escapeHtml(settings.hometown)})</h4>${artistKmSorted.slice(0, 20).map(([a, km]) => `<div class="pivot-row" onclick="quickFilter('fSearch','${escapeHtml(a).replace(/'/g, "\\'")}')"><span>${escapeHtml(a)}</span><span class="pivot-count">${km.toLocaleString("pl-PL")} km</span></div>`).join("")}</div>`; document.getElementById("pivotGrid").innerHTML = kmBox + mkBox("Artysta (Top 20)", "artysta", "fSearch") + mkBox("Rok", "rok", "fYear") + mkBox("Gatunek", "gatunek", "fGenre"); }
     function quickFilter(id, val) { if (val === "(puste)") return; const el = document.getElementById(id); if (el) { el.value = el.value === val ? "" : val; applyFilters(); } }
@@ -1247,11 +1300,12 @@
     function toggleMarkers() { showMarkers = !showMarkers; document.getElementById("toggleMarkersBtn").textContent = showMarkers ? "Punkty: WŁ" : "Punkty: WYŁ"; updateHeatmap(); }
     function toggleArcs() { showArcs = !showArcs; document.getElementById("toggleArcsBtn").textContent = showArcs ? "Trasy: WŁ" : "Trasy: WYŁ"; updateHeatmap(); }
 
-    function updateHeatmap() { if (!map) return; if (heatLayer) map.removeLayer(heatLayer); arcsLayer.clearLayers(); markersLayer.clearLayers(); const p = getThemeProfile(), home = settings.hometown_coords || [52.4064, 16.9252], groups = {}; filteredConcerts.forEach(c => { if (!c.miasto) return; if (!groups[c.miasto]) groups[c.miasto] = { city: c.miasto, country: c.kraj, items: [] }; groups[c.miasto].items.push(c); }); const radius = parseInt(document.getElementById("heatRadius").value, 10), moc = parseInt(document.getElementById("heatIntensity").value, 10); document.getElementById("heatRadiusVal").textContent = radius; document.getElementById("heatIntensityVal").textContent = moc; const sorted = Object.values(groups).sort((a, b) => b.items.length - a.items.length), maxC = sorted[0] ? sorted[0].items.length : 1, heatPts = []; sorted.forEach(g => { const coords = getCityCoords(g.city); if (!coords) return; const lRatio = maxC > 1 ? g.items.length / maxC : 1, col = interpolateColor(Math.pow(lRatio, 0.72), p.colorStops); const reps = Math.max(1, Math.min(6, Math.round(1 + lRatio * 5))); for (let k = 0; k < reps; k++) heatPts.push([coords[0], coords[1], 0.22 + 0.78 * lRatio]); const distKm = Math.round(haversineKm(home[0], home[1], coords[0], coords[1])); if (showArcs && distKm > 18) { L.polyline(buildArcPoints(home, coords), { color: col, weight: 1.5 + lRatio * 1.4, opacity: 0.46, dashArray: "5 7" }).bindTooltip(`${escapeHtml(settings.hometown)} → ${escapeHtml(g.city)}: ${distKm.toLocaleString("pl-PL")} km`, { sticky: true }).addTo(arcsLayer); } if (showMarkers) { const r = Math.round(7 + 21 * lRatio); L.circleMarker(coords, { radius: r, color: p.markerStroke, weight: 2, fillColor: col, fillOpacity: 0.76 }).bindPopup(`<div style="font-family:var(--font-display);font-weight:800;font-size:15px;">${escapeHtml(g.city)}</div><div style="font-family:var(--font-mono);font-size:12px;color:${col};font-weight:700;margin:2px 0 6px;">${g.items.length} koncertów • ${distKm.toLocaleString("pl-PL")} km</div><div style="font-size:11px;color:var(--text-muted);">${escapeHtml([...new Set(g.items.map(i => i.artysta))].slice(0, 8).join(", "))}</div>`).addTo(markersLayer); if (g.items.length >= 6) L.marker(coords, { interactive: false, icon: L.divIcon({ className: "city-count-label", html: `<div style="color:${p.labelTextColor};line-height:${r * 2}px;">${g.items.length}</div>`, iconSize: [r * 2, r * 2], iconAnchor: [r, r] }) }).addTo(markersLayer); } }); heatLayer = L.heatLayer(heatPts, { radius, blur: Math.max(12, Math.round(radius * 0.68)), maxZoom: 11, max: Math.max(0.45, 5.2 - moc * 0.46), minOpacity: Math.min(0.85, 0.16 + moc * 0.062), gradient: p.heatGradient }).addTo(map); document.getElementById("topCitiesList").innerHTML = sorted.slice(0, 10).map(g => { const cCol = interpolateColor(Math.pow(maxC > 1 ? g.items.length / maxC : 1, 0.72), p.colorStops); return `<button class="city-jump" onclick="map.flyTo([${getCityCoords(g.city)}],9,{duration:0.8})"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${cCol};"></span>${escapeHtml(g.city)}</span><span class="cnt">${g.items.length}</span></button>`; }).join(""); }
+    function updateHeatmap() { if (!map) return; const sz = map.getSize(); if (!sz || sz.x === 0 || sz.y === 0) return; if (heatLayer) map.removeLayer(heatLayer); arcsLayer.clearLayers(); markersLayer.clearLayers(); const p = getThemeProfile(), home = settings.hometown_coords || [52.4064, 16.9252], groups = {}; filteredConcerts.forEach(c => { if (!c.miasto) return; if (!groups[c.miasto]) groups[c.miasto] = { city: c.miasto, country: c.kraj, items: [] }; groups[c.miasto].items.push(c); }); const radius = parseInt(document.getElementById("heatRadius").value, 10), moc = parseInt(document.getElementById("heatIntensity").value, 10); document.getElementById("heatRadiusVal").textContent = radius; document.getElementById("heatIntensityVal").textContent = moc; const sorted = Object.values(groups).sort((a, b) => b.items.length - a.items.length), maxC = sorted[0] ? sorted[0].items.length : 1, heatPts = []; sorted.forEach(g => { const coords = getCityCoords(g.city); if (!coords) return; const lRatio = maxC > 1 ? g.items.length / maxC : 1, col = interpolateColor(Math.pow(lRatio, 0.72), p.colorStops); const reps = Math.max(1, Math.min(6, Math.round(1 + lRatio * 5))); for (let k = 0; k < reps; k++) heatPts.push([coords[0], coords[1], 0.22 + 0.78 * lRatio]); const distKm = Math.round(haversineKm(home[0], home[1], coords[0], coords[1])); if (showArcs && distKm > 18) { L.polyline(buildArcPoints(home, coords), { color: col, weight: 1.5 + lRatio * 1.4, opacity: 0.46, dashArray: "5 7" }).bindTooltip(`${escapeHtml(settings.hometown)} → ${escapeHtml(g.city)}: ${distKm.toLocaleString("pl-PL")} km`, { sticky: true }).addTo(arcsLayer); } if (showMarkers) { const r = Math.round(7 + 21 * lRatio); L.circleMarker(coords, { radius: r, color: p.markerStroke, weight: 2, fillColor: col, fillOpacity: 0.76 }).bindPopup(`<div style="font-family:var(--font-display);font-weight:800;font-size:15px;">${escapeHtml(g.city)}</div><div style="font-family:var(--font-mono);font-size:12px;color:${col};font-weight:700;margin:2px 0 6px;">${g.items.length} koncertów • ${distKm.toLocaleString("pl-PL")} km</div><div style="font-size:11px;color:var(--text-muted);">${escapeHtml([...new Set(g.items.map(i => i.artysta))].slice(0, 8).join(", "))}</div>`).addTo(markersLayer); if (g.items.length >= 6) L.marker(coords, { interactive: false, icon: L.divIcon({ className: "city-count-label", html: `<div style="color:${p.labelTextColor};line-height:${r * 2}px;">${g.items.length}</div>`, iconSize: [r * 2, r * 2], iconAnchor: [r, r] }) }).addTo(markersLayer); } }); heatLayer = L.heatLayer(heatPts, { radius, blur: Math.max(12, Math.round(radius * 0.68)), maxZoom: 11, max: Math.max(0.45, 5.2 - moc * 0.46), minOpacity: Math.min(0.85, 0.16 + moc * 0.062), gradient: p.heatGradient }).addTo(map); document.getElementById("topCitiesList").innerHTML = sorted.slice(0, 10).map(g => { const cCol = interpolateColor(Math.pow(maxC > 1 ? g.items.length / maxC : 1, 0.72), p.colorStops); return `<button class="city-jump" onclick="map.flyTo([${getCityCoords(g.city)}],9,{duration:0.8})"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${cCol};"></span>${escapeHtml(g.city)}</span><span class="cnt">${g.items.length}</span></button>`; }).join(""); }
 
     function renderUpcoming() {
       const card = document.getElementById("startUpcomingCard");
-      card.classList.toggle("view-hidden", upcomingConcerts.length === 0);
+      const hasActiveFilter = ["fSearch","fYear","fGenre","fWho","fCrew"].some(id => (document.getElementById(id)?.value || "").trim() !== "");
+      card.classList.toggle("view-hidden", upcomingConcerts.length === 0 || hasActiveFilter);
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const sorted = [...upcomingConcerts].sort((a, b) => (a.data || "9999").localeCompare(b.data || "9999"));
       document.getElementById("upcomingGrid").innerHTML = sorted.map(u => {
@@ -1404,7 +1458,7 @@
     function renderFullTable() { const sorted = [...filteredConcerts].sort((a, b) => { const va = String(a[sortCol] || "").toLowerCase(), vb = String(b[sortCol] || "").toLowerCase(); return sortAsc ? va.localeCompare(vb, "pl") : vb.localeCompare(va, "pl"); }); document.getElementById("fullTableBody").innerHTML = sorted.map(c => `<tr><td style="font-family:var(--font-mono);white-space:nowrap;">${escapeHtml(c.data)}</td><td><strong>${escapeHtml(c.artysta)}</strong></td><td>${escapeHtml(c.event)}</td><td>${escapeHtml(c.miasto)}</td><td><span class="badge-genre">${escapeHtml(c.gatunek || "—")}</span></td><td>${escapeHtml(c.z_kim || "—")}</td><td style="white-space:nowrap;"><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(c)}">Setlist.fm</a><button class="btn btn-sm" onclick="editConcertInTab(${c.id})">Edytuj</button><button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">Usuń</button></td></tr>`).join(""); }
 
     function openWrappedModal() { const yrs = [...new Set(allConcerts.map(c => c.rok).filter(Boolean))].sort((a, b) => b - a); document.getElementById("wrappedYearSelect").innerHTML = `<option value="all">Cała historia</option>` + yrs.map(y => `<option value="${y}">Sezon ${y}</option>`).join(""); renderWrapped(); document.getElementById("wrappedModal").classList.add("open"); }
-    function renderWrapped() { const yr = document.getElementById("wrappedYearSelect").value; const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr); const byA = {}, byC = {}, byG = {}, byCr = {}; list.forEach(c => { if (c.artysta) byA[c.artysta] = (byA[c.artysta] || 0) + 1; if (c.miasto) byC[c.miasto] = (byC[c.miasto] || 0) + 1; if (c.gatunek) byG[c.gatunek] = (byG[c.gatunek] || 0) + 1; if (c.z_kim) byCr[c.z_kim] = (byCr[c.z_kim] || 0) + 1; }); const { totalKm, farthest, artistKmSorted } = computeDistances(list); const [tA, tAC] = topEntry(byA), [tC, tCC] = topEntry(byC), [tG, tGC] = topEntry(byG), [tCr, tCrC] = topEntry(byCr), topKm = artistKmSorted[0] || ["—", 0]; document.getElementById("wrappedBody").innerHTML = `<div class="wrapped-card"><div class="wrapped-stat"><div class="lbl">Koncerty</div><div class="val">${list.length}</div></div><div class="wrapped-stat"><div class="lbl">Kilometry z ${escapeHtml(settings.hometown)}</div><div class="val">${totalKm.toLocaleString("pl-PL")} km</div></div><div class="wrapped-stat"><div class="lbl">Top Artysta</div><div class="val">${escapeHtml(tA)} (${tAC}×)</div></div><div class="wrapped-stat"><div class="lbl">Najwięcej KM za Artystą</div><div class="val">${escapeHtml(topKm[0])} (${Number(topKm[1]).toLocaleString("pl-PL")} km)</div></div><div class="wrapped-stat"><div class="lbl">Top Miasto</div><div class="val">${escapeHtml(tC)} (${tCC})</div></div><div class="wrapped-stat"><div class="lbl">Top Gatunek</div><div class="val">${escapeHtml(tG)} (${tGC})</div></div><div class="wrapped-stat"><div class="lbl">Najwierniejsza Ekipa</div><div class="val">${escapeHtml(tCr)} (${tCrC})</div></div><div class="wrapped-stat"><div class="lbl">Najdalszy Koncert</div><div class="val">${escapeHtml(farthest.city)} (${farthest.km.toLocaleString("pl-PL")} km)</div></div></div>`; }
+    function renderWrapped() { const yr = document.getElementById("wrappedYearSelect").value; const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr); const byA = {}, byC = {}, byG = {}, byCr = {}; list.forEach(c => { if (c.artysta) byA[c.artysta] = (byA[c.artysta] || 0) + 1; if (c.miasto) byC[c.miasto] = (byC[c.miasto] || 0) + 1; if (c.gatunek) byG[c.gatunek] = (byG[c.gatunek] || 0) + 1; if (c.z_kim) byCr[c.z_kim] = (byCr[c.z_kim] || 0) + 1; }); const { totalKm, farthest, artistKmSorted } = computeDistances(list); const [tA, tAC] = topEntry(byA), [tC, tCC] = topEntry(byC), [tG, tGC] = topEntry(byG), [tCr, tCrC] = topEntry(byCr), topKm = artistKmSorted[0] || ["—", 0]; document.getElementById("wrappedBody").innerHTML = `<div class="wrapped-card"><div class="wrapped-stat"><div class="lbl">Koncerty</div><div class="val">${list.length}</div></div><div class="wrapped-stat"><div class="lbl">Kilometry z ${escapeHtml(settings.hometown)}</div><div class="val">${totalKm.toLocaleString("pl-PL")} km</div></div><div class="wrapped-stat"><div class="lbl">Top Artysta</div><div class="val">${escapeHtml(tA)} (${tAC}×)</div></div><div class="wrapped-stat"><div class="lbl">Liczba kilometrów za artystą</div><div class="val">${escapeHtml(topKm[0])} (${Number(topKm[1]).toLocaleString("pl-PL")} km)</div></div><div class="wrapped-stat"><div class="lbl">Top Miasto</div><div class="val">${escapeHtml(tC)} (${tCC})</div></div><div class="wrapped-stat"><div class="lbl">Top Gatunek</div><div class="val">${escapeHtml(tG)} (${tGC})</div></div><div class="wrapped-stat"><div class="lbl">Najwierniejsza Ekipa</div><div class="val">${escapeHtml(tCr)} (${tCrC})</div></div><div class="wrapped-stat"><div class="lbl">Najdalszy Koncert</div><div class="val">${escapeHtml(farthest.city)} (${farthest.km.toLocaleString("pl-PL")} km)</div></div></div>`; }
     function exportXLSX() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allConcerts), "Koncerty"); XLSX.writeFile(wb, `Festivals_life_${new Date().toISOString().slice(0, 10)}.xlsx`); showToast("Wyeksportowano Excel!"); }
     async function handleImport(event) { const file = event.target.files[0]; if (!file) return; try { const imported = file.name.toLowerCase().endsWith(".json") ? JSON.parse(await file.text()) : []; if (imported.length && storageMode === "supabase" && sbClient && currentUser) { const rows = imported.map(({ id, ...r }) => ({ ...r, user_id: currentUser.id, data: r.data || null, cena: r.cena !== "" && r.cena != null ? Number(r.cena) : null })); const { data } = await sbClient.from("concerts").insert(rows).select(); allConcerts = [...allConcerts, ...(data || [])]; applyFilters(); showToast(`Zaimportowano ${rows.length} koncertów!`); } } catch (err) { showToast("Błąd importu: " + err.message); } event.target.value = ""; }
 
