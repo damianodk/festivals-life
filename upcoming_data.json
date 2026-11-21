@@ -1,0 +1,19 @@
+[
+  {
+    "rok": 2027,
+    "event": "III dekady z dymem",
+    "artysta": "Włodi",
+    "data": "2027-01-16",
+    "dzien": "sobota",
+    "godzina": "20:00",
+    "miejsce": "Palladium",
+    "miasto": "Warszawa",
+    "kraj": "Polska",
+    "gatunek": "Hip-Hop/Rap",
+    "z_kim": "Rataj",
+    "status_biletu": "Kupiony",
+    "cena": "194",
+    "uwagi": "",
+    "id": 1
+  }
+]
