@@ -1,4 +1,4 @@
-const CACHE_NAME = "festivals-life-pwa-v4";
+const CACHE_NAME = "festivals-life-pwa-v5";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e) => {
@@ -14,7 +14,7 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
-  if (url.hostname.includes("supabase.co") || url.pathname.startsWith("/api/") || url.hostname.includes("theaudiodb.com") || url.hostname.includes("wikipedia.org")) {
+  if (url.hostname.includes("supabase.co") || url.pathname.startsWith("/api/") || url.hostname.includes("spotify.com") || url.hostname.includes("theaudiodb.com") || url.hostname.includes("wikipedia.org")) {
     return;
   }
   if (e.request.method === "GET" && url.origin === location.origin) {
