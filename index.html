@@ -18,6 +18,17 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
+  <!-- PWA Manifest & Mobile Meta -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0B0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FESTIVAL'S LIFE" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+
+  <!-- Supabase JS SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- SheetJS for .xlsx Import / Export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -1178,6 +1189,164 @@
       .map-stage, .map-stage.expanded { height: 420px; }
       .top-cities-overlay { display: none; }
     }
+
+    /* AUTH SCREEN OVERLAY */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 4000;
+      background: var(--bg-grad);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .auth-overlay.open { display: flex; }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--border-strong);
+      border-radius: 26px;
+      padding: 28px 26px;
+      box-shadow: var(--shadow);
+    }
+    .auth-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 17px;
+      background: var(--grad-primary);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 23px;
+      color: var(--btn-primary-text);
+      margin-bottom: 14px;
+      box-shadow: 0 10px 26px var(--btn-primary-shadow);
+    }
+    .auth-card h2 {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      margin-bottom: 4px;
+    }
+    .auth-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .auth-error {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+      font-size: 0.8rem;
+      padding: 9px 12px;
+      border-radius: 11px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* MOBILE BOTTOM NAVIGATION BAR (PWA) */
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+      }
+      .container {
+        padding: 12px 12px 24px;
+      }
+      .topbar {
+        padding: 13px 14px;
+        border-radius: 18px;
+        margin-bottom: 10px;
+      }
+      .brand-badge {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+      .actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .actions .btn {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+      }
+      /* Hide top sticky nav on mobile in favor of thumb-friendly bottom bar */
+      .top-nav {
+        display: none;
+      }
+      .mobile-bottom-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1500;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        background: var(--surface-solid);
+        border-top: 1px solid var(--border-strong);
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+      }
+      .m-nav-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-family: var(--font-body);
+        font-size: 0.66rem;
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 5px 2px;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+      }
+      .m-nav-btn span.ico {
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+      .m-nav-btn.active {
+        color: var(--accent-pink);
+        background: var(--grad-subtle);
+      }
+      .m-nav-badge {
+        position: absolute;
+        top: 2px;
+        right: 14%;
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: var(--grad-primary);
+        color: var(--btn-primary-text);
+      }
+      .card {
+        padding: 15px 14px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+      }
+      .map-stage, .map-stage.expanded {
+        height: 400px;
+      }
+      .timeline-grid {
+        grid-template-columns: 1fr;
+      }
+      .modal {
+        padding: 18px 16px;
+        border-radius: 18px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1213,6 +1382,7 @@
           <option value="volcano">Volcano Lava Black</option>
           <option value="nasa">NASA Space Grey</option>
         </select>
+        <button class="btn btn-sm" id="logoutBtn" style="display:none" onclick="handleLogout()" title="Wyloguj z konta Supabase">Wyloguj</button>
       </div>
     </header>
 
@@ -1676,6 +1846,58 @@
   <datalist id="dlKto"></datalist>
   <datalist id="dlZKim"></datalist>
 
+  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="m-nav-btn active" data-view="all" onclick="setView('all', this)">
+      <span class="ico">🏠</span><span>Start</span>
+    </button>
+    <button class="m-nav-btn" data-view="map" onclick="setView('map', this)">
+      <span class="ico">🗺️</span><span>Mapa</span>
+    </button>
+    <button class="m-nav-btn" data-view="upcoming" onclick="setView('upcoming', this)">
+      <span class="ico">🎟️</span><span>Plany</span>
+      <span class="m-nav-badge" id="mobileUpcomingBadge">0</span>
+    </button>
+    <button class="m-nav-btn" data-view="timeline" onclick="setView('timeline', this)">
+      <span class="ico">🎪</span><span>Eventy</span>
+    </button>
+    <button class="m-nav-btn" data-view="records" onclick="setView('records', this)">
+      <span class="ico">🏆</span><span>Rekordy</span>
+    </button>
+    <button class="m-nav-btn" data-view="table" onclick="setView('table', this)">
+      <span class="ico">📋</span><span>Baza</span>
+    </button>
+  </nav>
+
+  <!-- SUPABASE CLOUD AUTH OVERLAY -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <div class="auth-logo">FL</div>
+      <h2>FESTIVAL'S LIFE</h2>
+      <p>Zaloguj się do swojej chmury koncertowej, aby zsynchronizować mapę, zdjęcia i historię między komputerem a telefonem.</p>
+      <div class="auth-error" id="authError"></div>
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>E-mail</label>
+          <input type="email" id="authEmail" required placeholder="damian@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Hasło</label>
+          <input type="password" id="authPassword" required placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:11px;">Zaloguj się</button>
+          <button type="button" class="btn" onclick="handleSignUp()" style="justify-content:center;padding:11px;">Załóż konto</button>
+        </div>
+      </form>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);text-align:center;">
+        <button type="button" class="btn btn-sm" onclick="enterOfflineDemoMode()" style="width:100%;justify-content:center;">
+          Kontynuuj bez logowania (tryb lokalny / demo)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -1736,6 +1958,16 @@
         palette: ["#ECEFF4", "#CBD5E1", "#A3B0C2", "#7E8B9E", "#5F6B7D", "#475161", "#333B48", "#D8DEE9"]
       }
     };
+
+    // =========================================================================
+    // KONFIGURACJA SUPABASE (publiczne klucze chronione przez RLS w bazie)
+    // =========================================================================
+    const SUPABASE_URL = "https://oxandbanjcrotsxckagy.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_rc8Mp26K7r8w6tNNTDJ83w_RNMxZBeA";
+
+    let sbClient = null;
+    let currentUser = null;
+    let storageMode = "offline"; // "supabase" | "local_python" | "offline"
 
     let allConcerts = [];
     let filteredConcerts = [];
@@ -1810,7 +2042,11 @@
           const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
           cityCoords[city] = coords;
           localStorage.setItem(COORDS_KEY, JSON.stringify(cityCoords));
-          if (isLocalServer) {
+          if (storageMode === "supabase" && sbClient) {
+            await sbClient.from("cities_cache").upsert({
+              city, country: country || "", lat: coords[0], lng: coords[1]
+            }, { onConflict: "city" });
+          } else if (storageMode === "local_python") {
             fetch("/api/coords", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1840,7 +2076,15 @@
         return;
       }
       settings = { hometown: city, hometown_coords: coords };
-      if (isLocalServer) {
+      if (storageMode === "supabase" && sbClient && currentUser) {
+        await sbClient.from("profiles").upsert({
+          id: currentUser.id,
+          hometown: city,
+          hometown_lat: coords[0],
+          hometown_lng: coords[1],
+          updated_at: new Date().toISOString()
+        });
+      } else if (storageMode === "local_python") {
         await fetch("/api/settings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1863,8 +2107,10 @@
     // --- VIEW NAVIGATION ---
     function setView(view, btn) {
       currentView = view;
-      document.querySelectorAll("#topNav .nav-tab").forEach(b => b.classList.remove("active"));
-      if (btn) btn.classList.add("active");
+      document.querySelectorAll("#topNav .nav-tab, #mobileBottomNav .m-nav-btn").forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-view") === view);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
       const secFilter = document.getElementById("secFilter");
       const secKpi = document.getElementById("secKpi");
@@ -1939,15 +2185,184 @@
       if (view === "all" || view === "charts") setTimeout(() => renderCharts(), 60);
     }
 
-    // --- BOOTSTRAP ---
-    async function initData() {
-      applyTheme(localStorage.getItem(THEME_KEY) || "dark", false);
+    // --- SUPABASE & HYBRID STORAGE ENGINE ---
+    function isSupabaseConfigured() {
+      return (
+        typeof window.supabase !== "undefined" &&
+        SUPABASE_URL.startsWith("https://") &&
+        SUPABASE_ANON_KEY &&
+        !SUPABASE_ANON_KEY.includes("WKLEJ_TUTAJ")
+      );
+    }
 
+    function initSupabaseClient() {
+      if (!isSupabaseConfigured()) return null;
+      if (!sbClient) {
+        sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: true, autoRefreshToken: true }
+        });
+      }
+      return sbClient;
+    }
+
+    async function resolveSignedMediaUrl(pathOrUrl) {
+      if (!pathOrUrl) return "";
+      if (pathOrUrl.startsWith("http") || pathOrUrl.startsWith("data:") || pathOrUrl.startsWith("/uploads/")) {
+        return pathOrUrl;
+      }
+      if (storageMode === "supabase" && sbClient) {
+        const { data } = await sbClient.storage.from("event-media").createSignedUrl(pathOrUrl, 60 * 60 * 24);
+        if (data && data.signedUrl) return data.signedUrl;
+      }
+      return pathOrUrl;
+    }
+
+    async function hydrateEventMediaUrls() {
+      if (storageMode !== "supabase" || !sbClient) return;
+      for (const key of Object.keys(eventsMeta)) {
+        const m = eventsMeta[key];
+        if (m.poster_path && !m.poster) {
+          m.poster = await resolveSignedMediaUrl(m.poster_path);
+        }
+        if (Array.isArray(m.photos)) {
+          for (const ph of m.photos) {
+            if (ph.path && !ph.url) {
+              ph.url = await resolveSignedMediaUrl(ph.path);
+            }
+          }
+        }
+      }
+    }
+
+    async function loadFromSupabase(user) {
+      currentUser = user;
+      storageMode = "supabase";
+      isLocalServer = false;
+
+      const pill = document.getElementById("serverStatus");
+      pill.classList.remove("offline");
+      document.getElementById("serverStatusText").textContent = `SUPABASE CLOUD • ${user.email}`;
+      document.getElementById("logoutBtn").style.display = "inline-flex";
+
+      const [profRes, citiesRes, concertsRes, upRes, metaRes] = await Promise.all([
+        sbClient.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        sbClient.from("cities_cache").select("*"),
+        sbClient.from("concerts").select("*").order("data", { ascending: true }),
+        sbClient.from("upcoming_concerts").select("*").order("data", { ascending: true }),
+        sbClient.from("events_meta").select("*")
+      ]);
+
+      if (profRes.data) {
+        settings = {
+          hometown: profRes.data.hometown || "Poznań",
+          hometown_coords: [
+            profRes.data.hometown_lat ?? 52.4064,
+            profRes.data.hometown_lng ?? 16.9252
+          ]
+        };
+        if (profRes.data.theme && THEME_PROFILES[profRes.data.theme]) {
+          applyTheme(profRes.data.theme, false);
+        }
+      }
+
+      if (Array.isArray(citiesRes.data)) {
+        citiesRes.data.forEach(row => {
+          cityCoords[row.city] = [row.lat, row.lng];
+        });
+      }
+
+      allConcerts = (concertsRes.data || []).map(r => ({
+        ...r,
+        cena: r.cena !== null && r.cena !== undefined ? String(r.cena) : ""
+      }));
+
+      upcomingConcerts = (upRes.data || []).map(r => ({
+        ...r,
+        cena: r.cena !== null && r.cena !== undefined ? String(r.cena) : ""
+      }));
+
+      eventsMeta = { ...INITIAL_EVENTS_META };
+      (metaRes.data || []).forEach(row => {
+        eventsMeta[row.event_key] = {
+          poster_path: row.poster_path || "",
+          poster: "",
+          photos: Array.isArray(row.photos) ? row.photos : [],
+          lineup: Array.isArray(row.lineup) ? row.lineup : []
+        };
+      });
+
+      await hydrateEventMediaUrls();
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const errBox = document.getElementById("authError");
+      errBox.style.display = "none";
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+      const client = initSupabaseClient();
+      if (!client) return;
+
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) {
+        errBox.textContent = "Błąd logowania: " + error.message;
+        errBox.style.display = "block";
+        return;
+      }
+      document.getElementById("authOverlay").classList.remove("open");
+      await loadFromSupabase(data.user);
+      finishAppBootstrap();
+      showToast("Zalogowano do chmury Supabase!");
+    }
+
+    async function handleSignUp() {
+      const errBox = document.getElementById("authError");
+      errBox.style.display = "none";
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+      if (!email || password.length < 6) {
+        errBox.textContent = "Podaj e-mail oraz hasło (min. 6 znaków).";
+        errBox.style.display = "block";
+        return;
+      }
+      const client = initSupabaseClient();
+      const { data, error } = await client.auth.signUp({ email, password });
+      if (error) {
+        errBox.textContent = "Błąd rejestracji: " + error.message;
+        errBox.style.display = "block";
+        return;
+      }
+      if (data.session && data.user) {
+        document.getElementById("authOverlay").classList.remove("open");
+        await loadFromSupabase(data.user);
+        finishAppBootstrap();
+        showToast("Konto utworzone i zalogowane!");
+      } else {
+        showToast("Konto utworzone! Sprawdź e-mail lub zaloguj się.");
+      }
+    }
+
+    async function handleLogout() {
+      if (sbClient) await sbClient.auth.signOut();
+      currentUser = null;
+      document.getElementById("logoutBtn").style.display = "none";
+      document.getElementById("authOverlay").classList.add("open");
+      showToast("Wylogowano.");
+    }
+
+    function enterOfflineDemoMode() {
+      document.getElementById("authOverlay").classList.remove("open");
+      loadLocalOrOfflineFallback();
+      finishAppBootstrap();
+    }
+
+    async function loadLocalOrOfflineFallback() {
       try {
         const res = await fetch("/api/bootstrap", { cache: "no-store" });
         if (res.ok) {
           const payload = await res.json();
           if (Array.isArray(payload.concerts)) {
+            storageMode = "local_python";
             isLocalServer = true;
             allConcerts = payload.concerts;
             upcomingConcerts = Array.isArray(payload.upcoming) ? payload.upcoming : [];
@@ -1956,29 +2371,30 @@
             if (payload.coords) cityCoords = { ...INITIAL_COORDS, ...payload.coords };
             const pill = document.getElementById("serverStatus");
             pill.classList.remove("offline");
-            document.getElementById("serverStatusText").textContent = "LOKALNY PYTHON v3 • ZAPIS NA DYSK";
+            document.getElementById("serverStatusText").textContent = "LOKALNY PYTHON • ZAPIS NA DYSK";
+            return;
           }
         }
-      } catch (err) {
-        isLocalServer = false;
-      }
+      } catch (err) {}
 
-      if (!isLocalServer) {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        allConcerts = saved ? JSON.parse(saved) : [...INITIAL_CONCERTS];
-        const savedUp = localStorage.getItem(UPCOMING_KEY);
-        upcomingConcerts = savedUp ? JSON.parse(savedUp) : [];
-        const savedMeta = localStorage.getItem(META_KEY);
-        eventsMeta = savedMeta ? { ...INITIAL_EVENTS_META, ...JSON.parse(savedMeta) } : { ...INITIAL_EVENTS_META };
-        const savedSet = localStorage.getItem(SETTINGS_KEY);
-        if (savedSet) settings = { ...settings, ...JSON.parse(savedSet) };
-        const savedCoords = localStorage.getItem(COORDS_KEY);
-        if (savedCoords) cityCoords = { ...INITIAL_COORDS, ...JSON.parse(savedCoords) };
-        document.getElementById("serverStatusText").textContent = "TRYB OFFLINE (localStorage)";
-      }
+      storageMode = "offline";
+      isLocalServer = false;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      allConcerts = saved ? JSON.parse(saved) : [...INITIAL_CONCERTS];
+      const savedUp = localStorage.getItem(UPCOMING_KEY);
+      upcomingConcerts = savedUp ? JSON.parse(savedUp) : [];
+      const savedMeta = localStorage.getItem(META_KEY);
+      eventsMeta = savedMeta ? { ...INITIAL_EVENTS_META, ...JSON.parse(savedMeta) } : { ...INITIAL_EVENTS_META };
+      const savedSet = localStorage.getItem(SETTINGS_KEY);
+      if (savedSet) settings = { ...settings, ...JSON.parse(savedSet) };
+      const savedCoords = localStorage.getItem(COORDS_KEY);
+      if (savedCoords) cityCoords = { ...INITIAL_COORDS, ...JSON.parse(savedCoords) };
+      document.getElementById("serverStatusText").textContent = "TRYB OFFLINE (localStorage)";
+    }
 
+    function finishAppBootstrap() {
       updateHometownUI();
-      initMap();
+      if (!map) initMap();
       populateFilterDropdowns();
       populateDatalists();
       renderUpcoming();
@@ -1986,6 +2402,30 @@
       if (currentView === "all") {
         document.getElementById("secUpcoming").classList.toggle("view-hidden", upcomingConcerts.length === 0);
       }
+    }
+
+    async function initData() {
+      applyTheme(localStorage.getItem(THEME_KEY) || "dark", false);
+
+      // Register PWA Service Worker
+      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+
+      if (isSupabaseConfigured()) {
+        const client = initSupabaseClient();
+        const { data } = await client.auth.getSession();
+        if (data && data.session && data.session.user) {
+          await loadFromSupabase(data.session.user);
+          finishAppBootstrap();
+        } else {
+          document.getElementById("authOverlay").classList.add("open");
+        }
+        return;
+      }
+
+      await loadLocalOrOfflineFallback();
+      finishAppBootstrap();
     }
 
     function applyTheme(theme, refresh = true) {
@@ -1998,6 +2438,9 @@
         loadBasemap();
         updateHeatmap();
         renderCharts();
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          sbClient.from("profiles").update({ theme }).eq("id", currentUser.id).then(() => {});
+        }
       }
     }
 
@@ -2478,6 +2921,8 @@
     // --- UPCOMING CONCERTS ---
     function renderUpcoming() {
       document.getElementById("upcomingBadge").textContent = upcomingConcerts.length;
+      const mBadge = document.getElementById("mobileUpcomingBadge");
+      if (mBadge) { mBadge.textContent = upcomingConcerts.length; mBadge.style.display = upcomingConcerts.length ? "inline-block" : "none"; }
       const grid = document.getElementById("upcomingGrid");
       if (!upcomingConcerts.length) {
         grid.innerHTML = `<div style="color:var(--text-muted);font-size:0.88rem;padding:10px 2px;">
@@ -2563,7 +3008,7 @@
         rok: parseInt(document.getElementById("uRok").value, 10) || null,
         event: document.getElementById("uEvent").value.trim(),
         artysta: document.getElementById("uArtysta").value.trim(),
-        data: document.getElementById("uData").value,
+        data: document.getElementById("uData").value || null,
         dzien: document.getElementById("uDzien").value.trim(),
         godzina: document.getElementById("uGodzina").value.trim(),
         miejsce: document.getElementById("uMiejsce").value.trim(),
@@ -2572,7 +3017,7 @@
         gatunek: document.getElementById("uGatunek").value.trim(),
         z_kim: document.getElementById("uZKim").value.trim(),
         status_biletu: document.getElementById("uStatus").value,
-        cena: document.getElementById("uCena").value,
+        cena: document.getElementById("uCena").value !== "" ? Number(document.getElementById("uCena").value) : null,
         uwagi: document.getElementById("uUwagi").value.trim()
       };
 
@@ -2580,14 +3025,23 @@
 
       if (idVal) {
         const uid = parseInt(idVal, 10);
-        item.id = uid;
-        if (isLocalServer) {
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          const { data, error } = await sbClient.from("upcoming_concerts").update(item).eq("id", uid).select().single();
+          if (error) { showToast("Błąd zapisu: " + error.message); return; }
+          Object.assign(item, data);
+        } else if (storageMode === "local_python") {
+          item.id = uid;
           await fetch(`/api/upcoming/${uid}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(item) });
         }
+        item.id = uid;
         const idx = upcomingConcerts.findIndex(x => x.id === uid);
         if (idx >= 0) upcomingConcerts[idx] = item;
       } else {
-        if (isLocalServer) {
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          const { data, error } = await sbClient.from("upcoming_concerts").insert({ ...item, user_id: currentUser.id }).select().single();
+          if (error) { showToast("Błąd zapisu: " + error.message); return; }
+          item.id = data.id;
+        } else if (storageMode === "local_python") {
           const res = await fetch("/api/upcoming", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(item) });
           const data = await res.json();
           item.id = data.item ? data.item.id : (Math.max(0, ...upcomingConcerts.map(x => x.id || 0)) + 1);
@@ -2597,7 +3051,7 @@
         upcomingConcerts.push(item);
       }
 
-      if (!isLocalServer) localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts));
+      if (storageMode === "offline") localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts));
       closeModal("upcomingModal");
       renderUpcoming();
       if (currentView === "all") document.getElementById("secUpcoming").classList.remove("view-hidden");
@@ -2607,7 +3061,23 @@
     async function completeUpcoming(id) {
       const u = upcomingConcerts.find(x => x.id === id);
       if (!u || !confirm(`Przenieść „${u.artysta}” (${u.event}) do przeżytych koncertów?`)) return;
-      if (isLocalServer) {
+
+      if (storageMode === "supabase" && sbClient && currentUser) {
+        const insertPayload = {
+          user_id: currentUser.id,
+          rok: u.rok, event: u.event || "", artysta: u.artysta || "",
+          data: u.data || null, dzien: u.dzien || "", godzina: u.godzina || "",
+          scena: "", miejsce: u.miejsce || "", miasto: u.miasto || "",
+          district: "", kraj: u.kraj || "Polska", gatunek: u.gatunek || "",
+          podgatunek: "", kto: "Razem", z_kim: u.z_kim || "",
+          ocena: 0, cena: u.cena !== "" && u.cena !== null ? Number(u.cena) : null,
+          uwagi: u.uwagi || ""
+        };
+        const { data, error } = await sbClient.from("concerts").insert(insertPayload).select().single();
+        if (error) { showToast("Błąd przenoszenia: " + error.message); return; }
+        await sbClient.from("upcoming_concerts").delete().eq("id", id);
+        allConcerts.push(data);
+      } else if (storageMode === "local_python") {
         const res = await fetch(`/api/upcoming/${id}/complete`, { method: "POST" });
         const data = await res.json();
         if (data.concert) allConcerts.push(data.concert);
@@ -2616,8 +3086,9 @@
         allConcerts.push({ ...u, id: nextId, scena: "", district: "", podgatunek: "", kto: "Razem", ocena: 0 });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts));
       }
+
       upcomingConcerts = upcomingConcerts.filter(x => x.id !== id);
-      if (!isLocalServer) localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts));
+      if (storageMode === "offline") localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts));
       renderUpcoming();
       populateFilterDropdowns();
       populateDatalists();
@@ -2627,9 +3098,13 @@
 
     async function deleteUpcoming(id) {
       if (!confirm("Usunąć z listy nadchodzących?")) return;
-      if (isLocalServer) await fetch(`/api/upcoming/${id}`, { method: "DELETE" });
+      if (storageMode === "supabase" && sbClient) {
+        await sbClient.from("upcoming_concerts").delete().eq("id", id);
+      } else if (storageMode === "local_python") {
+        await fetch(`/api/upcoming/${id}`, { method: "DELETE" });
+      }
       upcomingConcerts = upcomingConcerts.filter(x => x.id !== id);
-      if (!isLocalServer) localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts));
+      if (storageMode === "offline") localStorage.setItem(UPCOMING_KEY, JSON.stringify(upcomingConcerts));
       renderUpcoming();
       showToast("Usunięto z planów.");
     }
@@ -2757,11 +3232,26 @@
     }
 
     async function saveEventMetaToStore(key) {
-      if (isLocalServer) {
+      const m = eventsMeta[key] || { poster: "", poster_path: "", photos: [], lineup: [] };
+      if (storageMode === "supabase" && sbClient && currentUser) {
+        const cleanPhotos = (m.photos || []).map(p => ({
+          path: p.path || "",
+          url: p.path ? "" : (p.url || ""),
+          added_at: p.added_at || new Date().toISOString()
+        }));
+        await sbClient.from("events_meta").upsert({
+          user_id: currentUser.id,
+          event_key: key,
+          poster_path: m.poster_path || "",
+          photos: cleanPhotos,
+          lineup: m.lineup || [],
+          updated_at: new Date().toISOString()
+        }, { onConflict: "user_id,event_key" });
+      } else if (storageMode === "local_python") {
         await fetch("/api/events_meta", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key, meta: eventsMeta[key] })
+          body: JSON.stringify({ key, meta: m })
         });
       } else {
         localStorage.setItem(META_KEY, JSON.stringify(eventsMeta));
@@ -2894,18 +3384,30 @@
       });
     }
 
-    async function uploadImageToServerOrLocal(file, prefix) {
+    async function uploadImageToStore(file, prefix) {
+      if (storageMode === "supabase" && sbClient && currentUser) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const filePath = `${currentUser.id}/${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await sbClient.storage.from("event-media").upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false
+        });
+        if (error) throw error;
+        const signedUrl = await resolveSignedMediaUrl(filePath);
+        return { path: filePath, url: signedUrl };
+      }
+
       const dataUrl = await readFileAsDataUrl(file);
-      if (isLocalServer) {
+      if (storageMode === "local_python") {
         const res = await fetch("/api/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prefix, data_url: dataUrl })
         });
         const data = await res.json();
-        if (data.url) return data.url;
+        if (data.url) return { path: "", url: data.url };
       }
-      return dataUrl;
+      return { path: "", url: dataUrl };
     }
 
     async function handleEventPhotosUpload(e) {
@@ -2914,14 +3416,19 @@
       const meta = getEventMeta(activeUploadEventKey);
       if (!meta.photos) meta.photos = [];
       showToast(`Zapisuję ${files.length} zdjęć...`);
-      for (const f of files) {
-        const url = await uploadImageToServerOrLocal(f, "photo");
-        meta.photos.push({ url, added_at: new Date().toISOString() });
+      try {
+        for (const f of files) {
+          const uploaded = await uploadImageToStore(f, "photo");
+          meta.photos.push({ path: uploaded.path, url: uploaded.url, added_at: new Date().toISOString() });
+        }
+        await saveEventMetaToStore(activeUploadEventKey);
+        renderTimeline();
+        showToast(`Dodano ${files.length} zdjęć do wydarzenia!`);
+      } catch (err) {
+        showToast("Błąd uploadu zdjęcia: " + err.message);
+      } finally {
+        e.target.value = "";
       }
-      await saveEventMetaToStore(activeUploadEventKey);
-      renderTimeline();
-      showToast(`Dodano ${files.length} zdjęć do wydarzenia!`);
-      e.target.value = "";
     }
 
     async function handleEventPosterUpload(e) {
@@ -2929,20 +3436,30 @@
       if (!file || !activeUploadEventKey) return;
       const meta = getEventMeta(activeUploadEventKey);
       showToast("Zapisuję plakat...");
-      meta.poster = await uploadImageToServerOrLocal(file, "poster");
-      await saveEventMetaToStore(activeUploadEventKey);
-      renderTimeline();
-      showToast("Zapisano plakat z line-upem!");
-      e.target.value = "";
+      try {
+        const uploaded = await uploadImageToStore(file, "poster");
+        meta.poster_path = uploaded.path;
+        meta.poster = uploaded.url;
+        await saveEventMetaToStore(activeUploadEventKey);
+        renderTimeline();
+        showToast("Zapisano plakat z line-upem!");
+      } catch (err) {
+        showToast("Błąd uploadu plakatu: " + err.message);
+      } finally {
+        e.target.value = "";
+      }
     }
 
     async function removePoster(key) {
       if (!confirm("Usunąć plakat tego wydarzenia?")) return;
       const meta = getEventMeta(key);
-      if (isLocalServer && meta.poster && meta.poster.startsWith("/uploads/")) {
+      if (storageMode === "supabase" && sbClient && meta.poster_path) {
+        sbClient.storage.from("event-media").remove([meta.poster_path]).catch(() => {});
+      } else if (storageMode === "local_python" && meta.poster && meta.poster.startsWith("/uploads/")) {
         fetch(`/api/upload/${meta.poster.split("/").pop()}`, { method: "DELETE" }).catch(() => {});
       }
       meta.poster = "";
+      meta.poster_path = "";
       await saveEventMetaToStore(key);
       renderTimeline();
     }
@@ -2951,7 +3468,9 @@
       if (!confirm("Usunąć to zdjęcie?")) return;
       const meta = getEventMeta(key);
       const removed = meta.photos.splice(idx, 1)[0];
-      if (isLocalServer && removed && removed.url && removed.url.startsWith("/uploads/")) {
+      if (storageMode === "supabase" && sbClient && removed && removed.path) {
+        sbClient.storage.from("event-media").remove([removed.path]).catch(() => {});
+      } else if (storageMode === "local_python" && removed && removed.url && removed.url.startsWith("/uploads/")) {
         fetch(`/api/upload/${removed.url.split("/").pop()}`, { method: "DELETE" }).catch(() => {});
       }
       await saveEventMetaToStore(key);
@@ -3131,7 +3650,7 @@
         rok: parseInt(document.getElementById("mRok").value, 10) || null,
         event: document.getElementById("mEvent").value.trim(),
         artysta: document.getElementById("mArtysta").value.trim(),
-        data: document.getElementById("mData").value,
+        data: document.getElementById("mData").value || null,
         dzien: document.getElementById("mDzien").value.trim(),
         godzina: document.getElementById("mGodzina").value.trim(),
         scena: document.getElementById("mScena").value.trim(),
@@ -3144,7 +3663,7 @@
         kto: document.getElementById("mKto").value.trim(),
         z_kim: document.getElementById("mZKim").value.trim(),
         ocena: parseInt(document.getElementById("mOcena").value, 10) || 0,
-        cena: document.getElementById("mCena").value,
+        cena: document.getElementById("mCena").value !== "" ? Number(document.getElementById("mCena").value) : null,
         uwagi: document.getElementById("mUwagi").value.trim()
       };
 
@@ -3155,15 +3674,24 @@
 
       if (idVal) {
         const cid = parseInt(idVal, 10);
-        record.id = cid;
-        if (isLocalServer) {
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          const { data, error } = await sbClient.from("concerts").update(record).eq("id", cid).select().single();
+          if (error) { showToast("Błąd zapisu w chmurze: " + error.message); return; }
+          Object.assign(record, data);
+        } else if (storageMode === "local_python") {
+          record.id = cid;
           await fetch(`/api/concerts/${cid}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(record) });
         }
+        record.id = cid;
         const idx = allConcerts.findIndex(c => c.id === cid);
         if (idx >= 0) allConcerts[idx] = record;
         showToast("Zaktualizowano koncert i zapisano!");
       } else {
-        if (isLocalServer) {
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          const { data, error } = await sbClient.from("concerts").insert({ ...record, user_id: currentUser.id }).select().single();
+          if (error) { showToast("Błąd zapisu w chmurze: " + error.message); return; }
+          record.id = data.id;
+        } else if (storageMode === "local_python") {
           const res = await fetch("/api/concerts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(record) });
           const data = await res.json();
           record.id = data.concert ? data.concert.id : (Math.max(0, ...allConcerts.map(c => c.id || 0)) + 1);
@@ -3174,7 +3702,7 @@
         showToast("Dodano nowy koncert i zapisano!");
       }
 
-      if (!isLocalServer) localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts));
+      if (storageMode === "offline") localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts));
       closeModal("concertModal");
       populateFilterDropdowns();
       populateDatalists();
@@ -3184,9 +3712,14 @@
     async function deleteConcert(id) {
       const c = allConcerts.find(x => x.id === id);
       if (!c || !confirm(`Usunąć koncert: ${c.artysta} (${c.event}, ${c.rok})?`)) return;
-      if (isLocalServer) await fetch(`/api/concerts/${id}`, { method: "DELETE" });
+      if (storageMode === "supabase" && sbClient) {
+        const { error } = await sbClient.from("concerts").delete().eq("id", id);
+        if (error) { showToast("Błąd usuwania: " + error.message); return; }
+      } else if (storageMode === "local_python") {
+        await fetch(`/api/concerts/${id}`, { method: "DELETE" });
+      }
       allConcerts = allConcerts.filter(x => x.id !== id);
-      if (!isLocalServer) localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts));
+      if (storageMode === "offline") localStorage.setItem(STORAGE_KEY, JSON.stringify(allConcerts));
       populateFilterDropdowns();
       applyFilters();
       showToast("Usunięto koncert.");
@@ -3296,7 +3829,22 @@
           }
         }
         if (!imported.length) { showToast("Nie znaleziono koncertów w pliku."); return; }
-        if (isLocalServer) {
+        if (storageMode === "supabase" && sbClient && currentUser) {
+          const rows = imported.map(({ id, ...rest }) => ({
+            ...rest,
+            user_id: currentUser.id,
+            data: rest.data || null,
+            cena: rest.cena !== "" && rest.cena !== null ? Number(rest.cena) : null
+          }));
+          const { data, error } = await sbClient.from("concerts").insert(rows).select();
+          if (error) throw error;
+          allConcerts = [...allConcerts, ...(data || [])];
+          populateFilterDropdowns();
+          populateDatalists();
+          applyFilters();
+          showToast(`Dopisano ${rows.length} koncertów do Supabase!`);
+          return;
+        } else if (storageMode === "local_python") {
           await fetch("/api/concerts/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(imported) });
         } else {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
