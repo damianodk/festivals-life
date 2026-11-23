@@ -1,4 +1,4 @@
-const CACHE_NAME = "fest-life-pwa-v11";
+const CACHE_NAME = "fest-life-pwa-v11-1";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e) => {

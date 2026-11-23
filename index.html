@@ -418,6 +418,10 @@
     .ob-steps { display: flex; gap: 6px; margin-bottom: 14px; }
     .ob-dot { flex: 1; height: 5px; border-radius: 999px; background: var(--pill-bg); transition: background 0.2s; }
     .ob-dot.active { background: var(--grad-primary); }
+
+    .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 16px; }
+    .auth-tab { border: none; background: transparent; color: var(--text-muted); font-family: var(--font-display); font-weight: 700; font-size: 0.84rem; padding: 9px 10px; border-radius: 9px; cursor: pointer; transition: all 0.18s ease; }
+    .auth-tab.active { background: var(--grad-primary); color: var(--btn-primary-text); box-shadow: 0 4px 14px var(--btn-primary-shadow); }
   </style>
 </head>
 <body>
@@ -1140,13 +1144,36 @@
     <div class="auth-card">
       <div class="fl-logo" style="width:54px;height:54px;border-radius:16px;margin-bottom:14px;"><span class="fl-logo-dot"></span><span class="fl-logo-text" style="font-size:22px;">FL</span></div>
       <h2>FEST LIFE</h2>
-      <p style="font-size:0.84rem;color:var(--text-muted);margin:4px 0 16px;">Zaloguj się do swojej chmury koncertowej.</p>
+      <p id="authSubtitle" style="font-size:0.84rem;color:var(--text-muted);margin:4px 0 14px;">Zaloguj się do swojej chmury koncertowej.</p>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="authTabLogin" onclick="switchAuthMode('login')">Zaloguj się</button>
+        <button type="button" class="auth-tab" id="authTabRegister" onclick="switchAuthMode('register')">Załóż konto</button>
+      </div>
+
       <div class="auth-error" id="authError"></div>
-      <form onsubmit="handleAuthSubmit(event)">
-        <div class="form-group" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="authEmail" required autocomplete="email" /></div>
-        <div class="form-group" style="margin-bottom:16px;"><label>Hasło</label><input type="password" id="authPassword" required autocomplete="current-password" /></div>
-        <div style="display:flex;gap:8px;"><button type="submit" class="btn btn-primary" style="flex:1;padding:11px;">Zaloguj się</button><button type="button" class="btn" onclick="handleSignUp()" style="padding:11px;">Załóż konto</button></div>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>E-mail</label>
+          <input type="email" id="authEmail" required autocomplete="email" placeholder="twoj@email.com" />
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>Hasło</label>
+          <input type="password" id="authPassword" required autocomplete="current-password" placeholder="Minimum 6 znaków" />
+        </div>
+        <div class="form-group view-hidden" id="authConfirmWrap" style="margin-bottom:14px;">
+          <label>Powtórz hasło</label>
+          <input type="password" id="authPasswordConfirm" autocomplete="new-password" placeholder="Powtórz hasło" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%;padding:11px;margin-top:4px;">Zaloguj się</button>
       </form>
+
+      <div style="margin-top:12px;text-align:center;font-size:0.8rem;color:var(--text-muted);">
+        <span id="authSwitchPrompt">Nie masz jeszcze konta?</span>
+        <a href="#" id="authSwitchLink" style="color:var(--accent-coral);font-weight:600;text-decoration:none;margin-left:4px;" onclick="event.preventDefault();switchAuthMode(authMode==='login'?'register':'login')">Załóż konto</a>
+      </div>
+
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);"><button type="button" class="btn btn-sm" onclick="enterOfflineDemoMode()" style="width:100%;">Tryb lokalny / demo</button></div>
     </div>
   </div>
@@ -1404,8 +1431,73 @@
       }
     }
 
-    async function handleAuthSubmit(e) { e.preventDefault(); const errBox = document.getElementById("authError"); errBox.style.display = "none"; const { data, error } = await initSupabaseClient().auth.signInWithPassword({ email: document.getElementById("authEmail").value.trim(), password: document.getElementById("authPassword").value }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); checkOnboarding(); }
-    async function handleSignUp() { const errBox = document.getElementById("authError"); errBox.style.display = "none"; const email = document.getElementById("authEmail").value.trim(), password = document.getElementById("authPassword").value; const { data, error } = await initSupabaseClient().auth.signUp({ email, password }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } if (data.session && data.user) { document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); checkOnboarding(); } else showToast("Konto utworzone! Zaloguj się."); }
+    let authMode = "login";
+
+    function switchAuthMode(mode) {
+      authMode = mode === "register" ? "register" : "login";
+      const isReg = authMode === "register";
+      document.getElementById("authTabLogin").classList.toggle("active", !isReg);
+      document.getElementById("authTabRegister").classList.toggle("active", isReg);
+      document.getElementById("authConfirmWrap").classList.toggle("view-hidden", !isReg);
+      document.getElementById("authPasswordConfirm").required = isReg;
+      document.getElementById("authPassword").setAttribute("autocomplete", isReg ? "new-password" : "current-password");
+      document.getElementById("authSubtitle").textContent = isReg
+        ? "Utwórz darmowe konto FEST LIFE i zbuduj swoją historię koncertów."
+        : "Zaloguj się do swojej chmury koncertowej.";
+      document.getElementById("authSubmitBtn").textContent = isReg ? "Utwórz konto" : "Zaloguj się";
+      document.getElementById("authSwitchPrompt").textContent = isReg ? "Masz już konto?" : "Nie masz jeszcze konta?";
+      document.getElementById("authSwitchLink").textContent = isReg ? "Zaloguj się" : "Załóż konto";
+      document.getElementById("authError").style.display = "none";
+      document.getElementById("authPassword").value = "";
+      document.getElementById("authPasswordConfirm").value = "";
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const errBox = document.getElementById("authError");
+      errBox.style.display = "none";
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+
+      if (!email || !email.includes("@")) {
+        errBox.textContent = "Wpisz poprawny adres e-mail.";
+        errBox.style.display = "block";
+        return;
+      }
+      if (password.length < 6) {
+        errBox.textContent = "Hasło musi mieć co najmniej 6 znaków.";
+        errBox.style.display = "block";
+        return;
+      }
+
+      if (authMode === "register") {
+        const confirmPw = document.getElementById("authPasswordConfirm").value;
+        if (password !== confirmPw) {
+          errBox.textContent = "Hasła nie są takie same.";
+          errBox.style.display = "block";
+          return;
+        }
+        const { data, error } = await initSupabaseClient().auth.signUp({ email, password });
+        if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; }
+        if (data.session && data.user) {
+          document.getElementById("authOverlay").classList.remove("open");
+          await loadFromSupabase(data.user);
+          finishBootstrap();
+          checkOnboarding();
+        } else {
+          switchAuthMode("login");
+          showToast("Konto utworzone! Potwierdź e-mail (jeśli wymagane) i zaloguj się.");
+        }
+        return;
+      }
+
+      const { data, error } = await initSupabaseClient().auth.signInWithPassword({ email, password });
+      if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; }
+      document.getElementById("authOverlay").classList.remove("open");
+      await loadFromSupabase(data.user);
+      finishBootstrap();
+      checkOnboarding();
+    }
     async function handleLogout() { if (sbClient) await sbClient.auth.signOut(); currentUser = null; document.getElementById("authOverlay").classList.add("open"); }
 
     function enterOfflineDemoMode() {
