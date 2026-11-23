@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>FESTIVAL'S LIFE</title>
+  <title>FEST LIFE</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#0B0616" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="FESTIVAL'S LIFE" />
+  <meta name="apple-mobile-web-app-title" content="FEST LIFE" />
   <link rel="apple-touch-icon" href="./icon.svg" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -370,7 +370,7 @@
           <span class="fl-logo-text">FL</span>
         </div>
         <div class="brand-info">
-          <h1>FESTIVAL'S LIFE</h1>
+          <h1>FEST LIFE</h1>
           <div class="brand-meta">
             <span class="status-dot offline" id="statusDot"></span>
             <span id="serverStatusText">Łączenie...</span>
@@ -829,6 +829,10 @@
     <div class="modal">
       <div class="modal-head"><h3 id="swModalTitle">Rozliczenie wyjazdu</h3><button class="btn btn-sm" onclick="closeModal('splitwiseModal')">Zamknij</button></div>
       <input type="hidden" id="swEventKey" />
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Uczestnicy wyjazdu (oddzieleni przecinkiem — do podziału „kto komu ile wisi”)</label>
+        <input type="text" id="swParticipants" placeholder="np. Damian, Oliwki, Klopstegi" oninput="saveSwParticipants()" />
+      </div>
       <form onsubmit="addExpense(event)" class="sw-form">
         <input type="text" id="swTitle" required placeholder="Wydatek (np. Nocleg, Paliwo)" />
         <input type="number" id="swAmount" required min="1" step="0.01" placeholder="Kwota PLN" />
@@ -850,9 +854,10 @@
   <div class="modal-backdrop" id="wrappedModal" onclick="if(event.target===this) closeModal('wrappedModal')">
     <div class="modal">
       <div class="modal-head">
-        <h3>FESTIVAL'S LIFE — Wrapped</h3>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <h3>FEST LIFE — Wrapped</h3>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <select id="wrappedYearSelect" onchange="renderWrapped()"></select>
+          <button class="btn btn-sm btn-primary" onclick="exportWrappedStoriesPNG()">Stories 9:16</button>
           <button class="btn btn-sm" onclick="closeModal('wrappedModal')">Zamknij</button>
         </div>
       </div>
@@ -876,7 +881,7 @@
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-card">
       <div class="fl-logo" style="width:54px;height:54px;border-radius:16px;margin-bottom:14px;"><span class="fl-logo-dot"></span><span class="fl-logo-text" style="font-size:22px;">FL</span></div>
-      <h2>FESTIVAL'S LIFE</h2>
+      <h2>FEST LIFE</h2>
       <p style="font-size:0.84rem;color:var(--text-muted);margin:4px 0 16px;">Zaloguj się do swojej chmury koncertowej.</p>
       <div class="auth-error" id="authError"></div>
       <form onsubmit="handleAuthSubmit(event)">
@@ -1465,7 +1470,7 @@
         const { totalKm } = computeDistances(filteredConcerts);
         ctx.fillStyle = textCol;
         ctx.font = `800 ${12 * scale}px "Syne", sans-serif`;
-        ctx.fillText("FESTIVAL'S LIFE", bx + 14 * scale, by + 22 * scale);
+        ctx.fillText("FEST LIFE", bx + 14 * scale, by + 22 * scale);
 
         ctx.fillStyle = mutedCol;
         ctx.font = `600 ${9.5 * scale}px "JetBrains Mono", monospace`;
@@ -1489,7 +1494,7 @@
         ctx.restore();
 
         // 5. Trigger PNG download
-        const fname = `Festivals_life_HeatMap_${new Date().toISOString().slice(0, 10)}.png`;
+        const fname = `Fest_Life_HeatMap_${new Date().toISOString().slice(0, 10)}.png`;
         canvas.toBlob((blob) => {
           if (!blob) {
             const a = document.createElement("a");
@@ -1651,8 +1656,93 @@
     function openLineupEditor(k) { document.getElementById("luEventKey").value = k; document.getElementById("luTextarea").value = (getEventMeta(k).lineup || []).join("\n"); document.getElementById("lineupModal").classList.add("open"); }
     async function saveEventLineup(e) { e.preventDefault(); const k = document.getElementById("luEventKey").value; getEventMeta(k).lineup = [...new Set(document.getElementById("luTextarea").value.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean))]; await saveEventMetaToStore(k); expandedLineups.add(k); closeModal("lineupModal"); renderTimeline(); showToast("Zapisano line-up!"); }
 
-    function openSplitwise(ek) { const [ev, yr] = ek.split("|"); document.getElementById("swEventKey").value = ek; document.getElementById("swModalTitle").textContent = `Rozliczenie: ${ev} (${yr})`; renderSplitwiseList(); document.getElementById("splitwiseModal").classList.add("open"); }
-    function renderSplitwiseList() { const ek = document.getElementById("swEventKey").value; const items = tripExpenses.filter(x => x.event_key === ek); const sum = items.reduce((s, x) => s + Number(x.amount_pln || 0), 0); document.getElementById("swList").innerHTML = `<div style="font-family:var(--font-mono);font-size:0.82rem;margin-bottom:10px;color:var(--accent-coral);">Łącznie: <strong>${sum.toFixed(2)} PLN</strong></div>` + items.map(x => `<div class="list-row"><div><strong>${escapeHtml(x.title)}</strong><div style="font-size:0.75rem;color:var(--text-muted);">Płacił: ${escapeHtml(x.paid_by)}</div></div><div style="display:flex;align-items:center;gap:8px;"><strong style="font-family:var(--font-mono);">${Number(x.amount_pln).toFixed(2)} zł</strong><button class="btn btn-sm btn-danger" onclick="deleteExpense(${x.id})">Usuń</button></div></div>`).join("") || `<div style="font-size:0.82rem;color:var(--text-muted);">Brak wydatków dla tego wydarzenia.</div>`; }
+    const SW_PARTICIPANTS_KEY = "fest_life_sw_participants_v1";
+    let swParticipantsMap = JSON.parse(localStorage.getItem(SW_PARTICIPANTS_KEY) || "{}");
+
+    function saveSwParticipants() {
+      const ek = document.getElementById("swEventKey").value;
+      if (!ek) return;
+      swParticipantsMap[ek] = document.getElementById("swParticipants").value;
+      localStorage.setItem(SW_PARTICIPANTS_KEY, JSON.stringify(swParticipantsMap));
+      renderSplitwiseList();
+    }
+
+    function computeSettlements(items, participants) {
+      const people = [...new Set(participants.map(p => p.trim()).filter(Boolean))];
+      items.forEach(x => { const pb = (x.paid_by || "").trim(); if (pb && !people.includes(pb)) people.push(pb); });
+      if (people.length < 2 || !items.length) return { people, perPerson: 0, transfers: [] };
+
+      const total = items.reduce((s, x) => s + Number(x.amount_pln || 0), 0);
+      const perPerson = total / people.length;
+      const paid = {};
+      people.forEach(p => paid[p] = 0);
+      items.forEach(x => { const pb = (x.paid_by || "").trim(); if (pb) paid[pb] = (paid[pb] || 0) + Number(x.amount_pln || 0); });
+
+      const debtors = [], creditors = [];
+      people.forEach(p => {
+        const bal = +(paid[p] - perPerson).toFixed(2);
+        if (bal < -0.01) debtors.push({ name: p, amt: -bal });
+        else if (bal > 0.01) creditors.push({ name: p, amt: bal });
+      });
+      debtors.sort((a, b) => b.amt - a.amt);
+      creditors.sort((a, b) => b.amt - a.amt);
+
+      const transfers = [];
+      let i = 0, j = 0;
+      while (i < debtors.length && j < creditors.length) {
+        const d = debtors[i], c = creditors[j];
+        const pay = Math.min(d.amt, c.amt);
+        if (pay > 0.01) transfers.push({ from: d.name, to: c.name, amount: pay });
+        d.amt = +(d.amt - pay).toFixed(2);
+        c.amt = +(c.amt - pay).toFixed(2);
+        if (d.amt <= 0.01) i++;
+        if (c.amt <= 0.01) j++;
+      }
+      return { people, perPerson, transfers };
+    }
+
+    function openSplitwise(ek) {
+      const [ev, yr] = ek.split("|");
+      document.getElementById("swEventKey").value = ek;
+      document.getElementById("swModalTitle").textContent = `Rozliczenie: ${ev} (${yr})`;
+      if (!swParticipantsMap[ek]) {
+        const crews = new Set(["Damian"]);
+        allConcerts.filter(c => `${c.event || "Koncert"}|${c.rok || "?"}` === ek && c.z_kim).forEach(c => {
+          c.z_kim.split(/[,&]+/).map(s => s.trim()).filter(Boolean).forEach(p => crews.add(p));
+        });
+        swParticipantsMap[ek] = [...crews].join(", ");
+      }
+      document.getElementById("swParticipants").value = swParticipantsMap[ek] || "Damian";
+      renderSplitwiseList();
+      document.getElementById("splitwiseModal").classList.add("open");
+    }
+
+    function renderSplitwiseList() {
+      const ek = document.getElementById("swEventKey").value;
+      const items = tripExpenses.filter(x => x.event_key === ek);
+      const sum = items.reduce((s, x) => s + Number(x.amount_pln || 0), 0);
+      const rawP = (document.getElementById("swParticipants")?.value || "").split(/[,;]+/);
+      const { people, perPerson, transfers } = computeSettlements(items, rawP);
+
+      const settleHtml = (items.length && people.length >= 2) ? `
+        <div style="background:var(--grad-subtle);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin-bottom:12px;">
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-gold);font-weight:700;margin-bottom:6px;">
+            Podział (${people.length} os. • po ${perPerson.toFixed(2)} PLN / os.)
+          </div>
+          ${transfers.length ? transfers.map(t => `
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.84rem;padding:4px 0;">
+              <span><strong>${escapeHtml(t.from)}</strong> → <strong>${escapeHtml(t.to)}</strong></span>
+              <span style="font-family:var(--font-mono);font-weight:700;color:var(--accent-coral);">${t.amount.toFixed(2)} PLN</span>
+            </div>
+          `).join("") : `<div style="font-size:0.82rem;color:var(--accent-cyan);">Wszystko rozliczone po równo!</div>`}
+        </div>
+      ` : "";
+
+      document.getElementById("swList").innerHTML =
+        `<div style="font-family:var(--font-mono);font-size:0.82rem;margin-bottom:10px;color:var(--accent-coral);">Łącznie: <strong>${sum.toFixed(2)} PLN</strong></div>` +
+        settleHtml +
+        (items.map(x => `<div class="list-row"><div><strong>${escapeHtml(x.title)}</strong><div style="font-size:0.75rem;color:var(--text-muted);">Płacił: ${escapeHtml(x.paid_by)}</div></div><div style="display:flex;align-items:center;gap:8px;"><strong style="font-family:var(--font-mono);">${Number(x.amount_pln).toFixed(2)} zł</strong><button class="btn btn-sm btn-danger" onclick="deleteExpense(${x.id})">Usuń</button></div></div>`).join("") || `<div style="font-size:0.82rem;color:var(--text-muted);">Brak wydatków dla tego wydarzenia.</div>`);
+    }
     async function addExpense(e) { e.preventDefault(); const row = { event_key: document.getElementById("swEventKey").value, title: document.getElementById("swTitle").value.trim(), amount_pln: Number(document.getElementById("swAmount").value), paid_by: document.getElementById("swPaidBy").value.trim() }; if (storageMode === "supabase" && sbClient && currentUser) { const { data } = await sbClient.from("trip_expenses").insert({ ...row, user_id: currentUser.id }).select().single(); if (data) tripExpenses.unshift(data); } else { tripExpenses.unshift({ ...row, id: Date.now() }); localStorage.setItem(EXPENSES_KEY, JSON.stringify(tripExpenses)); } document.getElementById("swTitle").value = ""; document.getElementById("swAmount").value = ""; renderSplitwiseList(); renderTimeline(); renderCrewProfiles(); }
     async function deleteExpense(id) { if (storageMode === "supabase" && sbClient) await sbClient.from("trip_expenses").delete().eq("id", id); tripExpenses = tripExpenses.filter(x => x.id !== id); if (storageMode === "offline") localStorage.setItem(EXPENSES_KEY, JSON.stringify(tripExpenses)); renderSplitwiseList(); renderTimeline(); renderCrewProfiles(); }
 
@@ -1673,7 +1763,136 @@
 
     function openWrappedModal() { const yrs = [...new Set(allConcerts.map(c => c.rok).filter(Boolean))].sort((a, b) => b - a); document.getElementById("wrappedYearSelect").innerHTML = `<option value="all">Cała historia</option>` + yrs.map(y => `<option value="${y}">Sezon ${y}</option>`).join(""); renderWrapped(); document.getElementById("wrappedModal").classList.add("open"); }
     function renderWrapped() { const yr = document.getElementById("wrappedYearSelect").value; const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr); const byA = {}, byC = {}, byG = {}, byCr = {}; list.forEach(c => { if (c.artysta) byA[c.artysta] = (byA[c.artysta] || 0) + 1; if (c.miasto) byC[c.miasto] = (byC[c.miasto] || 0) + 1; if (c.gatunek) byG[c.gatunek] = (byG[c.gatunek] || 0) + 1; if (c.z_kim) byCr[c.z_kim] = (byCr[c.z_kim] || 0) + 1; }); const { totalKm, farthest, artistKmSorted } = computeDistances(list); const [tA, tAC] = topEntry(byA), [tC, tCC] = topEntry(byC), [tG, tGC] = topEntry(byG), [tCr, tCrC] = topEntry(byCr), topKm = artistKmSorted[0] || ["—", 0]; document.getElementById("wrappedBody").innerHTML = `<div class="wrapped-card"><div class="wrapped-stat"><div class="lbl">Koncerty</div><div class="val">${list.length}</div></div><div class="wrapped-stat"><div class="lbl">Kilometry z ${escapeHtml(settings.hometown)}</div><div class="val">${totalKm.toLocaleString("pl-PL")} km</div></div><div class="wrapped-stat"><div class="lbl">Top Artysta</div><div class="val">${escapeHtml(tA)} (${tAC}×)</div></div><div class="wrapped-stat"><div class="lbl">Liczba kilometrów za artystą</div><div class="val">${escapeHtml(topKm[0])} (${Number(topKm[1]).toLocaleString("pl-PL")} km)</div></div><div class="wrapped-stat"><div class="lbl">Top Miasto</div><div class="val">${escapeHtml(tC)} (${tCC})</div></div><div class="wrapped-stat"><div class="lbl">Top Gatunek</div><div class="val">${escapeHtml(tG)} (${tGC})</div></div><div class="wrapped-stat"><div class="lbl">Najwierniejsza Ekipa</div><div class="val">${escapeHtml(tCr)} (${tCrC})</div></div><div class="wrapped-stat"><div class="lbl">Najdalszy Koncert</div><div class="val">${escapeHtml(farthest.city)} (${farthest.km.toLocaleString("pl-PL")} km)</div></div></div>`; }
-    function exportXLSX() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allConcerts), "Koncerty"); XLSX.writeFile(wb, `Festivals_life_${new Date().toISOString().slice(0, 10)}.xlsx`); showToast("Wyeksportowano Excel!"); }
+
+    function exportWrappedStoriesPNG() {
+      const yr = document.getElementById("wrappedYearSelect").value;
+      const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr);
+      const byA = {}, byC = {}, byG = {}, byCr = {};
+      list.forEach(c => {
+        if (c.artysta) byA[c.artysta] = (byA[c.artysta] || 0) + 1;
+        if (c.miasto) byC[c.miasto] = (byC[c.miasto] || 0) + 1;
+        if (c.gatunek) byG[c.gatunek] = (byG[c.gatunek] || 0) + 1;
+        if (c.z_kim) byCr[c.z_kim] = (byCr[c.z_kim] || 0) + 1;
+      });
+      const { totalKm, farthest, artistKmSorted } = computeDistances(list);
+      const [tA, tAC] = topEntry(byA), [tC, tCC] = topEntry(byC), [tG] = topEntry(byG), [tCr] = topEntry(byCr);
+      const topKm = artistKmSorted[0] || ["—", 0];
+      const countries = new Set(list.map(c => c.kraj).filter(Boolean)).size;
+
+      const W = 1080, H = 1920;
+      const canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext("2d");
+
+      const cs = getComputedStyle(document.documentElement);
+      const bg = (cs.getPropertyValue("--bg") || "#0B0616").trim();
+      const surfaceSolid = (cs.getPropertyValue("--surface-solid") || "#160D28").trim();
+      const textCol = (cs.getPropertyValue("--text") || "#FFF2EB").trim();
+      const mutedCol = (cs.getPropertyValue("--text-muted") || "#B8A5C8").trim();
+      const accentPink = (cs.getPropertyValue("--accent-pink") || "#FF2A85").trim();
+      const accentCoral = (cs.getPropertyValue("--accent-coral") || "#FF6B4A").trim();
+      const accentGold = (cs.getPropertyValue("--accent-gold") || "#FFB86C").trim();
+      const borderStrong = (cs.getPropertyValue("--border-strong") || "rgba(255,42,133,0.44)").trim();
+
+      // Background + ambient glow
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      const g1 = ctx.createRadialGradient(180, 260, 40, 180, 260, 620);
+      g1.addColorStop(0, accentPink + "44"); g1.addColorStop(1, "transparent");
+      ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+      const g2 = ctx.createRadialGradient(900, 1560, 40, 900, 1560, 620);
+      g2.addColorStop(0, accentCoral + "38"); g2.addColorStop(1, "transparent");
+      ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+
+      // Top Brand Badge (FL + FEST LIFE)
+      ctx.save();
+      ctx.fillStyle = surfaceSolid;
+      ctx.strokeStyle = accentPink;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.roundRect(80, 110, 96, 96, 26); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = accentPink;
+      ctx.beginPath(); ctx.arc(154, 134, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = textCol;
+      ctx.font = '800 42px "Syne", sans-serif';
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("FL", 128, 162);
+      ctx.restore();
+
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      const titleGrad = ctx.createLinearGradient(200, 130, 700, 200);
+      titleGrad.addColorStop(0, accentPink); titleGrad.addColorStop(0.6, accentCoral); titleGrad.addColorStop(1, accentGold);
+      ctx.fillStyle = titleGrad;
+      ctx.font = '800 58px "Syne", sans-serif';
+      ctx.fillText("FEST LIFE", 204, 168);
+
+      ctx.fillStyle = mutedCol;
+      ctx.font = '600 26px "JetBrains Mono", monospace';
+      ctx.fillText(yr === "all" ? "WRAPPED • CAŁA HISTORIA" : `WRAPPED • SEZON ${yr}`, 206, 208);
+
+      // Hero Big Number
+      ctx.fillStyle = textCol;
+      ctx.font = '800 132px "Syne", sans-serif';
+      ctx.fillText(String(list.length), 80, 410);
+      ctx.fillStyle = mutedCol;
+      ctx.font = '600 36px "Space Grotesk", sans-serif';
+      ctx.fillText(`koncertów w ${countries} krajach • ${totalKm.toLocaleString("pl-PL")} km`, 80, 468);
+
+      // Stats Cards Grid (2 columns x 3 rows)
+      const cards = [
+        { lbl: "TOP ARTYSTA", val: tA, sub: `${tAC}× na żywo` },
+        { lbl: "KM ZA ARTYSTĄ", val: topKm[0], sub: `${Number(topKm[1]).toLocaleString("pl-PL")} km` },
+        { lbl: "TOP MIASTO", val: tC, sub: `${tCC} koncertów` },
+        { lbl: "TOP GATUNEK", val: tG, sub: "ulubione brzmienie" },
+        { lbl: "NAJWIERNIEJSZA EKIPA", val: tCr, sub: "wspólne wyjazdy" },
+        { lbl: "NAJDALSZA PODRÓŻ", val: farthest.city, sub: `${farthest.km.toLocaleString("pl-PL")} km z ${settings.hometown}` }
+      ];
+
+      const cardW = 442, cardH = 260, gap = 36, startX = 80, startY = 550;
+      cards.forEach((c, idx) => {
+        const col = idx % 2, row = Math.floor(idx / 2);
+        const x = startX + col * (cardW + gap);
+        const y = startY + row * (cardH + gap);
+
+        ctx.save();
+        ctx.fillStyle = surfaceSolid;
+        ctx.globalAlpha = 0.92;
+        ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 32); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 2; ctx.strokeStyle = borderStrong; ctx.stroke();
+
+        ctx.fillStyle = accentGold;
+        ctx.font = '700 20px "JetBrains Mono", monospace';
+        ctx.fillText(c.lbl, x + 32, y + 58);
+
+        ctx.fillStyle = textCol;
+        const valStr = String(c.val || "—");
+        ctx.font = valStr.length > 14 ? '800 34px "Syne", sans-serif' : '800 44px "Syne", sans-serif';
+        ctx.fillText(valStr.slice(0, 20), x + 32, y + 148);
+
+        ctx.fillStyle = mutedCol;
+        ctx.font = '500 24px "Space Grotesk", sans-serif';
+        ctx.fillText(String(c.sub || "").slice(0, 28), x + 32, y + 206);
+        ctx.restore();
+      });
+
+      // Footer
+      ctx.fillStyle = mutedCol;
+      ctx.font = '600 26px "JetBrains Mono", monospace';
+      ctx.textAlign = "center";
+      ctx.fillText("FEST LIFE • damianodk.github.io/festivals-life", W / 2, 1790);
+
+      const fname = `Fest_Life_Wrapped_${yr}_Stories.png`;
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = fname;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        showToast("Zapisano kartę Wrapped 9:16 (1080×1920)!");
+      }, "image/png");
+    }
+
+    function exportXLSX() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allConcerts), "Koncerty"); XLSX.writeFile(wb, `Fest_Life_${new Date().toISOString().slice(0, 10)}.xlsx`); showToast("Wyeksportowano Excel!"); }
     async function handleImport(event) { const file = event.target.files[0]; if (!file) return; try { const imported = file.name.toLowerCase().endsWith(".json") ? JSON.parse(await file.text()) : []; if (imported.length && storageMode === "supabase" && sbClient && currentUser) { const rows = imported.map(({ id, ...r }) => ({ ...r, user_id: currentUser.id, data: r.data || null, cena: r.cena !== "" && r.cena != null ? Number(r.cena) : null })); const { data } = await sbClient.from("concerts").insert(rows).select(); allConcerts = [...allConcerts, ...(data || [])]; applyFilters(); showToast(`Zaimportowano ${rows.length} koncertów!`); } } catch (err) { showToast("Błąd importu: " + err.message); } event.target.value = ""; }
 
     window.addEventListener("DOMContentLoaded", initData);
