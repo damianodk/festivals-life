@@ -400,6 +400,24 @@
       border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem;
       word-break: break-all;
     }
+
+    /* SOCIAL, ONBOARDING & CONCERT MATCH 1v1 */
+    .social-search-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .social-search-row input { flex: 1; min-width: 180px; }
+    .match-score-ring {
+      width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 10px;
+      background: var(--grad-primary); color: var(--btn-primary-text);
+      display: grid; place-items: center; font-family: var(--font-display);
+      font-weight: 800; font-size: 1.6rem; box-shadow: 0 8px 26px var(--btn-primary-shadow);
+    }
+    .match-compare-grid {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center;
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px;
+      padding: 12px 14px; margin-bottom: 12px; text-align: center;
+    }
+    .ob-steps { display: flex; gap: 6px; margin-bottom: 14px; }
+    .ob-dot { flex: 1; height: 5px; border-radius: 999px; background: var(--pill-bg); transition: background 0.2s; }
+    .ob-dot.active { background: var(--grad-primary); }
   </style>
 </head>
 <body>
@@ -483,6 +501,8 @@
         <div id="publicBannerBio" style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;"></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm" id="pubFollowBtn" style="display:none" onclick="toggleFollowCurrentPublic()">Obserwuj</button>
+        <button class="btn btn-sm" id="pubMatchBtn" style="display:none" onclick="openConcertMatchForCurrentPublic()">Concert Match</button>
         <button class="btn btn-sm" onclick="openWrappedModal()">Wrapped</button>
         <button class="btn btn-sm btn-primary" onclick="exitPublicMode()">Moje konto / Zaloguj</button>
       </div>
@@ -882,6 +902,22 @@
 
       <section class="card">
         <div class="section-head">
+          <div>
+            <h2 class="section-title">Społeczność & Znajomi</h2>
+            <p class="section-sub">Szukaj profili po @nicku, obserwuj znajomych i sprawdzaj dopasowanie Concert Match 1v1</p>
+          </div>
+        </div>
+        <div class="social-search-row">
+          <input type="text" id="socialSearchInput" placeholder="Wpisz @nick lub nazwę znajomego..." oninput="searchPublicProfiles()" />
+          <button class="btn btn-sm" onclick="searchPublicProfiles()">Szukaj</button>
+        </div>
+        <div id="socialSearchResults" style="margin-bottom:12px;"></div>
+        <div style="font-size:0.71rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);font-weight:700;margin-bottom:8px;">Obserwowani znajomi</div>
+        <div id="followingListContainer"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
           <div><h2 class="section-title">Bucket List — Lista Marzeń</h2><p class="section-sub">Artyści, których chcesz zobaczyć na żywo</p></div>
         </div>
         <form onsubmit="addBucketItem(event)" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
@@ -1008,6 +1044,85 @@
     </div>
   </div>
 
+  <!-- ONBOARDING WIZARD MODAL -->
+  <div class="modal-backdrop" id="onboardingModal">
+    <div class="modal modal-sm">
+      <div class="modal-head">
+        <h3>Witaj w FEST LIFE!</h3>
+        <button class="btn btn-sm" onclick="closeModal('onboardingModal')">Pomiń</button>
+      </div>
+      <div class="ob-steps">
+        <div class="ob-dot active" id="obDot1"></div>
+        <div class="ob-dot" id="obDot2"></div>
+        <div class="ob-dot" id="obDot3"></div>
+      </div>
+
+      <div id="obStep1">
+        <p class="section-sub" style="margin-bottom:12px;">Skonfiguruj swój profil w 30 sekund — potem wszystko możesz zmienić w zakładce Ja.</p>
+        <div class="form-grid">
+          <div class="form-group full"><label>Twój nick (@username)</label><input type="text" id="obUsername" placeholder="np. damian" /></div>
+          <div class="form-group full"><label>Imię / nazwa wyświetlana</label><input type="text" id="obDisplayName" placeholder="np. Damian" /></div>
+          <div class="form-group full"><label>Twoje miasto (Hometown — do liczenia km)</label><input type="text" id="obHometown" value="Poznań" placeholder="np. Poznań" /></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-primary" onclick="goObStep(2)">Dalej</button>
+        </div>
+      </div>
+
+      <div id="obStep2" class="view-hidden">
+        <p class="section-sub" style="margin-bottom:12px;">Wybierz styl aplikacji i ulubiony serwis streamingowy.</p>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Motyw kolorystyczny</label>
+            <select id="obTheme" onchange="applyTheme(this.value, true)">
+              <option value="dark">Sunset Dark (GTA VI)</option>
+              <option value="light">BitterSweet Cream</option>
+              <option value="volcano">Volcano Lava Black</option>
+              <option value="nasa">NASA Space Grey</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Domyślna platforma muzyczna</label>
+            <select id="obStreaming" onchange="saveStreamingProvider(this.value)">
+              <option value="spotify">Spotify</option>
+              <option value="apple">Apple Music</option>
+              <option value="youtube">YouTube Music</option>
+              <option value="tidal">Tidal</option>
+            </select>
+          </div>
+          <div class="form-group full" style="flex-direction:row;align-items:center;gap:10px;">
+            <input type="checkbox" id="obIsPublic" checked style="width:18px;height:18px;accent-color:var(--accent-pink);" />
+            <label for="obIsPublic" style="margin:0;text-transform:none;letter-spacing:0;color:var(--text);font-size:0.82rem;">Udostępnij mój profil publicznie (tylko statystyki i HeatMapa)</label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" onclick="goObStep(1)">Wstecz</button>
+          <button class="btn btn-primary" onclick="saveOnboardingProfile()">Zapisz i dalej</button>
+        </div>
+      </div>
+
+      <div id="obStep3" class="view-hidden">
+        <p class="section-sub" style="margin-bottom:14px;">Twój profil jest gotowy! Jak chcesz zacząć?</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary btn-block" onclick="closeModal('onboardingModal'); setView('add'); switchAddSubTab('concert');">Dodaj pierwszy koncert ręcznie</button>
+          <button class="btn btn-block" onclick="closeModal('onboardingModal'); document.getElementById('importFile').click();">Zaimportuj bazę z pliku (.json / .xlsx)</button>
+          <button class="btn btn-block" onclick="closeModal('onboardingModal');">Przejdź do aplikacji</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONCERT MATCH 1v1 MODAL -->
+  <div class="modal-backdrop" id="matchModal" onclick="if(event.target===this) closeModal('matchModal')">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="matchModalTitle">Concert Match 1v1</h3>
+        <button class="btn btn-sm" onclick="closeModal('matchModal')">Zamknij</button>
+      </div>
+      <div id="matchModalBody"></div>
+    </div>
+  </div>
+
   <datalist id="dlArtysta"></datalist><datalist id="dlEvent"></datalist><datalist id="dlScena"></datalist>
   <datalist id="dlMiejsce"></datalist><datalist id="dlMiasto"></datalist><datalist id="dlDistrict"></datalist>
   <datalist id="dlKraj"></datalist><datalist id="dlGatunek"></datalist><datalist id="dlPodgatunek"></datalist>
@@ -1068,6 +1183,7 @@
 
     let sbClient=null, currentUser=null, storageMode="offline", isPublicView=false;
     let publicProfileSettings={ username:"", display_name:"", bio:"", is_public:false };
+    let followingList=[], currentPublicProfile=null, loggedInUserForPublic=null;
     let allConcerts=[], filteredConcerts=[], upcomingConcerts=[], bucketList=[], tripExpenses=[], clashSlots=[];
     let travelMeta=JSON.parse(localStorage.getItem(TRAVEL_KEY)||"{}");
     let eventsMeta={}, settings={hometown:"Poznań",hometown_coords:[52.4064,16.9252]};
@@ -1249,7 +1365,7 @@
       document.getElementById("profileEmailLabel").textContent = `Zalogowano jako ${user.email}`;
       document.getElementById("logoutBtn").style.display = "inline-flex"; document.getElementById("profileLogoutBtn").style.display = "inline-flex";
 
-      const [profR, citiesR, conR, upR, metaR, blR, expR, artCacheR] = await Promise.all([
+      const [profR, citiesR, conR, upR, metaR, blR, expR, artCacheR, folR] = await Promise.all([
         sbClient.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         sbClient.from("cities_cache").select("*"),
         sbClient.from("concerts").select("*").order("data", { ascending: true }),
@@ -1257,7 +1373,8 @@
         sbClient.from("events_meta").select("*"),
         sbClient.from("bucket_list").select("*").order("created_at", { ascending: false }),
         sbClient.from("trip_expenses").select("*").order("created_at", { ascending: false }),
-        sbClient.from("artists_cache").select("*")
+        sbClient.from("artists_cache").select("*"),
+        sbClient.from("follows").select("following_id").eq("follower_id", user.id)
       ]);
 
       if (profR.data) {
@@ -1274,6 +1391,7 @@
       allConcerts = (conR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
       upcomingConcerts = (upR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
       bucketList = blR.data || []; tripExpenses = expR.data || [];
+      await hydrateFollowingList((folR?.data || []).map(x => x.following_id));
       (artCacheR.data || []).forEach(r => { if (r.artist_key && (!r.image_url || r.image_url.includes("scdn.co"))) artistsMetaCache[r.artist_key] = r; });
       try { localStorage.setItem(ARTIST_META_CACHE_KEY, JSON.stringify(artistsMetaCache)); } catch (_) {}
 
@@ -1286,8 +1404,8 @@
       }
     }
 
-    async function handleAuthSubmit(e) { e.preventDefault(); const errBox = document.getElementById("authError"); errBox.style.display = "none"; const { data, error } = await initSupabaseClient().auth.signInWithPassword({ email: document.getElementById("authEmail").value.trim(), password: document.getElementById("authPassword").value }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); }
-    async function handleSignUp() { const errBox = document.getElementById("authError"); errBox.style.display = "none"; const email = document.getElementById("authEmail").value.trim(), password = document.getElementById("authPassword").value; const { data, error } = await initSupabaseClient().auth.signUp({ email, password }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } if (data.session && data.user) { document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); } else showToast("Konto utworzone! Zaloguj się."); }
+    async function handleAuthSubmit(e) { e.preventDefault(); const errBox = document.getElementById("authError"); errBox.style.display = "none"; const { data, error } = await initSupabaseClient().auth.signInWithPassword({ email: document.getElementById("authEmail").value.trim(), password: document.getElementById("authPassword").value }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); checkOnboarding(); }
+    async function handleSignUp() { const errBox = document.getElementById("authError"); errBox.style.display = "none"; const email = document.getElementById("authEmail").value.trim(), password = document.getElementById("authPassword").value; const { data, error } = await initSupabaseClient().auth.signUp({ email, password }); if (error) { errBox.textContent = error.message; errBox.style.display = "block"; return; } if (data.session && data.user) { document.getElementById("authOverlay").classList.remove("open"); await loadFromSupabase(data.user); finishBootstrap(); checkOnboarding(); } else showToast("Konto utworzone! Zaloguj się."); }
     async function handleLogout() { if (sbClient) await sbClient.auth.signOut(); currentUser = null; document.getElementById("authOverlay").classList.add("open"); }
 
     function enterOfflineDemoMode() {
@@ -1313,6 +1431,7 @@
       renderBucketList();
       renderCrewProfiles();
       renderClashfinder();
+      renderFollowingList();
       applyFilters();
       syncArtistsFromEdge(false);
     }
@@ -1427,13 +1546,239 @@
         document.getElementById("serverStatusText").textContent = `@${prof.username}`;
         document.getElementById("publicBannerTitle").textContent = `Profil publiczny: ${prof.display_name || "@" + prof.username} (@${prof.username})`;
         document.getElementById("publicBannerBio").textContent = prof.bio || `Statystyki koncertowe z ${settings.hometown}`;
+        currentPublicProfile = prof;
         document.getElementById("publicBanner").classList.add("visible");
+
+        const { data: sessData } = await client.auth.getSession();
+        if (sessData?.session?.user) {
+          loggedInUserForPublic = sessData.session.user;
+          document.getElementById("pubMatchBtn").style.display = "inline-flex";
+          if (prof.id && prof.id !== loggedInUserForPublic.id) {
+            document.getElementById("pubFollowBtn").style.display = "inline-flex";
+            const { data: fCheck } = await client.from("follows").select("following_id").eq("follower_id", loggedInUserForPublic.id).eq("following_id", prof.id).maybeSingle();
+            document.getElementById("pubFollowBtn").textContent = fCheck ? "Obserwujesz ✓" : "Obserwuj";
+          }
+        }
 
         finishBootstrap();
         return true;
       } catch (e) {
         return false;
       }
+    }
+
+
+    // --- ONBOARDING WIZARD ---
+    function checkOnboarding() {
+      if (isPublicView || storageMode !== "supabase" || !currentUser) return;
+      if (!publicProfileSettings.username && allConcerts.length === 0) {
+        document.getElementById("obHometown").value = settings.hometown || "Poznań";
+        document.getElementById("obTheme").value = localStorage.getItem(THEME_KEY) || "dark";
+        document.getElementById("obStreaming").value = streamingProvider || "spotify";
+        goObStep(1);
+        document.getElementById("onboardingModal").classList.add("open");
+      }
+    }
+
+    function goObStep(n) {
+      [1, 2, 3].forEach(i => {
+        document.getElementById("obStep" + i).classList.toggle("view-hidden", i !== n);
+        document.getElementById("obDot" + i).classList.toggle("active", i <= n);
+      });
+    }
+
+    async function saveOnboardingProfile() {
+      const slug = sanitizeSlug(document.getElementById("obUsername").value);
+      const disp = document.getElementById("obDisplayName").value.trim();
+      const city = document.getElementById("obHometown").value.trim() || "Poznań";
+      const isPub = !!document.getElementById("obIsPublic").checked;
+      const theme = document.getElementById("obTheme").value;
+
+      let coords = settings.hometown_coords || [52.4064, 16.9252];
+      const geo = await geocodeCity(city);
+      if (geo) coords = geo;
+      settings = { hometown: city, hometown_coords: coords };
+      publicProfileSettings = { username: slug, display_name: disp, bio: "", is_public: isPub };
+
+      if (sbClient && currentUser) {
+        const { error } = await sbClient.from("profiles").upsert({
+          id: currentUser.id,
+          username: slug || null,
+          display_name: disp,
+          hometown: city,
+          hometown_lat: coords[0],
+          hometown_lng: coords[1],
+          theme,
+          is_public: isPub,
+          updated_at: new Date().toISOString()
+        });
+        if (error && error.message.includes("unique")) {
+          showToast("Ten nick jest już zajęty — wybierz inny.");
+          goObStep(1);
+          return;
+        }
+      }
+      updateHometownUI();
+      updatePublicProfileUI();
+      goObStep(3);
+    }
+
+    // --- SOCIAL: SEARCH, FOLLOW & CONCERT MATCH 1v1 ---
+    async function hydrateFollowingList(ids) {
+      followingList = [];
+      if (!ids.length || !sbClient) return;
+      const { data } = await sbClient.rpc("list_public_profiles", { p_ids: ids });
+      followingList = data || [];
+    }
+
+    function renderFollowingList() {
+      const box = document.getElementById("followingListContainer");
+      if (!box) return;
+      if (!followingList.length) {
+        box.innerHTML = `<div style="font-size:0.82rem;color:var(--text-muted);">Nikogo jeszcze nie obserwujesz. Wpisz @nick znajomego powyżej!</div>`;
+        return;
+      }
+      box.innerHTML = followingList.map(p => {
+        const u = escapeHtml(p.username || "");
+        return `
+          <div class="list-row">
+            <div>
+              <strong>${escapeHtml(p.display_name || "@" + u)}</strong>
+              <span style="font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-coral);margin-left:6px;">@${u}</span>
+              ${p.hometown ? `<div style="font-size:0.74rem;color:var(--text-muted);">${escapeHtml(p.hometown)}</div>` : ""}
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" onclick="openConcertMatchByUsername('${u}')">Match 1v1</button>
+              <a class="btn btn-sm" target="_blank" href="${getPublicProfileUrl(u)}">Profil</a>
+              <button class="btn btn-sm btn-danger" onclick="unfollowUser('${p.id}')">Usuń</button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    async function searchPublicProfiles() {
+      const box = document.getElementById("socialSearchResults");
+      const q = (document.getElementById("socialSearchInput")?.value || "").trim().replace(/^@/, "");
+      if (!q || q.length < 2 || !sbClient) { if (box) box.innerHTML = ""; return; }
+      const { data } = await sbClient.rpc("search_public_profiles", { p_query: q });
+      const rows = (data || []).filter(r => !currentUser || r.id !== currentUser.id);
+      if (!rows.length) {
+        box.innerHTML = `<div style="font-size:0.8rem;color:var(--text-muted);">Brak publicznych profili pasujących do „${escapeHtml(q)}”.</div>`;
+        return;
+      }
+      const folIds = new Set(followingList.map(x => x.id));
+      box.innerHTML = rows.map(p => {
+        const u = escapeHtml(p.username || "");
+        const isFol = folIds.has(p.id);
+        return `
+          <div class="list-row">
+            <div>
+              <strong>${escapeHtml(p.display_name || "@" + u)}</strong>
+              <span style="font-family:var(--font-mono);font-size:0.74rem;color:var(--accent-coral);margin-left:6px;">@${u}</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" onclick="openConcertMatchByUsername('${u}')">Match 1v1</button>
+              ${isFol ? `<button class="btn btn-sm" disabled>Obserwujesz ✓</button>` : `<button class="btn btn-sm" onclick="followUser('${p.id}')">Obserwuj</button>`}
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    async function followUser(targetId) {
+      if (!sbClient || !currentUser) return;
+      const { error } = await sbClient.from("follows").insert({ follower_id: currentUser.id, following_id: targetId });
+      if (error && !error.message.includes("duplicate")) { showToast("Błąd: " + error.message); return; }
+      const { data: folR } = await sbClient.from("follows").select("following_id").eq("follower_id", currentUser.id);
+      await hydrateFollowingList((folR || []).map(x => x.following_id));
+      renderFollowingList();
+      searchPublicProfiles();
+      showToast("Dodano do obserwowanych!");
+    }
+
+    async function unfollowUser(targetId) {
+      if (!sbClient || !currentUser) return;
+      await sbClient.from("follows").delete().eq("follower_id", currentUser.id).eq("following_id", targetId);
+      followingList = followingList.filter(x => x.id !== targetId);
+      renderFollowingList();
+      searchPublicProfiles();
+      showToast("Usunięto z obserwowanych.");
+    }
+
+    async function toggleFollowCurrentPublic() {
+      if (!sbClient || !loggedInUserForPublic || !currentPublicProfile?.id) return;
+      const btn = document.getElementById("pubFollowBtn");
+      const isFollowing = btn.textContent.includes("✓");
+      if (isFollowing) {
+        await sbClient.from("follows").delete().eq("follower_id", loggedInUserForPublic.id).eq("following_id", currentPublicProfile.id);
+        btn.textContent = "Obserwuj";
+        showToast("Przestałeś obserwować @" + currentPublicProfile.username);
+      } else {
+        await sbClient.from("follows").insert({ follower_id: loggedInUserForPublic.id, following_id: currentPublicProfile.id });
+        btn.textContent = "Obserwujesz ✓";
+        showToast("Obserwujesz @" + currentPublicProfile.username + "!");
+      }
+    }
+
+    async function openConcertMatchByUsername(targetUsername) {
+      if (!sbClient) return;
+      showToast("Obliczam Concert Match z @" + targetUsername + "...");
+      const { data } = await sbClient.rpc("get_public_profile", { p_username: targetUsername });
+      if (!data || !data.profile) { showToast("Nie udało się pobrać profilu."); return; }
+      renderConcertMatchModal(
+        publicProfileSettings.display_name || "Ty",
+        allConcerts,
+        data.profile.display_name || ("@" + data.profile.username),
+        data.concerts || []
+      );
+    }
+
+    async function openConcertMatchForCurrentPublic() {
+      if (!sbClient || !loggedInUserForPublic || !currentPublicProfile) return;
+      const { data: myConcerts } = await sbClient.from("concerts").select("artysta,event,rok,kraj,miasto").eq("user_id", loggedInUserForPublic.id);
+      renderConcertMatchModal(
+        "Ty",
+        myConcerts || [],
+        currentPublicProfile.display_name || ("@" + currentPublicProfile.username),
+        allConcerts
+      );
+    }
+
+    function renderConcertMatchModal(nameA, listA, nameB, listB) {
+      const norm = s => String(s || "").trim().toLowerCase();
+      const artA = new Map(), artB = new Map();
+      listA.forEach(c => { if (c.artysta) artA.set(norm(c.artysta), c.artysta.trim()); });
+      listB.forEach(c => { if (c.artysta) artB.set(norm(c.artysta), c.artysta.trim()); });
+
+      const sharedArtists = [...artA.keys()].filter(k => artB.has(k)).map(k => artA.get(k)).sort();
+      const unionSize = new Set([...artA.keys(), ...artB.keys()]).size;
+      const score = unionSize ? Math.round((sharedArtists.length / Math.min(artA.size || 1, artB.size || 1)) * 100) : 0;
+
+      const evA = new Set(listA.map(c => `${norm(c.event)}|${c.rok || ""}`));
+      const sharedEvents = [...new Set(
+        listB.filter(c => evA.has(`${norm(c.event)}|${c.rok || ""}`)).map(c => `${c.event} (${c.rok})`)
+      )].sort();
+
+      document.getElementById("matchModalTitle").textContent = `Concert Match: ${nameA} × ${nameB}`;
+      document.getElementById("matchModalBody").innerHTML = `
+        <div class="match-score-ring">${Math.min(100, score)}%</div>
+        <div style="text-align:center;font-size:0.84rem;color:var(--text-muted);margin-bottom:14px;">
+          Wspólni artyści: <strong>${sharedArtists.length}</strong> • Wspólne festiwale/eventy: <strong>${sharedEvents.length}</strong>
+        </div>
+        <div class="match-compare-grid">
+          <div><div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;">${escapeHtml(nameA)}</div><strong style="font-family:var(--font-display);font-size:1.2rem;">${listA.length}</strong><div style="font-size:0.72rem;color:var(--text-muted);">koncertów</div></div>
+          <div style="font-family:var(--font-mono);color:var(--accent-coral);font-weight:700;">VS</div>
+          <div><div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;">${escapeHtml(nameB)}</div><strong style="font-family:var(--font-display);font-size:1.2rem;">${listB.length}</strong><div style="font-size:0.72rem;color:var(--text-muted);">koncertów</div></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:0.72rem;text-transform:uppercase;color:var(--accent-gold);font-weight:700;margin-bottom:6px;">Wspólni Artyści (${sharedArtists.length})</div>
+          <div class="artist-chips">${sharedArtists.length ? sharedArtists.slice(0, 30).map(a => `<span class="chip seen">${escapeHtml(a)}</span>`).join("") : `<span style="font-size:0.8rem;color:var(--text-muted);">Brak wspólnych artystów</span>`}</div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;text-transform:uppercase;color:var(--accent-gold);font-weight:700;margin-bottom:6px;">Wspólne Eventy (${sharedEvents.length})</div>
+          <div class="artist-chips">${sharedEvents.length ? sharedEvents.slice(0, 20).map(e => `<span class="chip">${escapeHtml(e)}</span>`).join("") : `<span style="font-size:0.8rem;color:var(--text-muted);">Brak wspólnych festiwali</span>`}</div>
+        </div>
+      `;
+      document.getElementById("matchModal").classList.add("open");
     }
 
     function exitPublicMode() {
