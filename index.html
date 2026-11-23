@@ -289,10 +289,10 @@
     .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
     .lightbox-img { max-width: 100%; max-height: 74vh; border-radius: 14px; display: block; margin: 0 auto; object-fit: contain; }
 
-    .wrapped-card { background: var(--grad-subtle); border: 1px solid var(--border-strong); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .wrapped-stat { background: var(--input-bg); border: 1px solid var(--border); border-radius: 13px; padding: 12px 14px; }
-    .wrapped-stat .lbl { font-size: 0.69rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
-    .wrapped-stat .val { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; margin-top: 3px; }
+    .wrapped-card { background: var(--grad-subtle); border: 1px solid var(--border-strong); border-radius: 16px; padding: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+    .wrapped-stat { background: var(--input-bg); border: 1px solid var(--border); border-radius: 13px; padding: 12px 14px; min-width: 0; overflow: hidden; }
+    .wrapped-stat .lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); line-height: 1.25; }
+    .wrapped-stat .val { font-family: var(--font-display); font-size: clamp(0.98rem, 2.2vw, 1.16rem); font-weight: 800; margin-top: 4px; line-height: 1.22; overflow-wrap: anywhere; word-break: break-word; }
 
     .auth-overlay { position: fixed; inset: 0; z-index: 4000; background: var(--bg-grad); display: none; align-items: center; justify-content: center; padding: 20px; }
     .auth-overlay.open { display: flex; }
@@ -358,6 +358,29 @@
       .cf-form input:first-child { grid-column: 1 / -1; }
       .cf-form button { grid-column: 1 / -1; }
       .modal { padding: 16px 14px; }
+    }
+
+    /* WRAPPED STUDIO (9:16 LIVE EDITOR + PHOTO/VIDEO BG) */
+    .modal.modal-studio { max-width: 980px; }
+    .wrapped-studio { display: grid; grid-template-columns: minmax(250px, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+    .wrapped-preview-col { display: flex; flex-direction: column; align-items: center; gap: 10px; position: sticky; top: 0; }
+    #wrappedPreviewCanvas { width: 100%; max-width: 330px; aspect-ratio: 9 / 16; height: auto; border-radius: 20px; border: 1.5px solid var(--border-strong); box-shadow: var(--shadow); background: var(--bg); display: block; }
+    .wrapped-controls-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .studio-box { background: var(--input-bg); border: 1px solid var(--border); border-radius: 15px; padding: 13px 14px; display: flex; flex-direction: column; gap: 10px; }
+    .studio-box-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-gold); font-weight: 700; }
+    .studio-sliders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .studio-slider { display: flex; flex-direction: column; gap: 4px; font-size: 0.74rem; color: var(--text-muted); }
+    .studio-slider input[type="range"] { width: 100%; padding: 0; border: none; background: transparent; accent-color: var(--accent-pink); }
+    .studio-tile-row { display: grid; grid-template-columns: auto 1fr 1fr; gap: 7px; align-items: center; }
+    .studio-tile-row input[type="text"] { padding: 6px 9px; font-size: 0.78rem; min-width: 0; width: 100%; }
+    .studio-tile-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-pink); cursor: pointer; }
+    @media (max-width: 820px) {
+      .wrapped-studio { grid-template-columns: 1fr; }
+      .wrapped-preview-col { position: static; }
+      #wrappedPreviewCanvas { max-width: 260px; }
+      .studio-sliders { grid-template-columns: 1fr; }
+      .studio-tile-row { grid-template-columns: auto 1fr; }
+      .studio-tile-row input[type="text"]:last-child { grid-column: 2; }
     }
   </style>
 </head>
@@ -851,17 +874,73 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="wrappedModal" onclick="if(event.target===this) closeModal('wrappedModal')">
-    <div class="modal">
+  <div class="modal-backdrop" id="wrappedModal" onclick="if(event.target===this) closeWrappedModal()">
+    <div class="modal modal-studio">
       <div class="modal-head">
-        <h3>FEST LIFE — Wrapped</h3>
+        <h3>FEST LIFE — Wrapped Studio</h3>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <select id="wrappedYearSelect" onchange="renderWrapped()"></select>
-          <button class="btn btn-sm btn-primary" onclick="exportWrappedStoriesPNG()">Stories 9:16</button>
-          <button class="btn btn-sm" onclick="closeModal('wrappedModal')">Zamknij</button>
+          <select id="wrappedYearSelect" onchange="onWrappedYearChange()"></select>
+          <button class="btn btn-sm" onclick="closeWrappedModal()">Zamknij</button>
         </div>
       </div>
-      <div id="wrappedBody"></div>
+
+      <div class="wrapped-studio">
+        <!-- LIVE 9:16 PREVIEW -->
+        <div class="wrapped-preview-col">
+          <canvas id="wrappedPreviewCanvas" width="1080" height="1920"></canvas>
+          <div style="display:flex;gap:8px;width:100%;max-width:330px;flex-wrap:wrap;">
+            <button class="btn btn-primary" style="flex:1" onclick="exportWrappedStoriesPNG()">Pobierz PNG (HD)</button>
+            <button class="btn" id="exportWrappedVideoBtn" style="flex:1;display:none;" onclick="exportWrappedStoriesVideo()">Nagraj Wideo</button>
+          </div>
+          <div id="wrappedRecStatus" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent-coral);text-align:center;"></div>
+        </div>
+
+        <!-- STUDIO EDITOR CONTROLS -->
+        <div class="wrapped-controls-col">
+          <!-- MEDIA BACKGROUND -->
+          <div class="studio-box">
+            <div class="studio-box-title">Tło karty (Zdjęcie lub Filmik)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" onclick="document.getElementById('wrappedBgInput').click()">Dodaj zdjęcie / wideo</button>
+              <button class="btn btn-sm btn-danger" id="wrappedClearBgBtn" style="display:none" onclick="clearWrappedMedia()">Usuń tło</button>
+              <input type="file" id="wrappedBgInput" accept="image/*,video/*" style="display:none" onchange="handleWrappedBgUpload(event)" />
+            </div>
+            <div class="studio-sliders">
+              <label class="studio-slider">Przyciemnienie tła: <span id="wsDimVal">45%</span>
+                <input type="range" id="wsDim" min="0" max="85" value="45" oninput="drawWrappedCanvas()" />
+              </label>
+              <label class="studio-slider">Rozmycie tła: <span id="wsBlurVal">0px</span>
+                <input type="range" id="wsBlur" min="0" max="20" value="0" oninput="drawWrappedCanvas()" />
+              </label>
+              <label class="studio-slider">Widoczność kafelków: <span id="wsTileOpVal">84%</span>
+                <input type="range" id="wsTileOp" min="15" max="98" value="84" oninput="drawWrappedCanvas()" />
+              </label>
+              <label class="studio-slider">Zoom tła: <span id="wsZoomVal">100%</span>
+                <input type="range" id="wsZoom" min="100" max="200" value="100" oninput="drawWrappedCanvas()" />
+              </label>
+              <label class="studio-slider" style="grid-column:1/-1;">Przesunięcie góra / dół: <span id="wsPosYVal">0%</span>
+                <input type="range" id="wsPosY" min="-50" max="50" value="0" oninput="drawWrappedCanvas()" />
+              </label>
+            </div>
+          </div>
+
+          <!-- HEADER & FOOTER TEXT -->
+          <div class="studio-box">
+            <div class="studio-box-title">Nagłówek i podpis</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Tytuł</label><input type="text" id="wsTitle" value="FEST LIFE" oninput="drawWrappedCanvas()" /></div>
+              <div class="form-group"><label>Podtytuł</label><input type="text" id="wsSubtitle" value="WRAPPED • CAŁA HISTORIA" oninput="drawWrappedCanvas()" /></div>
+              <div class="form-group full"><label>Stopka</label><input type="text" id="wsFooter" value="FEST LIFE • damianodk.github.io/festivals-life" oninput="drawWrappedCanvas()" /></div>
+            </div>
+          </div>
+
+          <!-- EDITABLE TILES -->
+          <div class="studio-box">
+            <div class="studio-box-title">Edycja kafelków (zaznacz widoczne i edytuj treść)</div>
+            <div id="wrappedTilesEditor" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1761,10 +1840,30 @@
     function sortTable(col) { if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; } renderFullTable(); }
     function renderFullTable() { const sorted = [...filteredConcerts].sort((a, b) => { const va = String(a[sortCol] || "").toLowerCase(), vb = String(b[sortCol] || "").toLowerCase(); return sortAsc ? va.localeCompare(vb, "pl") : vb.localeCompare(va, "pl"); }); document.getElementById("fullTableBody").innerHTML = sorted.map(c => `<tr><td style="font-family:var(--font-mono);white-space:nowrap;">${escapeHtml(c.data)}</td><td><strong>${escapeHtml(c.artysta)}</strong></td><td>${escapeHtml(c.event)}</td><td>${escapeHtml(c.miasto)}</td><td><span class="badge-genre">${escapeHtml(c.gatunek || "—")}</span></td><td>${escapeHtml(c.z_kim || "—")}</td><td style="white-space:nowrap;"><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(c)}">Setlist.fm</a><button class="btn btn-sm" onclick="editConcertInTab(${c.id})">Edytuj</button><button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">Usuń</button></td></tr>`).join(""); }
 
-    function openWrappedModal() { const yrs = [...new Set(allConcerts.map(c => c.rok).filter(Boolean))].sort((a, b) => b - a); document.getElementById("wrappedYearSelect").innerHTML = `<option value="all">Cała historia</option>` + yrs.map(y => `<option value="${y}">Sezon ${y}</option>`).join(""); renderWrapped(); document.getElementById("wrappedModal").classList.add("open"); }
-    function renderWrapped() { const yr = document.getElementById("wrappedYearSelect").value; const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr); const byA = {}, byC = {}, byG = {}, byCr = {}; list.forEach(c => { if (c.artysta) byA[c.artysta] = (byA[c.artysta] || 0) + 1; if (c.miasto) byC[c.miasto] = (byC[c.miasto] || 0) + 1; if (c.gatunek) byG[c.gatunek] = (byG[c.gatunek] || 0) + 1; if (c.z_kim) byCr[c.z_kim] = (byCr[c.z_kim] || 0) + 1; }); const { totalKm, farthest, artistKmSorted } = computeDistances(list); const [tA, tAC] = topEntry(byA), [tC, tCC] = topEntry(byC), [tG, tGC] = topEntry(byG), [tCr, tCrC] = topEntry(byCr), topKm = artistKmSorted[0] || ["—", 0]; document.getElementById("wrappedBody").innerHTML = `<div class="wrapped-card"><div class="wrapped-stat"><div class="lbl">Koncerty</div><div class="val">${list.length}</div></div><div class="wrapped-stat"><div class="lbl">Kilometry z ${escapeHtml(settings.hometown)}</div><div class="val">${totalKm.toLocaleString("pl-PL")} km</div></div><div class="wrapped-stat"><div class="lbl">Top Artysta</div><div class="val">${escapeHtml(tA)} (${tAC}×)</div></div><div class="wrapped-stat"><div class="lbl">Liczba kilometrów za artystą</div><div class="val">${escapeHtml(topKm[0])} (${Number(topKm[1]).toLocaleString("pl-PL")} km)</div></div><div class="wrapped-stat"><div class="lbl">Top Miasto</div><div class="val">${escapeHtml(tC)} (${tCC})</div></div><div class="wrapped-stat"><div class="lbl">Top Gatunek</div><div class="val">${escapeHtml(tG)} (${tGC})</div></div><div class="wrapped-stat"><div class="lbl">Najwierniejsza Ekipa</div><div class="val">${escapeHtml(tCr)} (${tCrC})</div></div><div class="wrapped-stat"><div class="lbl">Najdalszy Koncert</div><div class="val">${escapeHtml(farthest.city)} (${farthest.km.toLocaleString("pl-PL")} km)</div></div></div>`; }
+    // --- WRAPPED STUDIO ENGINE (LIVE 9:16 + PHOTO/VIDEO BG + EDITABLE TILES) ---
+    let wrappedBgType = "none"; // "none" | "image" | "video"
+    let wrappedBgImg = null;
+    let wrappedBgVideo = null;
+    let wrappedBgObjectUrl = "";
+    let wrappedRafId = null;
+    let wrappedState = { count: 0, countries: 0, totalKm: 0, tiles: [] };
 
-    function exportWrappedStoriesPNG() {
+    function openWrappedModal() {
+      const yrs = [...new Set(allConcerts.map(c => c.rok).filter(Boolean))].sort((a, b) => b - a);
+      document.getElementById("wrappedYearSelect").innerHTML =
+        `<option value="all">Cała historia</option>` + yrs.map(y => `<option value="${y}">Sezon ${y}</option>`).join("");
+      onWrappedYearChange();
+      document.getElementById("wrappedModal").classList.add("open");
+      startWrappedLoop();
+    }
+
+    function closeWrappedModal() {
+      closeModal("wrappedModal");
+      if (wrappedRafId) { cancelAnimationFrame(wrappedRafId); wrappedRafId = null; }
+      if (wrappedBgVideo) { try { wrappedBgVideo.pause(); } catch (_) {} }
+    }
+
+    function onWrappedYearChange() {
       const yr = document.getElementById("wrappedYearSelect").value;
       const list = yr === "all" ? allConcerts : allConcerts.filter(c => String(c.rok) === yr);
       const byA = {}, byC = {}, byG = {}, byCr = {};
@@ -1779,10 +1878,117 @@
       const topKm = artistKmSorted[0] || ["—", 0];
       const countries = new Set(list.map(c => c.kraj).filter(Boolean)).size;
 
-      const W = 1080, H = 1920;
-      const canvas = document.createElement("canvas");
-      canvas.width = W; canvas.height = H;
+      document.getElementById("wsSubtitle").value = yr === "all" ? "WRAPPED • CAŁA HISTORIA" : `WRAPPED • SEZON ${yr}`;
+      wrappedState = {
+        count: list.length,
+        countries,
+        totalKm,
+        tiles: [
+          { on: true, lbl: "TOP ARTYSTA", val: tA, sub: `${tAC}× na żywo` },
+          { on: true, lbl: "KM ZA ARTYSTĄ", val: topKm[0], sub: `${Number(topKm[1]).toLocaleString("pl-PL")} km` },
+          { on: true, lbl: "TOP MIASTO", val: tC, sub: `${tCC} koncertów` },
+          { on: true, lbl: "TOP GATUNEK", val: tG, sub: "ulubione brzmienie" },
+          { on: true, lbl: "NAJWIERNIEJSZA EKIPA", val: tCr, sub: "wspólne wyjazdy" },
+          { on: true, lbl: "NAJDALSZA PODRÓŻ", val: farthest.city, sub: `${farthest.km.toLocaleString("pl-PL")} km z ${settings.hometown}` }
+        ]
+      };
+      renderWrappedTilesEditor();
+      drawWrappedCanvas();
+    }
+
+    function renderWrappedTilesEditor() {
+      const box = document.getElementById("wrappedTilesEditor");
+      if (!box) return;
+      box.innerHTML = wrappedState.tiles.map((t, i) => `
+        <div class="studio-tile-row">
+          <input type="checkbox" ${t.on ? "checked" : ""} onchange="wrappedState.tiles[${i}].on=this.checked;drawWrappedCanvas();" title="Pokaż / ukryj kafelek" />
+          <input type="text" value="${escapeHtml(t.lbl)}" oninput="wrappedState.tiles[${i}].lbl=this.value;drawWrappedCanvas();" placeholder="Etykieta" />
+          <input type="text" value="${escapeHtml(t.val)}" oninput="wrappedState.tiles[${i}].val=this.value;drawWrappedCanvas();" placeholder="Wartość" />
+        </div>
+      `).join("");
+    }
+
+    function handleWrappedBgUpload(event) {
+      const file = (event.target.files || [])[0];
+      if (!file) return;
+      clearWrappedMedia(false);
+      wrappedBgObjectUrl = URL.createObjectURL(file);
+
+      if (file.type.startsWith("video/")) {
+        const vid = document.createElement("video");
+        vid.src = wrappedBgObjectUrl;
+        vid.muted = true;
+        vid.loop = true;
+        vid.playsInline = true;
+        vid.crossOrigin = "anonymous";
+        vid.onloadeddata = () => {
+          wrappedBgType = "video";
+          wrappedBgVideo = vid;
+          vid.play().catch(() => {});
+          document.getElementById("wrappedClearBgBtn").style.display = "inline-flex";
+          document.getElementById("exportWrappedVideoBtn").style.display = "inline-flex";
+          startWrappedLoop();
+          showToast("Załadowano filmik w tle!");
+        };
+      } else {
+        const img = new Image();
+        img.onload = () => {
+          wrappedBgType = "image";
+          wrappedBgImg = img;
+          document.getElementById("wrappedClearBgBtn").style.display = "inline-flex";
+          document.getElementById("exportWrappedVideoBtn").style.display = "none";
+          drawWrappedCanvas();
+          showToast("Załadowano zdjęcie w tle!");
+        };
+        img.src = wrappedBgObjectUrl;
+      }
+      event.target.value = "";
+    }
+
+    function clearWrappedMedia(redraw = true) {
+      if (wrappedBgVideo) { try { wrappedBgVideo.pause(); } catch (_) {} wrappedBgVideo = null; }
+      wrappedBgImg = null;
+      wrappedBgType = "none";
+      if (wrappedBgObjectUrl) { URL.revokeObjectURL(wrappedBgObjectUrl); wrappedBgObjectUrl = ""; }
+      const clr = document.getElementById("wrappedClearBgBtn");
+      const vBtn = document.getElementById("exportWrappedVideoBtn");
+      if (clr) clr.style.display = "none";
+      if (vBtn) vBtn.style.display = "none";
+      if (redraw) drawWrappedCanvas();
+    }
+
+    function startWrappedLoop() {
+      if (wrappedRafId) cancelAnimationFrame(wrappedRafId);
+      const tick = () => {
+        if (!document.getElementById("wrappedModal").classList.contains("open")) { wrappedRafId = null; return; }
+        drawWrappedCanvas();
+        if (wrappedBgType === "video" && wrappedBgVideo) {
+          wrappedRafId = requestAnimationFrame(tick);
+        } else {
+          wrappedRafId = null;
+        }
+      };
+      wrappedRafId = requestAnimationFrame(tick);
+    }
+
+    function drawWrappedCanvas() {
+      const canvas = document.getElementById("wrappedPreviewCanvas");
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
+      const W = 1080, H = 1920;
+
+      const dimPct = parseInt(document.getElementById("wsDim")?.value || "45", 10);
+      const blurPx = parseInt(document.getElementById("wsBlur")?.value || "0", 10);
+      const tileOp = parseInt(document.getElementById("wsTileOp")?.value || "84", 10) / 100;
+      const zoom = parseInt(document.getElementById("wsZoom")?.value || "100", 10) / 100;
+      const posY = parseInt(document.getElementById("wsPosY")?.value || "0", 10) / 100;
+
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt("wsDimVal", dimPct + "%");
+      setTxt("wsBlurVal", blurPx + "px");
+      setTxt("wsTileOpVal", Math.round(tileOp * 100) + "%");
+      setTxt("wsZoomVal", Math.round(zoom * 100) + "%");
+      setTxt("wsPosYVal", Math.round(posY * 100) + "%");
 
       const cs = getComputedStyle(document.documentElement);
       const bg = (cs.getPropertyValue("--bg") || "#0B0616").trim();
@@ -1794,22 +2000,90 @@
       const accentGold = (cs.getPropertyValue("--accent-gold") || "#FFB86C").trim();
       const borderStrong = (cs.getPropertyValue("--border-strong") || "rgba(255,42,133,0.44)").trim();
 
-      // Background + ambient glow
+      // 1. Background
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
-      const g1 = ctx.createRadialGradient(180, 260, 40, 180, 260, 620);
-      g1.addColorStop(0, accentPink + "44"); g1.addColorStop(1, "transparent");
-      ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
-      const g2 = ctx.createRadialGradient(900, 1560, 40, 900, 1560, 620);
-      g2.addColorStop(0, accentCoral + "38"); g2.addColorStop(1, "transparent");
-      ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
 
-      // Top Brand Badge (FL + FEST LIFE)
+      const media = wrappedBgType === "video" ? wrappedBgVideo : (wrappedBgType === "image" ? wrappedBgImg : null);
+      if (media) {
+        const mw = media.videoWidth || media.naturalWidth || W;
+        const mh = media.videoHeight || media.naturalHeight || H;
+        const coverScale = Math.max(W / mw, H / mh) * zoom;
+        const dw = mw * coverScale, dh = mh * coverScale;
+        const dx = (W - dw) / 2;
+        const dy = (H - dh) / 2 + posY * H * 0.4;
+        ctx.save();
+        if (blurPx > 0) ctx.filter = `blur(${blurPx * 2}px)`;
+        ctx.drawImage(media, dx, dy, dw, dh);
+        ctx.restore();
+
+        ctx.fillStyle = `rgba(0, 0, 0, ${dimPct / 100})`;
+        ctx.fillRect(0, 0, W, H);
+      } else {
+        const g1 = ctx.createRadialGradient(180, 260, 40, 180, 260, 620);
+        g1.addColorStop(0, accentPink + "44"); g1.addColorStop(1, "transparent");
+        ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+        const g2 = ctx.createRadialGradient(900, 1560, 40, 900, 1560, 620);
+        g2.addColorStop(0, accentCoral + "38"); g2.addColorStop(1, "transparent");
+        ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+      }
+
+      const drawFitLine = (text, x, y, maxW, weight, maxPx, minPx, family, align = "left") => {
+        const str = String(text || "");
+        let size = maxPx;
+        ctx.textAlign = align;
+        ctx.font = `${weight} ${size}px ${family}`;
+        while (size > minPx && ctx.measureText(str).width > maxW) {
+          size -= 2;
+          ctx.font = `${weight} ${size}px ${family}`;
+        }
+        let out = str;
+        if (ctx.measureText(out).width > maxW) {
+          while (out.length > 1 && ctx.measureText(out + "…").width > maxW) out = out.slice(0, -1);
+          out += "…";
+        }
+        ctx.fillText(out, x, y);
+      };
+
+      const drawWrappedVal = (text, x, y, maxW, maxPx, minPx) => {
+        const str = String(text || "—");
+        let size = maxPx;
+        ctx.textAlign = "left";
+        ctx.font = `800 ${size}px "Syne", sans-serif`;
+        if (ctx.measureText(str).width <= maxW) { ctx.fillText(str, x, y + 14); return; }
+        while (size > 28 && ctx.measureText(str).width > maxW) { size -= 2; ctx.font = `800 ${size}px "Syne", sans-serif`; }
+        if (ctx.measureText(str).width <= maxW) { ctx.fillText(str, x, y + 14); return; }
+
+        size = 28;
+        ctx.font = `800 ${size}px "Syne", sans-serif`;
+        const words = str.split(/\s+/);
+        let line1 = "", line2 = "";
+        for (const w of words) {
+          const test = line1 ? line1 + " " + w : w;
+          if (ctx.measureText(test).width <= maxW) line1 = test;
+          else line2 = line2 ? line2 + " " + w : w;
+        }
+        if (!line1) { line1 = str; line2 = ""; }
+        if (line2) {
+          drawFitLine(line1, x, y - 4, maxW, 800, 28, minPx, '"Syne", sans-serif');
+          drawFitLine(line2, x, y + 32, maxW, 800, 28, minPx, '"Syne", sans-serif');
+        } else {
+          drawFitLine(line1, x, y + 14, maxW, 800, 28, minPx, '"Syne", sans-serif');
+        }
+      };
+
+      // 2. Top Brand Badge (FL + Editable Title/Subtitle)
+      const mainTitle = document.getElementById("wsTitle")?.value || "FEST LIFE";
+      const subTitle = document.getElementById("wsSubtitle")?.value || "WRAPPED";
+      const footerTxt = document.getElementById("wsFooter")?.value || "";
+
       ctx.save();
       ctx.fillStyle = surfaceSolid;
+      ctx.globalAlpha = Math.min(0.95, tileOp + 0.08);
       ctx.strokeStyle = accentPink;
       ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.roundRect(80, 110, 96, 96, 26); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(80, 110, 96, 96, 26); ctx.fill();
+      ctx.globalAlpha = 1; ctx.stroke();
       ctx.fillStyle = accentPink;
       ctx.beginPath(); ctx.arc(154, 134, 7, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = textCol;
@@ -1818,69 +2092,67 @@
       ctx.fillText("FL", 128, 162);
       ctx.restore();
 
-      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-      const titleGrad = ctx.createLinearGradient(200, 130, 700, 200);
+      ctx.textBaseline = "alphabetic";
+      const titleGrad = ctx.createLinearGradient(200, 130, 820, 200);
       titleGrad.addColorStop(0, accentPink); titleGrad.addColorStop(0.6, accentCoral); titleGrad.addColorStop(1, accentGold);
       ctx.fillStyle = titleGrad;
-      ctx.font = '800 58px "Syne", sans-serif';
-      ctx.fillText("FEST LIFE", 204, 168);
+      drawFitLine(mainTitle, 204, 168, 790, 800, 56, 32, '"Syne", sans-serif');
 
-      ctx.fillStyle = mutedCol;
-      ctx.font = '600 26px "JetBrains Mono", monospace';
-      ctx.fillText(yr === "all" ? "WRAPPED • CAŁA HISTORIA" : `WRAPPED • SEZON ${yr}`, 206, 208);
+      ctx.fillStyle = media ? "#FFFFFF" : mutedCol;
+      drawFitLine(subTitle, 206, 208, 790, 600, 25, 16, '"JetBrains Mono", monospace');
 
-      // Hero Big Number
-      ctx.fillStyle = textCol;
+      // 3. Hero Big Number
+      ctx.fillStyle = media ? "#FFFFFF" : textCol;
+      ctx.textAlign = "left";
       ctx.font = '800 132px "Syne", sans-serif';
-      ctx.fillText(String(list.length), 80, 410);
-      ctx.fillStyle = mutedCol;
-      ctx.font = '600 36px "Space Grotesk", sans-serif';
-      ctx.fillText(`koncertów w ${countries} krajach • ${totalKm.toLocaleString("pl-PL")} km`, 80, 468);
+      ctx.fillText(String(wrappedState.count), 80, 410);
+      ctx.fillStyle = media ? "rgba(255,255,255,0.88)" : mutedCol;
+      drawFitLine(
+        `koncertów w ${wrappedState.countries} krajach • ${wrappedState.totalKm.toLocaleString("pl-PL")} km`,
+        80, 468, 920, 600, 34, 22, '"Space Grotesk", sans-serif'
+      );
 
-      // Stats Cards Grid (2 columns x 3 rows)
-      const cards = [
-        { lbl: "TOP ARTYSTA", val: tA, sub: `${tAC}× na żywo` },
-        { lbl: "KM ZA ARTYSTĄ", val: topKm[0], sub: `${Number(topKm[1]).toLocaleString("pl-PL")} km` },
-        { lbl: "TOP MIASTO", val: tC, sub: `${tCC} koncertów` },
-        { lbl: "TOP GATUNEK", val: tG, sub: "ulubione brzmienie" },
-        { lbl: "NAJWIERNIEJSZA EKIPA", val: tCr, sub: "wspólne wyjazdy" },
-        { lbl: "NAJDALSZA PODRÓŻ", val: farthest.city, sub: `${farthest.km.toLocaleString("pl-PL")} km z ${settings.hometown}` }
-      ];
+      // 4. Active Tiles Grid (strictly clipped & fitted)
+      const activeTiles = wrappedState.tiles.filter(t => t.on);
+      const cardW = 442, cardH = 268, gap = 36, startX = 80, startY = 550;
+      const innerPad = 28, innerMaxW = cardW - innerPad * 2;
 
-      const cardW = 442, cardH = 260, gap = 36, startX = 80, startY = 550;
-      cards.forEach((c, idx) => {
+      activeTiles.forEach((c, idx) => {
         const col = idx % 2, row = Math.floor(idx / 2);
         const x = startX + col * (cardW + gap);
         const y = startY + row * (cardH + gap);
 
         ctx.save();
         ctx.fillStyle = surfaceSolid;
-        ctx.globalAlpha = 0.92;
+        ctx.globalAlpha = tileOp;
         ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 32); ctx.fill();
         ctx.globalAlpha = 1;
         ctx.lineWidth = 2; ctx.strokeStyle = borderStrong; ctx.stroke();
 
+        ctx.beginPath(); ctx.roundRect(x + 6, y + 6, cardW - 12, cardH - 12, 26); ctx.clip();
+
         ctx.fillStyle = accentGold;
-        ctx.font = '700 20px "JetBrains Mono", monospace';
-        ctx.fillText(c.lbl, x + 32, y + 58);
+        drawFitLine(c.lbl, x + innerPad, y + 54, innerMaxW, 700, 19, 13, '"JetBrains Mono", monospace');
 
         ctx.fillStyle = textCol;
-        const valStr = String(c.val || "—");
-        ctx.font = valStr.length > 14 ? '800 34px "Syne", sans-serif' : '800 44px "Syne", sans-serif';
-        ctx.fillText(valStr.slice(0, 20), x + 32, y + 148);
+        drawWrappedVal(c.val, x + innerPad, y + 132, innerMaxW, 38, 20);
 
         ctx.fillStyle = mutedCol;
-        ctx.font = '500 24px "Space Grotesk", sans-serif';
-        ctx.fillText(String(c.sub || "").slice(0, 28), x + 32, y + 206);
+        drawFitLine(String(c.sub || ""), x + innerPad, y + 222, innerMaxW, 500, 22, 15, '"Space Grotesk", sans-serif');
         ctx.restore();
       });
 
-      // Footer
-      ctx.fillStyle = mutedCol;
-      ctx.font = '600 26px "JetBrains Mono", monospace';
-      ctx.textAlign = "center";
-      ctx.fillText("FEST LIFE • damianodk.github.io/festivals-life", W / 2, 1790);
+      // 5. Footer
+      if (footerTxt) {
+        ctx.fillStyle = media ? "rgba(255,255,255,0.85)" : mutedCol;
+        drawFitLine(footerTxt, W / 2, 1795, 920, 600, 25, 16, '"JetBrains Mono", monospace', "center");
+      }
+    }
 
+    function exportWrappedStoriesPNG() {
+      drawWrappedCanvas();
+      const canvas = document.getElementById("wrappedPreviewCanvas");
+      const yr = document.getElementById("wrappedYearSelect").value;
       const fname = `Fest_Life_Wrapped_${yr}_Stories.png`;
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
@@ -1890,6 +2162,56 @@
         setTimeout(() => URL.revokeObjectURL(url), 4000);
         showToast("Zapisano kartę Wrapped 9:16 (1080×1920)!");
       }, "image/png");
+    }
+
+    async function exportWrappedStoriesVideo() {
+      if (wrappedBgType !== "video" || !wrappedBgVideo) {
+        showToast("Najpierw dodaj filmik w tle.");
+        return;
+      }
+      const canvas = document.getElementById("wrappedPreviewCanvas");
+      const btn = document.getElementById("exportWrappedVideoBtn");
+      const status = document.getElementById("wrappedRecStatus");
+      if (typeof MediaRecorder === "undefined" || !canvas.captureStream) {
+        showToast("Twoja przeglądarka nie obsługuje nagrywania wideo z canvasu.");
+        return;
+      }
+
+      const mime = MediaRecorder.isTypeSupported("video/mp4")
+        ? "video/mp4"
+        : (MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : "video/webm");
+      const ext = mime.includes("mp4") ? "mp4" : "webm";
+      const durMs = Math.min(15000, Math.max(3000, Math.round((wrappedBgVideo.duration || 6) * 1000)));
+
+      try {
+        btn.disabled = true;
+        status.textContent = `Nagrywam wideo (${Math.round(durMs / 1000)}s)...`;
+        wrappedBgVideo.currentTime = 0;
+        await wrappedBgVideo.play();
+
+        const stream = canvas.captureStream(30);
+        const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 });
+        const chunks = [];
+        recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mime });
+          const url = URL.createObjectURL(blob);
+          const yr = document.getElementById("wrappedYearSelect").value;
+          const a = document.createElement("a");
+          a.href = url; a.download = `Fest_Life_Wrapped_${yr}_Stories.${ext}`;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          btn.disabled = false;
+          status.textContent = "";
+          showToast(`Zapisano wideo Wrapped (.${ext})!`);
+        };
+        recorder.start();
+        setTimeout(() => { if (recorder.state !== "inactive") recorder.stop(); }, durMs);
+      } catch (err) {
+        btn.disabled = false;
+        status.textContent = "";
+        showToast("Błąd nagrywania wideo: " + err.message);
+      }
     }
 
     function exportXLSX() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allConcerts), "Koncerty"); XLSX.writeFile(wb, `Fest_Life_${new Date().toISOString().slice(0, 10)}.xlsx`); showToast("Wyeksportowano Excel!"); }
