@@ -382,6 +382,24 @@
       .studio-tile-row { grid-template-columns: auto 1fr; }
       .studio-tile-row input[type="text"]:last-child { grid-column: 2; }
     }
+
+    /* PUBLIC PROFILE MODE */
+    .public-banner {
+      display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      padding: 12px 16px; margin-bottom: 12px; border-radius: 16px;
+      background: var(--grad-subtle); border: 1px solid var(--border-strong);
+      font-size: 0.84rem;
+    }
+    .public-banner.visible { display: flex; }
+    body.public-mode .private-only { display: none !important; }
+    body.public-mode .desktop-nav { grid-template-columns: repeat(3, 1fr); }
+    body.public-mode .mobile-bottom-nav { grid-template-columns: repeat(3, 1fr); }
+    .share-link-box {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 10px 12px; border-radius: 12px; background: var(--pill-bg);
+      border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
@@ -459,6 +477,17 @@
       </div>
     </header>
 
+    <div class="public-banner" id="publicBanner">
+      <div>
+        <strong id="publicBannerTitle">Profil publiczny</strong>
+        <div id="publicBannerBio" style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="openWrappedModal()">Wrapped</button>
+        <button class="btn btn-sm btn-primary" onclick="exitPublicMode()">Moje konto / Zaloguj</button>
+      </div>
+    </div>
+
     <nav class="desktop-nav" id="desktopNav">
       <button class="nav-tab active" data-view="start" onclick="goHomeReset()">
         <svg class="ico" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg>
@@ -468,7 +497,7 @@
         <svg class="ico" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
         Mapa
       </button>
-      <button class="nav-tab" data-view="add" onclick="setView('add')">
+      <button class="nav-tab private-only" data-view="add" onclick="setView('add')">
         <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         Dodaj
       </button>
@@ -476,7 +505,7 @@
         <svg class="ico" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
         Eventy
       </button>
-      <button class="nav-tab" data-view="me" onclick="setView('me')">
+      <button class="nav-tab private-only" data-view="me" onclick="setView('me')">
         <svg class="ico" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Ja
       </button>
@@ -724,9 +753,9 @@
       <section class="card">
         <div class="sub-tabs" id="eventsSubTabs">
           <button class="sub-tab active" data-esub="cards" onclick="switchEventSubTab('cards')">Karty Eventów</button>
-          <button class="sub-tab" data-esub="concerts" onclick="switchEventSubTab('concerts')">Baza koncertów eventu</button>
-          <button class="sub-tab" data-esub="crew" onclick="switchEventSubTab('crew')">Baza Ekipy</button>
-          <button class="sub-tab" data-esub="clash" onclick="switchEventSubTab('clash')">Clashfinder</button>
+          <button class="sub-tab private-only" data-esub="concerts" onclick="switchEventSubTab('concerts')">Baza koncertów eventu</button>
+          <button class="sub-tab private-only" data-esub="crew" onclick="switchEventSubTab('crew')">Baza Ekipy</button>
+          <button class="sub-tab private-only" data-esub="clash" onclick="switchEventSubTab('clash')">Clashfinder</button>
         </div>
 
         <div id="events-pane-cards">
@@ -813,6 +842,41 @@
           <button class="btn" onclick="exportXLSX()">Eksportuj do Excel (.xlsx)</button>
           <button class="btn" onclick="document.getElementById('importFile').click()">Importuj (.xlsx / .json)</button>
           <button class="btn btn-danger" id="profileLogoutBtn" style="display:none" onclick="handleLogout()">Wyloguj się</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Profil Publiczny & Udostępnianie</h2>
+            <p class="section-sub">Udostępnij znajomym link do Twoich statystyk, HeatMapy i Wrapped (bez biletów, cen i Splitwise)</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full" style="flex-direction:row;align-items:center;gap:10px;">
+            <input type="checkbox" id="pubIsPublic" style="width:18px;height:18px;accent-color:var(--accent-pink);cursor:pointer;" onchange="updatePublicLinkPreview()" />
+            <label for="pubIsPublic" style="margin:0;cursor:pointer;font-size:0.84rem;text-transform:none;letter-spacing:0;color:var(--text);">Udostępnij mój profil publicznie (tylko do odczytu)</label>
+          </div>
+          <div class="form-group">
+            <label>Twój nick w linku (np. damian)</label>
+            <input type="text" id="pubUsername" placeholder="damian" oninput="updatePublicLinkPreview()" />
+          </div>
+          <div class="form-group">
+            <label>Nazwa wyświetlana</label>
+            <input type="text" id="pubDisplayName" placeholder="Damian" />
+          </div>
+          <div class="form-group full">
+            <label>Krótkie bio (opcjonalnie)</label>
+            <input type="text" id="pubBio" placeholder="np. Open'er, BitterSweet & koncertowe kilometry" />
+          </div>
+        </div>
+        <div class="share-link-box" id="pubLinkBox" style="margin-top:12px;">
+          <span id="pubLinkText" style="flex:1;color:var(--text-muted);">Wpisz nick, aby wygenerować link...</span>
+          <button class="btn btn-sm" onclick="copyPublicProfileLink()">Kopiuj link</button>
+          <button class="btn btn-sm" onclick="openPublicProfilePreview()">Podgląd</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="savePublicProfileSettings()">Zapisz profil publiczny</button>
         </div>
       </section>
 
@@ -952,9 +1016,9 @@
   <nav class="mobile-bottom-nav" id="mobileBottomNav">
     <button class="m-nav-btn active" data-view="start" onclick="goHomeReset()"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>Start</span></button>
     <button class="m-nav-btn" data-view="map" onclick="setView('map')"><svg class="ico ico-lg" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Mapa</span></button>
-    <button class="m-nav-btn add-cta" data-view="add" onclick="setView('add')"><svg class="ico ico-lg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Dodaj</span></button>
+    <button class="m-nav-btn add-cta private-only" data-view="add" onclick="setView('add')"><svg class="ico ico-lg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Dodaj</span></button>
     <button class="m-nav-btn" data-view="events" onclick="setView('events')"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg><span>Eventy</span></button>
-    <button class="m-nav-btn" data-view="me" onclick="setView('me')"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Ja</span></button>
+    <button class="m-nav-btn private-only" data-view="me" onclick="setView('me')"><svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Ja</span></button>
   </nav>
 
   <div class="auth-overlay" id="authOverlay">
@@ -1002,7 +1066,8 @@
       nasa: { isDarkMap:true, heatGradient:{0.12:"#333945",0.42:"#737E91",0.75:"#C0C9D7",1.0:"#F4F7FA"}, colorStops:[[0.0,"#475569"],[0.42,"#8D99AE"],[0.76,"#CBD5E1"],[1.0,"#F8FAFC"]], labelTextColor:"#07080A", markerStroke:"#07080A", chartText:"#939CA9", chartGrid:"rgba(226,232,240,0.08)", bar1:"rgba(226, 232, 240, 0.84)", bar1Border:"#FFFFFF", bar2:"rgba(180, 190, 206, 0.82)", bar3:"rgba(138, 150, 168, 0.82)", palette:["#ECEFF4","#CBD5E1","#A3B0C2","#7E8B9E","#5F6B7D","#475161","#333B48","#D8DEE9"] }
     };
 
-    let sbClient=null, currentUser=null, storageMode="offline";
+    let sbClient=null, currentUser=null, storageMode="offline", isPublicView=false;
+    let publicProfileSettings={ username:"", display_name:"", bio:"", is_public:false };
     let allConcerts=[], filteredConcerts=[], upcomingConcerts=[], bucketList=[], tripExpenses=[], clashSlots=[];
     let travelMeta=JSON.parse(localStorage.getItem(TRAVEL_KEY)||"{}");
     let eventsMeta={}, settings={hometown:"Poznań",hometown_coords:[52.4064,16.9252]};
@@ -1195,7 +1260,16 @@
         sbClient.from("artists_cache").select("*")
       ]);
 
-      if (profR.data) { settings = { hometown: profR.data.hometown || "Poznań", hometown_coords: [profR.data.hometown_lat ?? 52.4064, profR.data.hometown_lng ?? 16.9252] }; if (profR.data.theme && THEME_PROFILES[profR.data.theme]) applyTheme(profR.data.theme, false); }
+      if (profR.data) {
+        settings = { hometown: profR.data.hometown || "Poznań", hometown_coords: [profR.data.hometown_lat ?? 52.4064, profR.data.hometown_lng ?? 16.9252] };
+        publicProfileSettings = {
+          username: profR.data.username || "",
+          display_name: profR.data.display_name || "",
+          bio: profR.data.bio || "",
+          is_public: !!profR.data.is_public
+        };
+        if (profR.data.theme && THEME_PROFILES[profR.data.theme]) applyTheme(profR.data.theme, false);
+      }
       (citiesR.data || []).forEach(r => { cityCoords[r.city] = [r.lat, r.lng]; });
       allConcerts = (conR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
       upcomingConcerts = (upR.data || []).map(r => ({ ...r, cena: r.cena != null ? String(r.cena) : "" }));
@@ -1230,6 +1304,7 @@
 
     function finishBootstrap() {
       updateHometownUI();
+      updatePublicProfileUI();
       updateStreamingUI();
       populateFilterDropdowns();
       populateDatalists();
@@ -1242,10 +1317,139 @@
       syncArtistsFromEdge(false);
     }
 
+
+    // --- PUBLIC PROFILE (SHARE PROFILE) ---
+    function sanitizeSlug(s) {
+      return String(s || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    }
+
+    function getPublicProfileUrl(slug) {
+      const clean = sanitizeSlug(slug);
+      if (!clean) return "";
+      return `${location.origin}${location.pathname}?u=${encodeURIComponent(clean)}`;
+    }
+
+    function updatePublicProfileUI() {
+      const cb = document.getElementById("pubIsPublic");
+      const uInp = document.getElementById("pubUsername");
+      const dInp = document.getElementById("pubDisplayName");
+      const bInp = document.getElementById("pubBio");
+      if (cb) cb.checked = !!publicProfileSettings.is_public;
+      if (uInp) uInp.value = publicProfileSettings.username || "";
+      if (dInp) dInp.value = publicProfileSettings.display_name || "";
+      if (bInp) bInp.value = publicProfileSettings.bio || "";
+      updatePublicLinkPreview();
+    }
+
+    function updatePublicLinkPreview() {
+      const slug = sanitizeSlug(document.getElementById("pubUsername")?.value || "");
+      const txt = document.getElementById("pubLinkText");
+      if (!txt) return;
+      if (!slug) { txt.textContent = "Wpisz nick, aby wygenerować link..."; return; }
+      txt.textContent = getPublicProfileUrl(slug);
+    }
+
+    async function savePublicProfileSettings() {
+      const slug = sanitizeSlug(document.getElementById("pubUsername").value);
+      const isPub = !!document.getElementById("pubIsPublic").checked;
+      const disp = document.getElementById("pubDisplayName").value.trim();
+      const bio = document.getElementById("pubBio").value.trim();
+      if (isPub && slug.length < 3) {
+        showToast("Nick musi mieć co najmniej 3 znaki (litery, cyfry, _ lub -).");
+        return;
+      }
+      document.getElementById("pubUsername").value = slug;
+      publicProfileSettings = { username: slug, display_name: disp, bio, is_public: isPub };
+      updatePublicLinkPreview();
+
+      if (storageMode === "supabase" && sbClient && currentUser) {
+        const { error } = await sbClient.from("profiles").upsert({
+          id: currentUser.id,
+          username: slug || null,
+          display_name: disp,
+          bio,
+          is_public: isPub,
+          updated_at: new Date().toISOString()
+        });
+        if (error) {
+          showToast(error.message.includes("unique") ? "Ten nick jest już zajęty!" : ("Błąd: " + error.message));
+          return;
+        }
+        showToast(isPub ? "Profil publiczny zapisany i aktywny!" : "Zapisano (profil prywatny).");
+      } else {
+        showToast("Zapisano lokalnie (udostępnianie wymaga chmury Supabase).");
+      }
+    }
+
+    function copyPublicProfileLink() {
+      const slug = sanitizeSlug(document.getElementById("pubUsername")?.value || "");
+      if (!slug) { showToast("Najpierw wpisz swój nick."); return; }
+      const url = getPublicProfileUrl(slug);
+      navigator.clipboard?.writeText(url).then(() => showToast("Skopiowano link do profilu!")).catch(() => showToast(url));
+    }
+
+    function openPublicProfilePreview() {
+      const slug = sanitizeSlug(document.getElementById("pubUsername")?.value || "");
+      if (!slug) { showToast("Najpierw wpisz i zapisz swój nick."); return; }
+      window.open(getPublicProfileUrl(slug), "_blank");
+    }
+
+    async function loadPublicProfileByUsername(slug) {
+      const client = initSupabaseClient();
+      if (!client) return false;
+      try {
+        const { data, error } = await client.rpc("get_public_profile", { p_username: slug });
+        if (error || !data || !data.profile) {
+          showToast("Nie znaleziono publicznego profilu @" + slug);
+          return false;
+        }
+        isPublicView = true;
+        storageMode = "public";
+        document.body.classList.add("public-mode");
+
+        const prof = data.profile;
+        settings = {
+          hometown: prof.hometown || "Poznań",
+          hometown_coords: [prof.hometown_lat ?? 52.4064, prof.hometown_lng ?? 16.9252]
+        };
+        if (prof.theme && THEME_PROFILES[prof.theme]) applyTheme(prof.theme, false);
+
+        (data.cities || []).forEach(r => { cityCoords[r.city] = [r.lat, r.lng]; });
+        (data.artists || []).forEach(r => { if (r.artist_key && (!r.image_url || r.image_url.includes("scdn.co"))) artistsMetaCache[r.artist_key] = r; });
+
+        allConcerts = data.concerts || [];
+        upcomingConcerts = [];
+        bucketList = [];
+        tripExpenses = [];
+        eventsMeta = { ...INITIAL_EVENTS_META };
+
+        document.getElementById("statusDot").classList.remove("offline");
+        document.getElementById("serverStatusText").textContent = `@${prof.username}`;
+        document.getElementById("publicBannerTitle").textContent = `Profil publiczny: ${prof.display_name || "@" + prof.username} (@${prof.username})`;
+        document.getElementById("publicBannerBio").textContent = prof.bio || `Statystyki koncertowe z ${settings.hometown}`;
+        document.getElementById("publicBanner").classList.add("visible");
+
+        finishBootstrap();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function exitPublicMode() {
+      location.href = location.origin + location.pathname;
+    }
+
     async function initData() {
       applyTheme(localStorage.getItem(THEME_KEY) || "dark", false);
       if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
         navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+      const urlParams = new URLSearchParams(location.search);
+      const publicUserSlug = (urlParams.get("u") || "").trim().toLowerCase();
+      if (publicUserSlug && isSupabaseConfigured()) {
+        const ok = await loadPublicProfileByUsername(publicUserSlug);
+        if (ok) return;
       }
       if (isSupabaseConfigured()) {
         const client = initSupabaseClient();
@@ -1713,7 +1917,7 @@
         const seenL = new Set(g.artists.map(a => a.toLowerCase())), fullL = meta.lineup || [], unseen = fullL.filter(a => !seenL.has(a.toLowerCase()));
         const isExp = expandedLineups.has(g.key);
         const expSum = tripExpenses.filter(x => x.event_key === g.key).reduce((s, x) => s + Number(x.amount_pln || 0), 0);
-        return `<div class="event-card"><div class="event-head"><div class="event-title">${escapeHtml(g.event)}</div><span class="event-year">${escapeHtml(g.rok)}</span></div><div class="event-meta">${escapeHtml(g.miejsce || "—")} • ${escapeHtml(g.miasto || "—")}, ${escapeHtml(g.kraj || "")}${g.crews.size ? `<br/>Ekipa: <strong>${escapeHtml([...g.crews].join(", "))}</strong>` : ""}</div>${meta.poster ? `<div class="poster-preview-bar" onclick="openLightbox('${escapeHtml(meta.poster)}','Plakat: ${escapeHtml(g.event)}')"><img src="${escapeHtml(meta.poster)}" /><div style="flex:1;font-size:0.76rem;"><strong>Plakat z line-upem</strong><br/><span style="color:var(--text-muted)">Kliknij, aby powiększyć</span></div><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();removePoster('${sk}')">✕</button></div>` : ""}${(meta.photos && meta.photos.length) ? `<div class="photo-strip">${meta.photos.map((ph, i) => `<div class="photo-thumb-wrap"><img class="photo-thumb" src="${escapeHtml(ph.url)}" onclick="openGalleryLightbox('${sk}',${i})" /><button class="photo-del" onclick="removeEventPhoto('${sk}',${i})">✕</button></div>`).join("")}</div>` : ""}<div><div class="lineup-progress"><span>Widziani: <strong>${g.artists.length}</strong>${fullL.length ? ` / ${fullL.length}` : ""}</span>${unseen.length ? `<a href="#" style="color:var(--accent-coral);text-decoration:none;" onclick="event.preventDefault();toggleLineupExpand('${sk}')">${isExp ? "Zwiń" : `Pełny line-up (+${unseen.length})`}</a>` : ""}</div><div class="artist-chips">${g.artists.map(a => `<span class="chip seen">${escapeHtml(a)}</span>`).join("")}${isExp ? unseen.map(a => `<span class="chip unseen" onclick="quickAddFromLineup('${sk}','${escapeHtml(a).replace(/'/g, "\\'")}')">+ ${escapeHtml(a)}</span>`).join("") : ""}</div></div><div class="event-toolbar"><button class="btn btn-sm" onclick="openEventInConcertsDb('${sk}')">Koncerty (${g.artists.length})</button><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(g.sample)}">Setlist.fm</a><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPhotoInput').click()">Zdjęcia</button><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPosterInput').click()">${meta.poster ? "Zmień plakat" : "Plakat"}</button><button class="btn btn-sm" onclick="openLineupEditor('${sk}')">Line-up</button><button class="btn btn-sm" onclick="openSplitwise('${sk}')">Rozliczenie${expSum ? ` (${expSum} zł)` : ""}</button></div></div>`;
+        return `<div class="event-card"><div class="event-head"><div class="event-title">${escapeHtml(g.event)}</div><span class="event-year">${escapeHtml(g.rok)}</span></div><div class="event-meta">${escapeHtml(g.miejsce || "—")} • ${escapeHtml(g.miasto || "—")}, ${escapeHtml(g.kraj || "")}${g.crews.size ? `<br/>Ekipa: <strong>${escapeHtml([...g.crews].join(", "))}</strong>` : ""}</div>${meta.poster ? `<div class="poster-preview-bar" onclick="openLightbox('${escapeHtml(meta.poster)}','Plakat: ${escapeHtml(g.event)}')"><img src="${escapeHtml(meta.poster)}" /><div style="flex:1;font-size:0.76rem;"><strong>Plakat z line-upem</strong><br/><span style="color:var(--text-muted)">Kliknij, aby powiększyć</span></div><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();removePoster('${sk}')">✕</button></div>` : ""}${(meta.photos && meta.photos.length) ? `<div class="photo-strip">${meta.photos.map((ph, i) => `<div class="photo-thumb-wrap"><img class="photo-thumb" src="${escapeHtml(ph.url)}" onclick="openGalleryLightbox('${sk}',${i})" /><button class="photo-del" onclick="removeEventPhoto('${sk}',${i})">✕</button></div>`).join("")}</div>` : ""}<div><div class="lineup-progress"><span>Widziani: <strong>${g.artists.length}</strong>${fullL.length ? ` / ${fullL.length}` : ""}</span>${unseen.length ? `<a href="#" style="color:var(--accent-coral);text-decoration:none;" onclick="event.preventDefault();toggleLineupExpand('${sk}')">${isExp ? "Zwiń" : `Pełny line-up (+${unseen.length})`}</a>` : ""}</div><div class="artist-chips">${g.artists.map(a => `<span class="chip seen">${escapeHtml(a)}</span>`).join("")}${isExp ? unseen.map(a => `<span class="chip unseen" onclick="quickAddFromLineup('${sk}','${escapeHtml(a).replace(/'/g, "\\'")}')">+ ${escapeHtml(a)}</span>`).join("") : ""}</div></div><div class="event-toolbar">${isPublicView ? `<a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(g.sample)}">Setlist.fm</a>` : `<button class="btn btn-sm" onclick="openEventInConcertsDb('${sk}')">Koncerty (${g.artists.length})</button><a class="btn btn-sm" target="_blank" href="${setlistSearchUrl(g.sample)}">Setlist.fm</a><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPhotoInput').click()">Zdjęcia</button><button class="btn btn-sm" onclick="activeUploadEventKey='${sk}';document.getElementById('eventPosterInput').click()">${meta.poster ? "Zmień plakat" : "Plakat"}</button><button class="btn btn-sm" onclick="openLineupEditor('${sk}')">Line-up</button><button class="btn btn-sm" onclick="openSplitwise('${sk}')">Rozliczenie${expSum ? ` (${expSum} zł)` : ""}</button>`}</div></div>`;
       }).join("");
     }
 
