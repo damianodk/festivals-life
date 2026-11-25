@@ -20,6 +20,7 @@ import {
   IconCheck,
   IconX,
   IconMusic,
+  IconAlertCircle,
 } from "@tabler/icons-react";
 import {
   ResolvedArtist,
@@ -42,20 +43,74 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 export const StartView: React.FC<any> = (props) => {
-  const {
-    concerts = [],
-    upcoming = [],
-    artistsCache: parentArtistsCache = {},
-    citiesCache = {},
-    hometown = "Poznań",
-    hometownLat = 52.4064,
-    hometownLng = 16.9252,
-    activeArtist = "",
-    hasActiveFilters = false,
-    onSelectArtist,
-    onOpenWrapped,
-    streamingPlatform = "spotify",
-  } = props;
+  // Obsługa wszystkich wariantów nazw propsów z App.tsx
+  const concerts: any[] = Array.isArray(props.concerts)
+    ? props.concerts
+    : Array.isArray(props.filteredConcerts)
+    ? props.filteredConcerts
+    : Array.isArray(props.filtered)
+    ? props.filtered
+    : Array.isArray(props.allConcerts)
+    ? props.allConcerts
+    : Array.isArray(props.items)
+    ? props.items
+    : [];
+
+  const allConcerts: any[] = Array.isArray(props.allConcerts)
+    ? props.allConcerts
+    : concerts;
+
+  const upcoming: any[] = Array.isArray(props.upcoming)
+    ? props.upcoming
+    : Array.isArray(props.upcomingConcerts)
+    ? props.upcomingConcerts
+    : [];
+
+  const parentArtistsCache = props.artistsCache || props.artists || {};
+  const rawCities = props.citiesCache || props.cities || props.coordsCache || {};
+
+  // Normalizacja citiesCache (obsługuje zarówno obiekt {Miasto: {lat, lng}}, jak i tablicę [{city, lat, lng}])
+  const citiesMap = useMemo(() => {
+    const map: Record<string, { lat: number; lng: number }> = {};
+    if (Array.isArray(rawCities)) {
+      for (const item of rawCities) {
+        const name = (item?.city || item?.miasto || item?.name || "").trim().toLowerCase();
+        if (name && item?.lat && item?.lng) {
+          map[name] = { lat: Number(item.lat), lng: Number(item.lng) };
+        }
+      }
+    } else if (rawCities && typeof rawCities === "object") {
+      for (const [k, v] of Object.entries<any>(rawCities)) {
+        if (v && v.lat && v.lng) {
+          map[k.trim().toLowerCase()] = { lat: Number(v.lat), lng: Number(v.lng) };
+        }
+      }
+    }
+    return map;
+  }, [rawCities]);
+
+  const hLat =
+    Number(
+      props.profile?.hometown_lat ??
+        props.hometown?.lat ??
+        props.hometownLat
+    ) || 52.4064;
+  const hLng =
+    Number(
+      props.profile?.hometown_lng ??
+        props.hometown?.lng ??
+        props.hometownLng
+    ) || 16.9252;
+
+  const activeArtist = props.activeArtist || props.artistFilter || "";
+  const hasActiveFilters = Boolean(props.hasActiveFilters || activeArtist);
+  const onSelectArtist =
+    props.onSelectArtist || props.setArtistFilter || props.onFilterArtist;
+  const onResetFilters = props.onResetFilters || props.resetFilters;
+  const onOpenWrapped =
+    props.onOpenWrapped || props.setWrappedOpen || props.onShowWrapped;
+  const streamingPlatform =
+    props.streamingPlatform || props.profile?.streaming_platform || "spotify";
 
   const [localCache, setLocalCache] = useState<Record<string, ResolvedArtist>>(() => ({
     ...loadLocalArtistCache(),
@@ -65,10 +120,7 @@ export const StartView: React.FC<any> = (props) => {
   const [playingArtist, setPlayingArtist] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Wehikuł czasu — losowy seed odświeżany przyciskiem
   const [memorySeed, setMemorySeed] = useState<number>(0);
-
-  // Quiz z własnej historii
   const [quizIndex, setQuizIndex] = useState<number>(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
@@ -77,7 +129,7 @@ export const StartView: React.FC<any> = (props) => {
     setLocalCache((prev) => ({ ...prev, ...parentArtistsCache }));
   }, [parentArtistsCache]);
 
-  // Automatyczne dociąganie prawdziwych portretów artystów (Deezer + TheAudioDB + Wiki)
+  // Automatyczne pobieranie portretów artystów (Deezer + TheAudioDB + Wikipedia)
   useEffect(() => {
     if (!concerts.length) return;
     const countMap = new Map<string, number>();
@@ -128,9 +180,6 @@ export const StartView: React.FC<any> = (props) => {
     const genreCounts = new Map<string, number>();
     let totalKm = 0;
 
-    const hLat = Number(hometown?.lat ?? hometownLat) || 52.4064;
-    const hLng = Number(hometown?.lng ?? hometownLng) || 16.9252;
-
     for (const c of concerts) {
       const art = (c.artysta || "").trim();
       const city = (c.miasto || "").trim();
@@ -145,9 +194,9 @@ export const StartView: React.FC<any> = (props) => {
       if (genre) genreCounts.set(genre, (genreCounts.get(genre) || 0) + 1);
 
       let dist = 0;
-      const cityCoords = citiesCache[city] || citiesCache[city.toLowerCase()];
+      const cityCoords = citiesMap[city.toLowerCase()];
       if (cityCoords && cityCoords.lat && cityCoords.lng) {
-        dist = haversineKm(hLat, hLng, Number(cityCoords.lat), Number(cityCoords.lng));
+        dist = haversineKm(hLat, hLng, cityCoords.lat, cityCoords.lng);
       }
       totalKm += dist;
 
@@ -184,9 +233,8 @@ export const StartView: React.FC<any> = (props) => {
       yearSeries,
       genreSeries,
     };
-  }, [concerts, citiesCache, hometown, hometownLat, hometownLng]);
+  }, [concerts, citiesMap, hLat, hLng]);
 
-  // Pasek postępu do kolejnej odznaki
   const badgeMilestone = useMemo(() => {
     const n = stats.totalConcerts;
     const steps = [10, 25, 50, 100, 150, 200, 250, 300, 500];
@@ -196,7 +244,6 @@ export const StartView: React.FC<any> = (props) => {
     return { current: n, next, pct, remaining: next - n };
   }, [stats.totalConcerts]);
 
-  // Wehikuł czasu (Wspomnienie z historii)
   const timeMachineConcert = useMemo(() => {
     if (!concerts.length) return null;
     const today = new Date();
@@ -212,7 +259,6 @@ export const StartView: React.FC<any> = (props) => {
     return { concert: concerts[idx], isAnniversary: false };
   }, [concerts, memorySeed]);
 
-  // Mini-Quiz generowany deterministycznie z własnej historii (0 tokenów AI)
   const quizQuestions = useMemo(() => {
     const qs: { question: string; options: string[]; answer: string }[] = [];
     if (stats.topArtists.length >= 4) {
@@ -231,9 +277,7 @@ export const StartView: React.FC<any> = (props) => {
     }
     if (stats.yearSeries.length >= 4) {
       const bestYear = [...stats.yearSeries].sort((a, b) => b.koncerty - a.koncerty)[0];
-      const opts = stats.yearSeries
-        .slice(0, 4)
-        .map((y) => y.rok);
+      const opts = stats.yearSeries.slice(0, 4).map((y) => y.rok);
       if (!opts.includes(bestYear.rok)) opts[0] = bestYear.rok;
       qs.push({
         question: "W którym roku zaliczyłeś swój absolutny rekord koncertowy?",
@@ -268,12 +312,38 @@ export const StartView: React.FC<any> = (props) => {
 
   const heroArtist = stats.topArtists[0];
   const heroMeta = heroArtist ? localCache[heroArtist.name.toLowerCase()] : undefined;
-
   const isFiltered = Boolean(activeArtist || hasActiveFilters);
+
+  // Komunikat diagnostyczny, jeśli lista jest pusta
+  if (!concerts.length) {
+    return (
+      <div className="fl-surface rounded-3xl border border-white/10 bg-[var(--bg-card)] p-6 text-center">
+        <IconAlertCircle size={32} className="mx-auto text-[var(--accent,#ff4d6d)]" />
+        <h2 className="mt-3 font-display text-lg font-bold">
+          {allConcerts.length > 0
+            ? "Brak koncertów dla wybranego filtra"
+            : "Brak załadowanych koncertów na tym koncie"}
+        </h2>
+        <p className="mx-auto mt-1.5 max-w-md text-xs opacity-75">
+          {allConcerts.length > 0
+            ? "Wyczyść aktywne filtry, aby przywrócić pełne statystyki."
+            : "Jeśli Twoje 156 koncertów było przypisane do drugiego konta w Supabase (damianandrzejkopec@gmail.com vs damiano.dk@gmail.com), wyloguj się w zakładce Ja i zaloguj na właściwy adres."}
+        </p>
+        {allConcerts.length > 0 && onResetFilters && (
+          <button
+            onClick={onResetFilters}
+            className="mt-4 rounded-full bg-[var(--accent,#ff4d6d)] px-4 py-2 text-xs font-semibold text-white"
+          >
+            Wyczyść filtry
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-8">
-      {/* 1. Asymetryczny Hero Card — Numer #1 + Ranga fana */}
+      {/* 1. Asymetryczny Hero Card — Numer #1 */}
       {heroArtist && (
         <section className="fl-surface relative overflow-hidden rounded-3xl border border-white/10 bg-[var(--bg-card)] p-5 sm:p-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -309,7 +379,10 @@ export const StartView: React.FC<any> = (props) => {
                 <p className="mt-1 text-sm opacity-75">
                   Widziany <strong className="font-semibold">{heroArtist.count}×</strong>
                   {heroArtist.km > 0 && (
-                    <> · <strong className="font-semibold">{heroArtist.km.toLocaleString("pl-PL")} km</strong> trasy</>
+                    <>
+                      {" "}
+                      · <strong className="font-semibold">{heroArtist.km.toLocaleString("pl-PL")} km</strong> trasy
+                    </>
                   )}
                 </p>
 
@@ -348,16 +421,14 @@ export const StartView: React.FC<any> = (props) => {
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent,#ff4d6d)]">
                   <IconSparkles size={15} /> Wrapped Studio 9:16
                 </div>
-                <div className="mt-0.5 text-xs opacity-70">
-                  Stwórz kartę na Stories
-                </div>
+                <div className="mt-0.5 text-xs opacity-70">Stwórz kartę na Stories</div>
               </button>
             )}
           </div>
         </section>
       )}
 
-      {/* 2. Skalibrowane KPI (5 kart: 2x2 na mobile + 5. pełna szerokość) */}
+      {/* 2. Skalibrowane KPI */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <div className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
           <div className="text-xs opacity-65">Koncerty</div>
@@ -380,13 +451,15 @@ export const StartView: React.FC<any> = (props) => {
         <div className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
           <div className="text-xs opacity-65">Miasta / Kraje</div>
           <div className="tabular-nums mt-1 font-display text-2xl font-extrabold sm:text-3xl">
-            {stats.uniqueCities} <span className="text-base font-normal opacity-50">/ {stats.uniqueCountries}</span>
+            {stats.uniqueCities}{" "}
+            <span className="text-base font-normal opacity-50">/ {stats.uniqueCountries}</span>
           </div>
         </div>
         <div className="fl-surface col-span-2 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4 sm:col-span-1">
           <div className="text-xs opacity-65">Muzyczne kilometry</div>
           <div className="tabular-nums mt-1 font-display text-2xl font-extrabold sm:text-3xl">
-            {stats.totalKm.toLocaleString("pl-PL")} <span className="text-sm font-normal opacity-60">km</span>
+            {stats.totalKm.toLocaleString("pl-PL")}{" "}
+            <span className="text-sm font-normal opacity-60">km</span>
           </div>
         </div>
       </section>
@@ -409,7 +482,7 @@ export const StartView: React.FC<any> = (props) => {
         </div>
       </section>
 
-      {/* 4. Galeria Top Artyści (prawdziwe zdjęcia + kliknięcie w Dossier) */}
+      {/* 4. Galeria Top Artyści */}
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-lg font-bold">Twoi Top Artyści</h2>
@@ -464,7 +537,8 @@ export const StartView: React.FC<any> = (props) => {
                 <div className="p-3">
                   <div className="truncate font-display text-sm font-bold">{item.name}</div>
                   <div className="tabular-nums mt-0.5 text-xs opacity-65">
-                    {item.count} {item.count === 1 ? "koncert" : item.count < 5 ? "koncerty" : "koncertów"}
+                    {item.count}{" "}
+                    {item.count === 1 ? "koncert" : item.count < 5 ? "koncerty" : "koncertów"}
                     {item.km > 0 ? ` · ${item.km} km` : ""}
                   </div>
                 </div>
@@ -474,10 +548,9 @@ export const StartView: React.FC<any> = (props) => {
         </div>
       </section>
 
-      {/* 5. Silnik zaangażowania: Wehikuł Czasu + Koncertowy Quiz */}
+      {/* 5. Wehikuł Czasu + Koncertowy Quiz */}
       {!isFiltered && (
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Wehikuł czasu */}
           {timeMachineConcert?.concert && (
             <div className="fl-surface flex flex-col justify-between rounded-2xl border border-white/10 bg-[var(--bg-card)] p-5">
               <div>
@@ -507,7 +580,9 @@ export const StartView: React.FC<any> = (props) => {
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs opacity-65">
-                <span>Data: {timeMachineConcert.concert.data || timeMachineConcert.concert.rok}</span>
+                <span>
+                  Data: {timeMachineConcert.concert.data || timeMachineConcert.concert.rok}
+                </span>
                 <button
                   onClick={() => setDossierArtist(timeMachineConcert.concert.artysta)}
                   className="font-semibold text-[var(--accent,#ff4d6d)]"
@@ -518,7 +593,6 @@ export const StartView: React.FC<any> = (props) => {
             </div>
           )}
 
-          {/* Interaktywny Quiz z Twojej historii (0 tokenów AI) */}
           {currentQuestion && (
             <div className="fl-surface flex flex-col justify-between rounded-2xl border border-white/10 bg-[var(--bg-card)] p-5">
               <div>
@@ -587,7 +661,7 @@ export const StartView: React.FC<any> = (props) => {
         </section>
       )}
 
-      {/* 6. Nadchodzące koncerty (ukrywane gdy profilujemy konkretnego artystę) */}
+      {/* 6. Nadchodzące koncerty (ukrywane w widoku pojedynczego artysty) */}
       {!isFiltered && upcoming.length > 0 && (
         <section className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-5">
           <h2 className="font-display text-base font-bold">
@@ -615,7 +689,7 @@ export const StartView: React.FC<any> = (props) => {
         </section>
       )}
 
-      {/* 7. Hall of Fame (w tym Liczba kilometrów za artystą) */}
+      {/* 7. Hall of Fame */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div
           onClick={() => heroArtist && setDossierArtist(heroArtist.name)}
@@ -625,7 +699,9 @@ export const StartView: React.FC<any> = (props) => {
           <div className="mt-1 truncate font-display text-lg font-bold">
             {heroArtist?.name || "—"}
           </div>
-          <div className="text-xs opacity-70">{heroArtist ? `${heroArtist.count} koncertów` : ""}</div>
+          <div className="text-xs opacity-70">
+            {heroArtist ? `${heroArtist.count} koncertów` : ""}
+          </div>
         </div>
 
         <div
