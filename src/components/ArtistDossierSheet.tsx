@@ -31,6 +31,12 @@ interface ArtistDossierSheetProps {
   streamingPlatform?: string;
 }
 
+interface RelatedArtistItem {
+  name: string;
+  score: number;
+  sharedEvent?: string;
+}
+
 export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   artistName,
   onClose,
@@ -87,16 +93,19 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   const genresSet = new Set(artistConcerts.map((c) => c.gatunek).filter(Boolean));
 
   // Powiązani artyści (widziani na tych samych festiwalach lub z tego samego gatunku)
-  const relatedMap = new Map<string, { name: string; score: number; sharedEvent?: string }>();
+  const relatedMap = new Map<string, RelatedArtistItem>();
   for (const c of concerts) {
     const other = (c.artysta || "").trim();
     if (!other || other.toLowerCase() === key) continue;
-    const sameEvent = c.event && eventsSet.has(c.event);
-    const sameGenre = c.gatunek && genresSet.has(c.gatunek);
+    const sameEvent = Boolean(c.event && eventsSet.has(c.event));
+    const sameGenre = Boolean(c.gatunek && genresSet.has(c.gatunek));
     if (sameEvent || sameGenre) {
-      const prev = relatedMap.get(other.toLowerCase()) || { name: other, score: 0 };
+      const prev: RelatedArtistItem = relatedMap.get(other.toLowerCase()) || {
+        name: other,
+        score: 0,
+      };
       prev.score += sameEvent ? 3 : 1;
-      if (sameEvent && !prev.sharedEvent) prev.sharedEvent = c.event;
+      if (sameEvent && !prev.sharedEvent) prev.sharedEvent = String(c.event);
       relatedMap.set(other.toLowerCase(), prev);
     }
   }
@@ -147,9 +156,9 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
       : meta?.spotify_url || `https://open.spotify.com/search/${encodeURIComponent(artistName)}`;
 
   return (
-    <Drawer.Root open={!!artistName} onOpenChange={(o) => !o && onClose()}>
+    <Drawer.Root open={!!artistName} onOpenChange={(o: boolean) => !o && onClose()}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs" />
+        <Drawer.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
         <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90vh] max-w-2xl flex-col rounded-t-3xl border-t border-white/10 bg-[var(--bg-card,#121216)] text-[var(--text-main,#f5f5f7)] outline-none">
           <div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-white/20" />
 
