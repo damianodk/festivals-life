@@ -1,5 +1,6 @@
-/* Stabilizacja układu, brak migotania i płynna praca na wszystkich zakładkach */
+/* Stabilizacja układu — eliminacja skakania strony i migotania na wszystkich zakładkach */
 html {
+  overflow-y: scroll;
   scrollbar-gutter: stable;
   overflow-x: hidden;
   scroll-behavior: auto;
@@ -8,13 +9,13 @@ html {
 body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeSpeed;
 }
 
-/* Izolacja renderowania kart zapobiegająca przeliczaniu całego drzewa DOM */
+/* Stały, niezmienny kolor kart niezależnie od aktywnego filtra artysty czy zakładki */
 .fl-surface {
+  background-color: var(--bg-card, var(--card, #15151b)) !important;
+  color: var(--text-main, #f5f5f7);
   contain: layout style;
-  transform: translateZ(0);
 }
 
 /* Spójne kadrowanie portretów artystów */
@@ -23,10 +24,11 @@ body {
   object-position: center 20%;
 }
 
-/* Wyłączenie ciężkich globalnych animacji przy przełączaniu zakładek */
+/* Zapobieganie skokom SVG wewnątrz wykresów Recharts */
 .recharts-wrapper,
 .recharts-surface {
   overflow: visible;
+  user-select: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

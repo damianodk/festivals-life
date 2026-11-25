@@ -18,6 +18,8 @@ import {
   fetchArtistImageCandidates,
   saveArtistPhotoOverride,
 } from "../lib/artistResolver";
+import { supabase } from "../lib/supabase";
+import { detectConcertKind } from "./StartView";
 
 interface ArtistDossierSheetProps {
   artistName: string | null;
@@ -37,6 +39,17 @@ interface RelatedArtistItem {
   sharedEvent?: string;
 }
 
+const CONCERT_TYPE_STORAGE_KEY = "festlife_concert_types_v1";
+
+function loadTypeOverrides(): Record<string, "solowy" | "festiwal"> {
+  try {
+    const raw = localStorage.getItem(CONCERT_TYPE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   artistName,
   onClose,
@@ -54,6 +67,9 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [customUrl, setCustomUrl] = useState("");
   const [savingPhoto, setSavingPhoto] = useState(false);
+  const [typeOverrides, setTypeOverrides] = useState<Record<string, "solowy" | "festiwal">>(() =>
+    loadTypeOverrides()
+  );
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -61,6 +77,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
     setCandidates([]);
     setCustomUrl("");
     setIsPlaying(false);
+    setTypeOverrides(loadTypeOverrides());
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -90,15 +107,14 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
 
   const cities = Array.from(new Set(artistConcerts.map((c) => c.miasto).filter(Boolean)));
   const eventsSet = new Set(artistConcerts.map((c) => c.event).filter(Boolean));
-  const genresSet = new Set(artistConcerts.map((c) => c.gatunek).filter(Boolean));
+  const genresSet = new Set(artistConcerts.map((c) => c.gatunek || c.genre).filter(Boolean));
 
-  // Powiązani artyści (widziani na tych samych festiwalach lub z tego samego gatunku)
   const relatedMap = new Map<string, RelatedArtistItem>();
   for (const c of concerts) {
     const other = (c.artysta || "").trim();
     if (!other || other.toLowerCase() === key) continue;
     const sameEvent = Boolean(c.event && eventsSet.has(c.event));
-    const sameGenre = Boolean(c.gatunek && genresSet.has(c.gatunek));
+    const sameGenre = Boolean((c.gatunek || c.genre) && genresSet.has(c.gatunek || c.genre));
     if (sameEvent || sameGenre) {
       const prev: RelatedArtistItem = relatedMap.get(other.toLowerCase()) || {
         name: other,
@@ -112,6 +128,41 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   const relatedArtists = Array.from(relatedMap.values())
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
+
+  const handleSetConcertKind = async (
+    concert: any,
+    nextKind: "solowy" | "festiwal",
+    idx: number
+  ) => {
+    const cKey =
+      concert.id !== undefined && concert.id !== null
+        ? String(concert.id)
+        : `${(concert.artysta || "").trim()}_${(concert.data || concert.rok || "").trim()}_${(
+            concert.miasto || ""
+          ).trim()}_${idx}`;
+
+    const next = { ...typeOverrides, [cKey]: nextKind };
+    setTypeOverrides(next);
+    try {
+      localStorage.setItem(CONCERT_TYPE_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    window.dispatchEvent(new Event("festlife:concert-updated"));
+
+    if (concert.id !== undefined && concert.id !== null) {
+      const { error } = await supabase
+        .from("concerts")
+        .update({ typ: nextKind })
+        .eq("id", concert.id);
+      if (error) {
+        await supabase
+          .from("concerts")
+          .update({ type: nextKind })
+          .eq("id", concert.id);
+      }
+    }
+  };
 
   const toggleAudio = () => {
     if (!meta?.preview_url) return;
@@ -159,7 +210,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
     <Drawer.Root open={!!artistName} onOpenChange={(o: boolean) => !o && onClose()}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90vh] max-w-2xl flex-col rounded-t-3xl border-t border-white/10 bg-[var(--bg-card,#121216)] text-[var(--text-main,#f5f5f7)] outline-none">
+        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90vh] max-w-2xl flex-col rounded-t-3xl border-t border-white/10 bg-[var(--bg-card,#15151b)] text-[var(--text-main,#f5f5f7)] outline-none">
           <div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-white/20" />
 
           <div className="overflow-y-auto px-5 pb-8 pt-4">
@@ -199,7 +250,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
                     : Array.from(genresSet).join(" · ") || "Artyści na żywo"}
                 </p>
 
-                {/* Akcje: Odsłuch 30s, Streaming, Zmień zdjęcie */}
+                {/* Akcje */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {meta?.preview_url && (
                     <button
@@ -241,7 +292,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
             {photoPickerOpen && (
               <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-xs font-medium opacity-80">
-                  Wybierz oficjalne zdjęcie z Deezer / TheAudioDB / Wikipedii lub wklej własny link:
+                  Wybierz zdjęcie z Deezer / TheAudioDB / Wikipedii lub wklej własny link:
                 </p>
                 {loadingCandidates ? (
                   <p className="mt-3 text-xs opacity-60">Szukanie zdjęć...</p>
@@ -306,7 +357,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
               </div>
             </div>
 
-            {/* Oś wspólnych koncertów */}
+            {/* Oś wspólnych koncertów z wyborem: Koncert solowy / Festiwal */}
             <div className="mt-6">
               <div className="flex items-center justify-between">
                 <h3 className="font-display text-base font-semibold">
@@ -326,33 +377,65 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
               </div>
 
               <div className="mt-3 space-y-2">
-                {artistConcerts.map((c, idx) => (
-                  <div
-                    key={c.id || idx}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.02] px-3.5 py-2.5"
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold">
-                        {c.event || c.miejsce || "Koncert klubowy"}
-                      </div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs opacity-65">
-                        <span className="inline-flex items-center gap-1">
-                          <IconCalendarEvent size={13} /> {c.data || c.rok}
-                        </span>
-                        {c.miasto && (
+                {artistConcerts.map((c, idx) => {
+                  const kind = detectConcertKind(c, typeOverrides, idx);
+                  return (
+                    <div
+                      key={c.id || idx}
+                      className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-white/10 bg-white/[0.02] px-3.5 py-2.5"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold">
+                          {c.event || c.miejsce || "Koncert solowy"}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs opacity-65">
                           <span className="inline-flex items-center gap-1">
-                            <IconMapPin size={13} /> {c.miasto}
+                            <IconCalendarEvent size={13} /> {c.data || c.rok}
+                          </span>
+                          {c.miasto && (
+                            <span className="inline-flex items-center gap-1">
+                              <IconMapPin size={13} /> {c.miasto}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {/* Przełącznik: Koncert solowy / Festiwal */}
+                        <div className="flex rounded-lg border border-white/15 bg-black/25 p-0.5 text-[11px]">
+                          <button
+                            onClick={() => handleSetConcertKind(c, "solowy", idx)}
+                            title="Koncert dedykowany jednemu artyście"
+                            className={`rounded-md px-2 py-0.5 font-medium ${
+                              kind === "solowy"
+                                ? "bg-[var(--accent,#ff4d6d)] text-white"
+                                : "opacity-65 hover:opacity-100"
+                            }`}
+                          >
+                            Solowy
+                          </button>
+                          <button
+                            onClick={() => handleSetConcertKind(c, "festiwal", idx)}
+                            title="Występ w ramach festiwalu"
+                            className={`rounded-md px-2 py-0.5 font-medium ${
+                              kind === "festiwal"
+                                ? "bg-[#38bdf8] text-slate-950 font-semibold"
+                                : "opacity-65 hover:opacity-100"
+                            }`}
+                          >
+                            Festiwal
+                          </button>
+                        </div>
+
+                        {Number(c.ocena) > 0 && (
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold">
+                            {c.ocena} <IconStarFilled size={12} className="text-amber-400" />
                           </span>
                         )}
                       </div>
                     </div>
-                    {Number(c.ocena) > 0 && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold">
-                        {c.ocena} <IconStarFilled size={12} className="text-amber-400" />
-                      </span>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
