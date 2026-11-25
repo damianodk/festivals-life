@@ -4,6 +4,10 @@ import {
   Area,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
@@ -29,6 +33,23 @@ import {
 } from "../lib/artistResolver";
 import { ArtistDossierSheet } from "./ArtistDossierSheet";
 
+const MONTH_LABELS = [
+  "Sty",
+  "Lut",
+  "Mar",
+  "Kwi",
+  "Maj",
+  "Cze",
+  "Lip",
+  "Sie",
+  "Wrz",
+  "Paź",
+  "Lis",
+  "Gru",
+];
+
+const PIE_COLORS = ["#ff4d6d", "#38bdf8", "#a855f7", "#f59e0b"];
+
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -43,7 +64,6 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 export const StartView: React.FC<any> = (props) => {
-  // Obsługa wszystkich wariantów nazw propsów z App.tsx
   const concerts: any[] = Array.isArray(props.concerts)
     ? props.concerts
     : Array.isArray(props.filteredConcerts)
@@ -66,10 +86,9 @@ export const StartView: React.FC<any> = (props) => {
     ? props.upcomingConcerts
     : [];
 
-  const parentArtistsCache = props.artistsCache || props.artists || {};
-  const rawCities = props.citiesCache || props.cities || props.coordsCache || {};
+  const parentArtistsCache = props.artistsCache || props.artists;
+  const rawCities = props.citiesCache || props.cities || props.coordsCache;
 
-  // Normalizacja citiesCache (obsługuje zarówno obiekt {Miasto: {lat, lng}}, jak i tablicę [{city, lat, lng}])
   const citiesMap = useMemo(() => {
     const map: Record<string, { lat: number; lng: number }> = {};
     if (Array.isArray(rawCities)) {
@@ -114,7 +133,7 @@ export const StartView: React.FC<any> = (props) => {
 
   const [localCache, setLocalCache] = useState<Record<string, ResolvedArtist>>(() => ({
     ...loadLocalArtistCache(),
-    ...parentArtistsCache,
+    ...(parentArtistsCache || {}),
   }));
   const [dossierArtist, setDossierArtist] = useState<string | null>(null);
   const [playingArtist, setPlayingArtist] = useState<string | null>(null);
@@ -125,11 +144,20 @@ export const StartView: React.FC<any> = (props) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
 
+  // Bezpieczna synchronizacja cache bez pętli re-renderów
+  const lastSyncedCacheSig = useRef<string>("");
   useEffect(() => {
+    if (!parentArtistsCache || typeof parentArtistsCache !== "object") return;
+    const keys = Object.keys(parentArtistsCache);
+    if (!keys.length) return;
+    const sig = `${keys.length}:${keys[0]}:${keys[keys.length - 1]}`;
+    if (sig === lastSyncedCacheSig.current) return;
+    lastSyncedCacheSig.current = sig;
     setLocalCache((prev) => ({ ...prev, ...parentArtistsCache }));
   }, [parentArtistsCache]);
 
-  // Automatyczne pobieranie portretów artystów (Deezer + TheAudioDB + Wikipedia)
+  // Jednorazowe pobieranie portretów dla bieżącego zestawu koncertów
+  const resolvedBatchSig = useRef<string>("");
   useEffect(() => {
     if (!concerts.length) return;
     const countMap = new Map<string, number>();
@@ -141,10 +169,14 @@ export const StartView: React.FC<any> = (props) => {
       .sort((a, b) => b[1] - a[1])
       .map(([name]) => name);
 
+    const sig = `${sortedArtists.length}:${sortedArtists.slice(0, 5).join("|")}`;
+    if (sig === resolvedBatchSig.current) return;
+    resolvedBatchSig.current = sig;
+
     resolveArtistsBatch(sortedArtists, localCache, (merged) => {
       setLocalCache(merged);
     });
-  }, [concerts.length]);
+  }, [concerts]);
 
   useEffect(() => {
     return () => {
@@ -170,28 +202,78 @@ export const StartView: React.FC<any> = (props) => {
       .catch(() => setPlayingArtist(null));
   };
 
-  // Agregacje KPI i rankingi
+  // Pełne statystyki + dane do 6 wykresów
   const stats = useMemo(() => {
     const artistCounts = new Map<string, { name: string; count: number; km: number }>();
-    const citySet = new Set<string>();
-    const countrySet = new Set<string>();
+    const cityCounts = new Map<string, number>();
+    const countryCounts = new Map<string, number>();
     const eventSet = new Set<string>();
     const yearCounts = new Map<string, number>();
     const genreCounts = new Map<string, number>();
+    const monthCounts = new Array<number>(12).fill(0);
+    const ratingCounts = new Map<number, number>([
+      [5, 0],
+      [4, 0],
+      [3, 0],
+      [2, 0],
+      [1, 0],
+    ]);
+
+    let festivalCount = 0;
+    let clubCount = 0;
     let totalKm = 0;
 
     for (const c of concerts) {
       const art = (c.artysta || "").trim();
       const city = (c.miasto || "").trim();
       const country = (c.kraj || "").trim();
-      const yr = String(c.rok || (c.data ? String(c.data).slice(0, 4) : ""));
+      const rawDate = String(c.data || "");
+      const yr = String(c.rok || (rawDate.length >= 4 ? rawDate.slice(0, 4) : ""));
       const genre = (c.gatunek || "").trim();
+      const ev = (c.event || "").trim();
+      const typ = String(c.typ || "").toLowerCase();
+      const rating = Math.round(Number(c.ocena) || 0);
 
-      if (city) citySet.add(city);
-      if (country) countrySet.add(country);
-      if (c.event) eventSet.add(c.event);
+      if (city) cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
+      if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+      if (ev) eventSet.add(ev);
       if (yr) yearCounts.set(yr, (yearCounts.get(yr) || 0) + 1);
       if (genre) genreCounts.set(genre, (genreCounts.get(genre) || 0) + 1);
+
+      // Miesiąc z daty YYYY-MM-DD
+      const monthMatch = rawDate.match(/^\d{4}-(\d{2})/);
+      if (monthMatch) {
+        const mIdx = Number(monthMatch[1]) - 1;
+        if (mIdx >= 0 && mIdx < 12) monthCounts[mIdx] += 1;
+      }
+
+      // Festiwal vs Koncert klubowy/solowy
+      const isFestival =
+        typ.includes("fest") ||
+        ev.toLowerCase().includes("festival") ||
+        ev.toLowerCase().includes("festiwal") ||
+        ev.toLowerCase().includes("open'er") ||
+        ev.toLowerCase().includes("orange") ||
+        ev.toLowerCase().includes("off ") ||
+        ev.toLowerCase().includes("pol'and'rock") ||
+        ev.toLowerCase().includes("tauron") ||
+        ev.toLowerCase().includes("audioriver") ||
+        ev.toLowerCase().includes("mystic") ||
+        ev.toLowerCase().includes("sziget") ||
+        ev.toLowerCase().includes("primavera") ||
+        ev.toLowerCase().includes("coachella") ||
+        ev.toLowerCase().includes("glastonbury") ||
+        Boolean(ev && ev.toLowerCase() !== art.toLowerCase());
+
+      if (isFestival) {
+        festivalCount += 1;
+      } else {
+        clubCount += 1;
+      }
+
+      if (rating >= 1 && rating <= 5) {
+        ratingCounts.set(rating, (ratingCounts.get(rating) || 0) + 1);
+      }
 
       let dist = 0;
       const cityCoords = citiesMap[city.toLowerCase()];
@@ -216,22 +298,47 @@ export const StartView: React.FC<any> = (props) => {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([rok, koncerty]) => ({ rok, koncerty }));
 
+    const monthSeries = MONTH_LABELS.map((miesiac, idx) => ({
+      miesiac,
+      koncerty: monthCounts[idx],
+    }));
+
+    const typeSeries = [
+      { name: "Festiwale / Eventy", value: festivalCount },
+      { name: "Koncerty klubowe / Solo", value: clubCount },
+    ].filter((d) => d.value > 0);
+
+    const citySeries = Array.from(cityCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 7)
+      .map(([miasto, liczba]) => ({ miasto, liczba }));
+
     const genreSeries = Array.from(genreCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
+      .slice(0, 7)
       .map(([gatunek, liczba]) => ({ gatunek, liczba }));
+
+    const ratingSeries = [5, 4, 3, 2, 1].map((stars) => ({
+      ocena: `${stars} ★`,
+      liczba: ratingCounts.get(stars) || 0,
+    }));
 
     return {
       totalConcerts: concerts.length,
       uniqueArtists: artistCounts.size,
-      uniqueCities: citySet.size,
-      uniqueCountries: countrySet.size,
+      uniqueCities: cityCounts.size,
+      uniqueCountries: countryCounts.size,
       uniqueEvents: eventSet.size,
       totalKm,
       topArtists,
       topKmArtist,
       yearSeries,
+      monthSeries,
+      typeSeries,
+      citySeries,
       genreSeries,
+      ratingSeries,
+      hasRatings: Array.from(ratingCounts.values()).some((v) => v > 0),
     };
   }, [concerts, citiesMap, hLat, hLng]);
 
@@ -314,7 +421,14 @@ export const StartView: React.FC<any> = (props) => {
   const heroMeta = heroArtist ? localCache[heroArtist.name.toLowerCase()] : undefined;
   const isFiltered = Boolean(activeArtist || hasActiveFilters);
 
-  // Komunikat diagnostyczny, jeśli lista jest pusta
+  const tooltipStyle = {
+    backgroundColor: "#141418",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "12px",
+    fontSize: "12px",
+    color: "#f5f5f7",
+  };
+
   if (!concerts.length) {
     return (
       <div className="fl-surface rounded-3xl border border-white/10 bg-[var(--bg-card)] p-6 text-center">
@@ -327,7 +441,7 @@ export const StartView: React.FC<any> = (props) => {
         <p className="mx-auto mt-1.5 max-w-md text-xs opacity-75">
           {allConcerts.length > 0
             ? "Wyczyść aktywne filtry, aby przywrócić pełne statystyki."
-            : "Jeśli Twoje 156 koncertów było przypisane do drugiego konta w Supabase (damianandrzejkopec@gmail.com vs damiano.dk@gmail.com), wyloguj się w zakładce Ja i zaloguj na właściwy adres."}
+            : "Jeśli Twoje 156 koncertów było przypisane do drugiego konta w Supabase, wyloguj się w zakładce Ja i zaloguj na właściwy adres."}
         </p>
         {allConcerts.length > 0 && onResetFilters && (
           <button
@@ -343,7 +457,7 @@ export const StartView: React.FC<any> = (props) => {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* 1. Asymetryczny Hero Card — Numer #1 */}
+      {/* 1. Hero Card — Numer #1 */}
       {heroArtist && (
         <section className="fl-surface relative overflow-hidden rounded-3xl border border-white/10 bg-[var(--bg-card)] p-5 sm:p-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -381,7 +495,11 @@ export const StartView: React.FC<any> = (props) => {
                   {heroArtist.km > 0 && (
                     <>
                       {" "}
-                      · <strong className="font-semibold">{heroArtist.km.toLocaleString("pl-PL")} km</strong> trasy
+                      ·{" "}
+                      <strong className="font-semibold">
+                        {heroArtist.km.toLocaleString("pl-PL")} km
+                      </strong>{" "}
+                      trasy
                     </>
                   )}
                 </p>
@@ -416,7 +534,7 @@ export const StartView: React.FC<any> = (props) => {
             {onOpenWrapped && (
               <button
                 onClick={onOpenWrapped}
-                className="self-start rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-3 text-left transition hover:bg-white/[0.08] sm:self-center"
+                className="self-start rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-3 text-left transition-colors hover:bg-white/[0.08] sm:self-center"
               >
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent,#ff4d6d)]">
                   <IconSparkles size={15} /> Wrapped Studio 9:16
@@ -464,7 +582,7 @@ export const StartView: React.FC<any> = (props) => {
         </div>
       </section>
 
-      {/* 3. Pasek postępu do kolejnego kamienia milowego */}
+      {/* 3. Pasek postępu */}
       <section className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
         <div className="flex items-center justify-between text-xs">
           <span className="font-medium">
@@ -476,7 +594,7 @@ export const StartView: React.FC<any> = (props) => {
         </div>
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-[var(--accent,#ff4d6d)] transition-all duration-300"
+            className="h-full rounded-full bg-[var(--accent,#ff4d6d)]"
             style={{ width: `${badgeMilestone.pct}%` }}
           />
         </div>
@@ -519,7 +637,7 @@ export const StartView: React.FC<any> = (props) => {
                     </div>
                   )}
 
-                  <span className="tabular-nums absolute left-2.5 top-2.5 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-bold text-white backdrop-blur-xs">
+                  <span className="tabular-nums absolute left-2.5 top-2.5 rounded-full bg-black/70 px-2 py-0.5 text-[11px] font-bold text-white">
                     #{idx + 1}
                   </span>
 
@@ -527,7 +645,7 @@ export const StartView: React.FC<any> = (props) => {
                     <button
                       onClick={(e) => togglePreview(item.name, meta.preview_url, e)}
                       aria-label={`Odsłuchaj ${item.name}`}
-                      className="absolute bottom-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent,#ff4d6d)] text-white shadow-md transition hover:scale-105"
+                      className="absolute bottom-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent,#ff4d6d)] text-white shadow-md"
                     >
                       {isThisPlaying ? <IconPlayerPause size={15} /> : <IconPlayerPlay size={15} />}
                     </button>
@@ -612,7 +730,7 @@ export const StartView: React.FC<any> = (props) => {
                     const isPicked = selectedAnswer === opt;
                     const isCorrect = opt === currentQuestion.answer;
                     let cls =
-                      "rounded-xl border border-white/15 bg-white/[0.02] px-3 py-2 text-left text-xs font-medium transition hover:bg-white/[0.06]";
+                      "rounded-xl border border-white/15 bg-white/[0.02] px-3 py-2 text-left text-xs font-medium hover:bg-white/[0.06]";
                     if (selectedAnswer) {
                       if (isCorrect) {
                         cls =
@@ -661,7 +779,7 @@ export const StartView: React.FC<any> = (props) => {
         </section>
       )}
 
-      {/* 6. Nadchodzące koncerty (ukrywane w widoku pojedynczego artysty) */}
+      {/* 6. Nadchodzące koncerty */}
       {!isFiltered && upcoming.length > 0 && (
         <section className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-5">
           <h2 className="font-display text-base font-bold">
@@ -730,70 +848,211 @@ export const StartView: React.FC<any> = (props) => {
         </div>
       </section>
 
-      {/* 8. Wykresy Recharts */}
-      {stats.yearSeries.length > 0 && (
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
-            <h3 className="mb-3 font-display text-sm font-bold">Koncerty w kolejnych latach</h3>
-            <div className="h-52 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.yearSeries}>
-                  <XAxis dataKey="rok" tick={{ fontSize: 11, fill: "currentColor" }} />
-                  <YAxis tick={{ fontSize: 11, fill: "currentColor" }} width={28} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#141418",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="koncerty"
-                    stroke="var(--accent, #ff4d6d)"
-                    fill="var(--accent, #ff4d6d)"
-                    fillOpacity={0.2}
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+      {/* 8. Pełny zestaw wykresów (6 wykresów bez migotania i skakania) */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-bold">Analityka koncertowa</h2>
+          <span className="text-xs opacity-60">Wszystkie Twoje statystyki na jednym ekranie</span>
+        </div>
 
-          <div className="fl-surface rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
-            <h3 className="mb-3 font-display text-sm font-bold">Top gatunki muzyczne</h3>
-            <div className="h-52 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.genreSeries} layout="vertical">
-                  <XAxis type="number" tick={{ fontSize: 11, fill: "currentColor" }} />
-                  <YAxis
-                    dataKey="gatunek"
-                    type="category"
-                    tick={{ fontSize: 11, fill: "currentColor" }}
-                    width={95}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#141418",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                    }}
-                  />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Wykres 1: Koncerty w kolejnych latach */}
+          {stats.yearSeries.length > 0 && (
+            <div className="fl-surface min-w-0 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
+              <h3 className="mb-3 font-display text-sm font-bold">Koncerty w kolejnych latach</h3>
+              <div style={{ width: "100%", height: 220 }}>
+                <ResponsiveContainer width="100%" height={220} minWidth={0}>
+                  <AreaChart data={stats.yearSeries}>
+                    <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                    <XAxis dataKey="rok" tick={{ fontSize: 11, fill: "currentColor" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "currentColor" }} width={28} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Area
+                      type="monotone"
+                      dataKey="koncerty"
+                      name="Koncerty"
+                      stroke="var(--accent, #ff4d6d)"
+                      fill="var(--accent, #ff4d6d)"
+                      fillOpacity={0.22}
+                      strokeWidth={2}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Wykres 2: Sezonowość (Miesiące) */}
+          <div className="fl-surface min-w-0 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
+            <h3 className="mb-3 font-display text-sm font-bold">
+              Sezonowość — koncerty według miesięcy
+            </h3>
+            <div style={{ width: "100%", height: 220 }}>
+              <ResponsiveContainer width="100%" height={220} minWidth={0}>
+                <BarChart data={stats.monthSeries}>
+                  <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <XAxis dataKey="miesiac" tick={{ fontSize: 11, fill: "currentColor" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "currentColor" }} width={28} />
+                  <Tooltip contentStyle={tooltipStyle} />
                   <Bar
-                    dataKey="liczba"
+                    dataKey="koncerty"
+                    name="Koncerty"
                     fill="var(--accent, #ff4d6d)"
-                    radius={[0, 8, 8, 0]}
+                    radius={[6, 6, 0, 0]}
+                    isAnimationActive={false}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-        </section>
-      )}
 
-      {/* Karta Artysty (Artist Dossier Bottom Sheet) */}
+          {/* Wykres 3: Festiwale vs Koncerty klubowe */}
+          {stats.typeSeries.length > 0 && (
+            <div className="fl-surface min-w-0 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
+              <h3 className="mb-3 font-display text-sm font-bold">
+                Festiwale vs Koncerty klubowe
+              </h3>
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
+                <div style={{ width: "100%", height: 200 }} className="sm:w-1/2">
+                  <ResponsiveContainer width="100%" height={200} minWidth={0}>
+                    <PieChart>
+                      <Pie
+                        data={stats.typeSeries}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={48}
+                        outerRadius={76}
+                        paddingAngle={3}
+                        isAnimationActive={false}
+                      >
+                        {stats.typeSeries.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={PIE_COLORS[index % PIE_COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={tooltipStyle} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="w-full space-y-2.5 sm:w-1/2">
+                  {stats.typeSeries.map((entry, index) => {
+                    const pct = Math.round(
+                      (entry.value / Math.max(1, stats.totalConcerts)) * 100
+                    );
+                    return (
+                      <div
+                        key={entry.name}
+                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-xs"
+                      >
+                        <span className="flex items-center gap-2 font-medium">
+                          <span
+                            className="h-2.5 w-2.5 rounded-full"
+                            style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                          />
+                          {entry.name}
+                        </span>
+                        <span className="tabular-nums font-bold">
+                          {entry.value} ({pct}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Wykres 4: Top Miasta */}
+          {stats.citySeries.length > 0 && (
+            <div className="fl-surface min-w-0 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
+              <h3 className="mb-3 font-display text-sm font-bold">Top miasta koncertowe</h3>
+              <div style={{ width: "100%", height: 220 }}>
+                <ResponsiveContainer width="100%" height={220} minWidth={0}>
+                  <BarChart data={stats.citySeries} layout="vertical">
+                    <CartesianGrid stroke="rgba(255,255,255,0.06)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: "currentColor" }} />
+                    <YAxis
+                      dataKey="miasto"
+                      type="category"
+                      tick={{ fontSize: 11, fill: "currentColor" }}
+                      width={95}
+                    />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar
+                      dataKey="liczba"
+                      name="Koncerty"
+                      fill="#38bdf8"
+                      radius={[0, 6, 6, 0]}
+                      isAnimationActive={false}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Wykres 5: Top Gatunki muzyczne */}
+          {stats.genreSeries.length > 0 && (
+            <div className="fl-surface min-w-0 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
+              <h3 className="mb-3 font-display text-sm font-bold">Top gatunki muzyczne</h3>
+              <div style={{ width: "100%", height: 220 }}>
+                <ResponsiveContainer width="100%" height={220} minWidth={0}>
+                  <BarChart data={stats.genreSeries} layout="vertical">
+                    <CartesianGrid stroke="rgba(255,255,255,0.06)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: "currentColor" }} />
+                    <YAxis
+                      dataKey="gatunek"
+                      type="category"
+                      tick={{ fontSize: 11, fill: "currentColor" }}
+                      width={95}
+                    />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar
+                      dataKey="liczba"
+                      name="Koncerty"
+                      fill="var(--accent, #ff4d6d)"
+                      radius={[0, 6, 6, 0]}
+                      isAnimationActive={false}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Wykres 6: Rozkład ocen */}
+          {stats.hasRatings && (
+            <div className="fl-surface min-w-0 rounded-2xl border border-white/10 bg-[var(--bg-card)] p-4">
+              <h3 className="mb-3 font-display text-sm font-bold">Rozkład Twoich ocen (1–5 ★)</h3>
+              <div style={{ width: "100%", height: 220 }}>
+                <ResponsiveContainer width="100%" height={220} minWidth={0}>
+                  <BarChart data={stats.ratingSeries}>
+                    <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                    <XAxis dataKey="ocena" tick={{ fontSize: 11, fill: "currentColor" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "currentColor" }} width={28} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar
+                      dataKey="liczba"
+                      name="Liczba koncertów"
+                      fill="#f59e0b"
+                      radius={[6, 6, 0, 0]}
+                      isAnimationActive={false}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Karta Artysty */}
       <ArtistDossierSheet
         artistName={dossierArtist}
         onClose={() => setDossierArtist(null)}
