@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   IconPhoto,
   IconListDetails,
@@ -11,7 +11,14 @@ import {
 } from "@tabler/icons-react";
 import type { ClashSlot, Concert, EventMeta, TripExpense, UserSettings } from "../types";
 import { getCityCoords, haversineKm, setlistSearchUrl, topEntry } from "../lib/geo";
+import { supabase } from "../lib/supabase";
 import { BottomSheet } from "./ui/BottomSheet";
+import {
+  ConcertKind,
+  detectConcertKind,
+  loadTypeOverrides,
+  saveConcertKindLocal,
+} from "./StartView";
 
 interface EventsViewProps {
   allConcerts: Concert[];
@@ -66,9 +73,13 @@ export const EventsView: React.FC<EventsViewProps> = ({
   const [subTab, setSubTab] = useState<"cards" | "concerts" | "crew" | "clash">("cards");
   const [expandedLineups, setExpandedLineups] = useState<Set<string>>(new Set());
   const [selectedEventKey, setSelectedEventKey] = useState<string>("");
+  const [highlightedEventKey, setHighlightedEventKey] = useState<string>("");
   const [lineupEditKey, setLineupEditKey] = useState<string | null>(null);
   const [lineupText, setLineupText] = useState("");
   const [lightbox, setLightbox] = useState<{ url: string; title: string } | null>(null);
+  const [typeOverrides, setTypeOverrides] = useState<Record<string, ConcertKind>>(() =>
+    loadTypeOverrides()
+  );
 
   const [cfArtist, setCfArtist] = useState("");
   const [cfStage, setCfStage] = useState("");
@@ -78,6 +89,52 @@ export const EventsView: React.FC<EventsViewProps> = ({
   const activeUploadKeyRef = useRef<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const posterInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const syncTypes = () => setTypeOverrides(loadTypeOverrides());
+    window.addEventListener("festlife:concert-updated", syncTypes);
+
+    // Obsługa przejścia z karty artysty bezpośrednio do konkretnego wydarzenia
+    const pendingKey = sessionStorage.getItem("festlife_focus_event");
+    if (pendingKey) {
+      sessionStorage.removeItem("festlife_focus_event");
+      setSubTab("cards");
+      setHighlightedEventKey(pendingKey);
+    }
+
+    const handleOpenEvent = (ev: Event) => {
+      const detail = (ev as CustomEvent<string>).detail;
+      if (detail) {
+        setSubTab("cards");
+        setHighlightedEventKey(detail);
+      }
+    };
+    window.addEventListener("festlife:open-event", handleOpenEvent);
+
+    return () => {
+      window.removeEventListener("festlife:concert-updated", syncTypes);
+      window.removeEventListener("festlife:open-event", handleOpenEvent);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!highlightedEventKey) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-event-key="${CSS.escape(highlightedEventKey)}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [highlightedEventKey, subTab]);
+
+  const handleToggleRowKind = async (c: Concert, nextKind: ConcertKind) => {
+    const nextMap = saveConcertKindLocal(c, nextKind);
+    setTypeOverrides(nextMap);
+    if (c.id) {
+      await supabase.from("concerts").update({ typ: nextKind } as any).eq("id", c.id);
+    }
+  };
 
   const eventGroups = useMemo(() => {
     const map: Record<
@@ -212,11 +269,17 @@ export const EventsView: React.FC<EventsViewProps> = ({
             const expSum = tripExpenses
               .filter((x) => x.event_key === g.key)
               .reduce((s, x) => s + Number(x.amount_pln || 0), 0);
+            const isHighlighted = highlightedEventKey === g.key;
 
             return (
               <div
                 key={g.key}
-                className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
+                data-event-key={g.key}
+                className={`flex flex-col justify-between gap-3 rounded-2xl border bg-[var(--surface)] p-4 ${
+                  isHighlighted
+                    ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/40"
+                    : "border-[var(--border)]"
+                }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
@@ -397,6 +460,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   <th className="px-3 py-2">Data</th>
                   <th className="px-3 py-2">Artysta</th>
                   <th className="px-3 py-2">Event</th>
+                  <th className="px-3 py-2">Rodzaj</th>
                   <th className="px-3 py-2">Scena / Miejsce</th>
                   <th className="px-3 py-2">Akcje</th>
                 </tr>
@@ -404,24 +468,53 @@ export const EventsView: React.FC<EventsViewProps> = ({
               <tbody>
                 {filteredConcerts
                   .filter((c) => !selectedEventKey || `${c.event || "Koncert"}|${c.rok || "?"}` === selectedEventKey)
-                  .map((c) => (
-                    <tr key={c.id} className="border-b border-[var(--border)]">
-                      <td className="whitespace-nowrap px-3 py-2 font-mono">{c.data} {c.godzina}</td>
-                      <td className="px-3 py-2 font-semibold">{c.artysta}</td>
-                      <td className="px-3 py-2">{c.event} ({c.rok})</td>
-                      <td className="px-3 py-2 text-[var(--text-muted)]">{c.scena ? `${c.scena} • ` : ""}{c.miejsce}</td>
-                      <td className="whitespace-nowrap px-3 py-2">
-                        <div className="flex gap-1">
-                          <button type="button" onClick={() => onEditConcert(c)} className="fl-btn !p-1.5">
-                            <IconEdit size={13} stroke={1.75} />
-                          </button>
-                          <button type="button" onClick={() => onDeleteConcert(c.id)} className="fl-btn fl-btn-danger !p-1.5">
-                            <IconTrash size={13} stroke={1.75} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  .map((c) => {
+                    const kind = detectConcertKind(c, typeOverrides);
+                    return (
+                      <tr key={c.id} className="border-b border-[var(--border)]">
+                        <td className="whitespace-nowrap px-3 py-2 font-mono">{c.data} {c.godzina}</td>
+                        <td className="px-3 py-2 font-semibold">{c.artysta}</td>
+                        <td className="px-3 py-2">{c.event} ({c.rok})</td>
+                        <td className="whitespace-nowrap px-3 py-2">
+                          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-0.5 text-[10px]">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleRowKind(c, "solowy")}
+                              className={`rounded px-1.5 py-0.5 font-semibold ${
+                                kind === "solowy"
+                                  ? "bg-[var(--accent)] text-[var(--accent-ink,#fff)]"
+                                  : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                              }`}
+                            >
+                              Solowy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleRowKind(c, "festiwal")}
+                              className={`rounded px-1.5 py-0.5 font-semibold ${
+                                kind === "festiwal"
+                                  ? "bg-[#38bdf8] text-slate-950"
+                                  : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                              }`}
+                            >
+                              Festiwal
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-[var(--text-muted)]">{c.scena ? `${c.scena} • ` : ""}{c.miejsce}</td>
+                        <td className="whitespace-nowrap px-3 py-2">
+                          <div className="flex gap-1">
+                            <button type="button" onClick={() => onEditConcert(c)} className="fl-btn !p-1.5">
+                              <IconEdit size={13} stroke={1.75} />
+                            </button>
+                            <button type="button" onClick={() => onDeleteConcert(c.id)} className="fl-btn fl-btn-danger !p-1.5">
+                              <IconTrash size={13} stroke={1.75} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

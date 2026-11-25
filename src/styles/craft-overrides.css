@@ -11,10 +11,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Wyłączenie scroll-anchoring zapobiega skokom widoku przy doładowywaniu zdjęć i wykresów */
+*,
+*::before,
+*::after {
+  overflow-anchor: none;
+}
+
 /* Stały, niezmienny kolor kart niezależnie od aktywnego filtra artysty czy zakładki */
 .fl-surface {
-  background-color: var(--bg-card, var(--card, #15151b)) !important;
-  color: var(--text-main, #f5f5f7);
+  background-color: var(--surface, var(--bg-card, #15151b)) !important;
+  color: var(--text, var(--text-main, #f5f5f7));
+  border-color: var(--border, rgba(255, 255, 255, 0.1));
   contain: layout style;
 }
 

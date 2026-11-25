@@ -2,6 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { IconEdit, IconExternalLink, IconTrash } from "@tabler/icons-react";
 import type { ArtistMeta, Concert, EventMeta, UpcomingConcert } from "../types";
 import { setlistSearchUrl } from "../lib/geo";
+import { supabase } from "../lib/supabase";
+import {
+  ConcertKind,
+  detectConcertKind,
+  inferKindFromFields,
+  loadTypeOverrides,
+  saveConcertKindLocal,
+} from "./StartView";
 
 interface AddViewProps {
   subTab: "concert" | "upcoming" | "database";
@@ -29,13 +37,15 @@ const DAYS_PL = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "
 const emptyConcertForm = {
   event: "", rok: "", artysta: "", data: "", dzien: "", godzina: "", scena: "",
   miejsce: "", miasto: "", district: "", kraj: "Polska", gatunek: "", podgatunek: "",
-  kto: "Razem", z_kim: "", ocena: 0, cena: "", uwagi: ""
+  kto: "Razem", z_kim: "", ocena: 0, cena: "", uwagi: "",
+  kind: "solowy" as ConcertKind,
 };
 
 const emptyUpcomingForm = {
   artysta: "", event: "", data: "", godzina: "", rok: "", dzien: "",
   miasto: "", kraj: "Polska", miejsce: "", gatunek: "", z_kim: "",
-  status_biletu: "Kupiony", cena: "", hotel: "", transport: "", uwagi: ""
+  status_biletu: "Kupiony", cena: "", hotel: "", transport: "", uwagi: "",
+  kind: "solowy" as ConcertKind,
 };
 
 export const AddView: React.FC<AddViewProps> = ({
@@ -54,13 +64,25 @@ export const AddView: React.FC<AddViewProps> = ({
   onSaveUpcoming
 }) => {
   const [form, setForm] = useState(emptyConcertForm);
+  const [kindTouched, setKindTouched] = useState(false);
   const [upForm, setUpForm] = useState(emptyUpcomingForm);
+  const [upKindTouched, setUpKindTouched] = useState(false);
   const [ticketFile, setTicketFile] = useState<File | null>(null);
   const [sortCol, setSortCol] = useState<keyof Concert>("data");
   const [sortAsc, setSortAsc] = useState(false);
+  const [typeOverrides, setTypeOverrides] = useState<Record<string, ConcertKind>>(() =>
+    loadTypeOverrides()
+  );
+
+  useEffect(() => {
+    const sync = () => setTypeOverrides(loadTypeOverrides());
+    window.addEventListener("festlife:concert-updated", sync);
+    return () => window.removeEventListener("festlife:concert-updated", sync);
+  }, []);
 
   useEffect(() => {
     if (editingConcert) {
+      setKindTouched(true);
       setForm({
         event: editingConcert.event || "",
         rok: editingConcert.rok ? String(editingConcert.rok) : "",
@@ -79,9 +101,12 @@ export const AddView: React.FC<AddViewProps> = ({
         z_kim: editingConcert.z_kim || "",
         ocena: editingConcert.ocena || 0,
         cena: editingConcert.cena != null ? String(editingConcert.cena) : "",
-        uwagi: editingConcert.uwagi || ""
+        uwagi: editingConcert.uwagi || "",
+        kind: detectConcertKind(editingConcert),
       });
     } else if (prefillConcert) {
+      const inferred = inferKindFromFields(prefillConcert.event, prefillConcert.artysta);
+      setKindTouched(false);
       setForm({
         ...emptyConcertForm,
         event: prefillConcert.event || "",
@@ -92,7 +117,8 @@ export const AddView: React.FC<AddViewProps> = ({
         miejsce: prefillConcert.miejsce || "",
         miasto: prefillConcert.miasto || "",
         kraj: prefillConcert.kraj || "Polska",
-        z_kim: prefillConcert.z_kim || ""
+        z_kim: prefillConcert.z_kim || "",
+        kind: inferred,
       });
     }
   }, [editingConcert, prefillConcert]);
@@ -124,60 +150,85 @@ export const AddView: React.FC<AddViewProps> = ({
     }
   };
 
+  const handleToggleDbRowKind = async (c: Concert, nextKind: ConcertKind) => {
+    const nextMap = saveConcertKindLocal(c, nextKind);
+    setTypeOverrides(nextMap);
+    if (c.id) {
+      await supabase.from("concerts").update({ typ: nextKind } as any).eq("id", c.id);
+    }
+  };
+
   const submitConcert = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSaveConcert(
-      {
-        rok: parseInt(form.rok, 10) || null,
-        event: form.event.trim(),
-        artysta: form.artysta.trim(),
-        data: form.data || null,
-        dzien: form.dzien.trim(),
-        godzina: form.godzina.trim(),
-        scena: form.scena.trim(),
-        miejsce: form.miejsce.trim(),
-        miasto: form.miasto.trim(),
-        district: form.district.trim(),
-        kraj: form.kraj.trim(),
-        gatunek: form.gatunek.trim(),
-        podgatunek: form.podgatunek.trim(),
-        kto: form.kto.trim(),
-        z_kim: form.z_kim.trim(),
-        ocena: Number(form.ocena) || 0,
-        cena: form.cena !== "" ? Number(form.cena) : null,
-        uwagi: form.uwagi.trim()
-      },
-      editingConcert?.id
-    );
+    const payload = {
+      rok: parseInt(form.rok, 10) || null,
+      event: form.event.trim(),
+      artysta: form.artysta.trim(),
+      data: form.data || null,
+      dzien: form.dzien.trim(),
+      godzina: form.godzina.trim(),
+      scena: form.scena.trim(),
+      miejsce: form.miejsce.trim(),
+      miasto: form.miasto.trim(),
+      district: form.district.trim(),
+      kraj: form.kraj.trim(),
+      gatunek: form.gatunek.trim(),
+      podgatunek: form.podgatunek.trim(),
+      kto: form.kto.trim(),
+      z_kim: form.z_kim.trim(),
+      ocena: Number(form.ocena) || 0,
+      cena: form.cena !== "" ? Number(form.cena) : null,
+      uwagi: form.uwagi.trim(),
+    };
+
+    const chosenKind = form.kind;
+    const nextMap = saveConcertKindLocal({ ...payload, id: editingConcert?.id }, chosenKind);
+    setTypeOverrides(nextMap);
+
+    await onSaveConcert(payload, editingConcert?.id);
+
+    if (editingConcert?.id) {
+      await supabase
+        .from("concerts")
+        .update({ typ: chosenKind } as any)
+        .eq("id", editingConcert.id);
+    }
+
     setForm(emptyConcertForm);
+    setKindTouched(false);
     onClearEditing();
   };
 
   const submitUpcoming = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      rok: parseInt(upForm.rok, 10) || null,
+      event: upForm.event.trim(),
+      artysta: upForm.artysta.trim(),
+      data: upForm.data || null,
+      dzien: upForm.dzien.trim(),
+      godzina: upForm.godzina.trim(),
+      miejsce: upForm.miejsce.trim(),
+      miasto: upForm.miasto.trim(),
+      kraj: upForm.kraj.trim(),
+      gatunek: upForm.gatunek.trim(),
+      z_kim: upForm.z_kim.trim(),
+      status_biletu: upForm.status_biletu,
+      cena: upForm.cena !== "" ? Number(upForm.cena) : null,
+      ticket_file_path: "",
+      uwagi: upForm.uwagi.trim(),
+    };
+    const nextMap = saveConcertKindLocal(payload, upForm.kind);
+    setTypeOverrides(nextMap);
+
     await onSaveUpcoming(
-      {
-        rok: parseInt(upForm.rok, 10) || null,
-        event: upForm.event.trim(),
-        artysta: upForm.artysta.trim(),
-        data: upForm.data || null,
-        dzien: upForm.dzien.trim(),
-        godzina: upForm.godzina.trim(),
-        miejsce: upForm.miejsce.trim(),
-        miasto: upForm.miasto.trim(),
-        kraj: upForm.kraj.trim(),
-        gatunek: upForm.gatunek.trim(),
-        z_kim: upForm.z_kim.trim(),
-        status_biletu: upForm.status_biletu,
-        cena: upForm.cena !== "" ? Number(upForm.cena) : null,
-        ticket_file_path: "",
-        uwagi: upForm.uwagi.trim()
-      },
+      payload,
       ticketFile,
       upForm.hotel.trim(),
       upForm.transport.trim()
     );
     setUpForm(emptyUpcomingForm);
+    setUpKindTouched(false);
     setTicketFile(null);
   };
 
@@ -226,10 +277,72 @@ export const AddView: React.FC<AddViewProps> = ({
 
       {subTab === "concert" && (
         <form onSubmit={submitConcert} className="space-y-4">
+          {/* Wybór rodzaju występu: Koncert solowy vs Festiwal */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Rodzaj występu
+                </div>
+                <div className="text-xs text-[var(--text-muted)]">
+                  {form.kind === "solowy"
+                    ? "Koncert dedykowany jednemu artyście (klubowy / halowy / stadionowy)"
+                    : "Występ artysty w ramach festiwalu lub większego wydarzenia"}
+                </div>
+              </div>
+              <div className="inline-flex shrink-0 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKindTouched(true);
+                    setForm((f) => ({ ...f, kind: "solowy" }));
+                  }}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    form.kind === "solowy"
+                      ? "bg-[var(--accent)] text-[var(--accent-ink,#fff)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                  }`}
+                >
+                  Koncert solowy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKindTouched(true);
+                    setForm((f) => ({ ...f, kind: "festiwal" }));
+                  }}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    form.kind === "festiwal"
+                      ? "bg-[#38bdf8] text-slate-950"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                  }`}
+                >
+                  Festiwal
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Event / Festiwal *</label>
-              <input required list="dlEvent" className="fl-input w-full" value={form.event} onChange={(e) => setForm({ ...form, event: e.target.value })} placeholder="np. Open’er Festival" />
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                {form.kind === "festiwal" ? "Nazwa festiwalu *" : "Trasa / Event / Nazwa koncertu *"}
+              </label>
+              <input
+                required
+                list="dlEvent"
+                className="fl-input w-full"
+                value={form.event}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm((f) => ({
+                    ...f,
+                    event: val,
+                    kind: kindTouched ? f.kind : inferKindFromFields(val, f.artysta),
+                  }));
+                }}
+                placeholder={form.kind === "festiwal" ? "np. Open’er Festival" : "np. Trasa koncertowa / Koncert klubowy"}
+              />
             </div>
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Rok (auto)</label>
@@ -327,7 +440,7 @@ export const AddView: React.FC<AddViewProps> = ({
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => { setForm(emptyConcertForm); onClearEditing(); }} className="fl-btn">
+            <button type="button" onClick={() => { setForm(emptyConcertForm); setKindTouched(false); onClearEditing(); }} className="fl-btn">
               Wyczyść
             </button>
             <button type="submit" className="fl-btn fl-btn-primary">
@@ -339,6 +452,51 @@ export const AddView: React.FC<AddViewProps> = ({
 
       {subTab === "upcoming" && (
         <form onSubmit={submitUpcoming} className="space-y-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Rodzaj wyjazdu
+                </div>
+                <div className="text-xs text-[var(--text-muted)]">
+                  {upForm.kind === "solowy"
+                    ? "Koncert dedykowany jednemu artyście"
+                    : "Występ w ramach festiwalu"}
+                </div>
+              </div>
+              <div className="inline-flex shrink-0 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUpKindTouched(true);
+                    setUpForm((f) => ({ ...f, kind: "solowy" }));
+                  }}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    upForm.kind === "solowy"
+                      ? "bg-[var(--accent)] text-[var(--accent-ink,#fff)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                  }`}
+                >
+                  Koncert solowy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUpKindTouched(true);
+                    setUpForm((f) => ({ ...f, kind: "festiwal" }));
+                  }}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    upForm.kind === "festiwal"
+                      ? "bg-[#38bdf8] text-slate-950"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                  }`}
+                >
+                  Festiwal
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Artysta *</label>
@@ -346,7 +504,21 @@ export const AddView: React.FC<AddViewProps> = ({
             </div>
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Event / Festiwal *</label>
-              <input required list="dlEvent" className="fl-input w-full" value={upForm.event} onChange={(e) => setUpForm({ ...upForm, event: e.target.value })} placeholder="np. Open’er Festival" />
+              <input
+                required
+                list="dlEvent"
+                className="fl-input w-full"
+                value={upForm.event}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setUpForm((f) => ({
+                    ...f,
+                    event: val,
+                    kind: upKindTouched ? f.kind : inferKindFromFields(val, f.artysta),
+                  }));
+                }}
+                placeholder="np. Open’er Festival"
+              />
             </div>
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Data *</label>
@@ -407,7 +579,7 @@ export const AddView: React.FC<AddViewProps> = ({
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => { setUpForm(emptyUpcomingForm); setTicketFile(null); }} className="fl-btn">
+            <button type="button" onClick={() => { setUpForm(emptyUpcomingForm); setUpKindTouched(false); setTicketFile(null); }} className="fl-btn">
               Wyczyść
             </button>
             <button type="submit" className="fl-btn fl-btn-primary">
@@ -425,6 +597,7 @@ export const AddView: React.FC<AddViewProps> = ({
                 <th className="cursor-pointer px-3 py-2.5" onClick={() => toggleSort("data")}>Data ↕</th>
                 <th className="cursor-pointer px-3 py-2.5" onClick={() => toggleSort("artysta")}>Artysta ↕</th>
                 <th className="cursor-pointer px-3 py-2.5" onClick={() => toggleSort("event")}>Event ↕</th>
+                <th className="px-3 py-2.5">Rodzaj</th>
                 <th className="cursor-pointer px-3 py-2.5" onClick={() => toggleSort("miasto")}>Miasto ↕</th>
                 <th className="cursor-pointer px-3 py-2.5" onClick={() => toggleSort("gatunek")}>Gatunek ↕</th>
                 <th className="cursor-pointer px-3 py-2.5" onClick={() => toggleSort("z_kim")}>Ekipa ↕</th>
@@ -432,33 +605,62 @@ export const AddView: React.FC<AddViewProps> = ({
               </tr>
             </thead>
             <tbody>
-              {sortedDb.map((c) => (
-                <tr key={c.id} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
-                  <td className="whitespace-nowrap px-3 py-2.5 font-mono">{c.data}</td>
-                  <td className="px-3 py-2.5 font-semibold">{c.artysta}</td>
-                  <td className="px-3 py-2.5">{c.event}</td>
-                  <td className="px-3 py-2.5">{c.miasto}</td>
-                  <td className="px-3 py-2.5">
-                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-[11px]">
-                      {c.gatunek || "—"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5 text-[var(--text-muted)]">{c.z_kim || "—"}</td>
-                  <td className="whitespace-nowrap px-3 py-2.5">
-                    <div className="flex gap-1">
-                      <a href={setlistSearchUrl(c)} target="_blank" rel="noreferrer" className="fl-btn !px-2 !py-1 !text-[11px]">
-                        Setlist <IconExternalLink size={12} stroke={1.75} />
-                      </a>
-                      <button type="button" onClick={() => onEditConcert(c)} className="fl-btn !p-1.5" title="Edytuj">
-                        <IconEdit size={13} stroke={1.75} />
-                      </button>
-                      <button type="button" onClick={() => onDeleteConcert(c.id)} className="fl-btn fl-btn-danger !p-1.5" title="Usuń">
-                        <IconTrash size={13} stroke={1.75} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {sortedDb.map((c) => {
+                const kind = detectConcertKind(c, typeOverrides);
+                return (
+                  <tr key={c.id} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
+                    <td className="whitespace-nowrap px-3 py-2.5 font-mono">{c.data}</td>
+                    <td className="px-3 py-2.5 font-semibold">{c.artysta}</td>
+                    <td className="px-3 py-2.5">{c.event}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5">
+                      <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-0.5 text-[10px]">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleDbRowKind(c, "solowy")}
+                          className={`rounded px-1.5 py-0.5 font-semibold ${
+                            kind === "solowy"
+                              ? "bg-[var(--accent)] text-[var(--accent-ink,#fff)]"
+                              : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                          }`}
+                        >
+                          Solowy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleDbRowKind(c, "festiwal")}
+                          className={`rounded px-1.5 py-0.5 font-semibold ${
+                            kind === "festiwal"
+                              ? "bg-[#38bdf8] text-slate-950"
+                              : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                          }`}
+                        >
+                          Festiwal
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5">{c.miasto}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-[11px]">
+                        {c.gatunek || "—"}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-[var(--text-muted)]">{c.z_kim || "—"}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5">
+                      <div className="flex gap-1">
+                        <a href={setlistSearchUrl(c)} target="_blank" rel="noreferrer" className="fl-btn !px-2 !py-1 !text-[11px]">
+                          Setlist <IconExternalLink size={12} stroke={1.75} />
+                        </a>
+                        <button type="button" onClick={() => onEditConcert(c)} className="fl-btn !p-1.5" title="Edytuj">
+                          <IconEdit size={13} stroke={1.75} />
+                        </button>
+                        <button type="button" onClick={() => onDeleteConcert(c.id)} className="fl-btn fl-btn-danger !p-1.5" title="Usuń">
+                          <IconTrash size={13} stroke={1.75} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
