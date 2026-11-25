@@ -41,6 +41,7 @@ interface ArtistDossierSheetProps {
   onOpenOtherArtist?: (artist: string) => void;
   streamingPlatform?: string;
   eventsMeta?: Record<string, EventMeta>;
+  onSaveConcert?: (rec: Omit<Concert, "id">, id?: number) => Promise<void>;
   onEditConcert?: (c: Concert) => void;
   onUploadEventPhotos?: (eventKey: string, files: File[]) => Promise<void>;
   onOpenEvent?: (eventKey: string) => void;
@@ -75,6 +76,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   onOpenOtherArtist,
   streamingPlatform = "spotify",
   eventsMeta = {},
+  onSaveConcert,
   onEditConcert,
   onUploadEventPhotos,
   onOpenEvent,
@@ -168,10 +170,15 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
   const handleSetConcertKind = async (concert: any, nextKind: ConcertKind) => {
     const nextMap = saveConcertKindLocal(concert, nextKind);
     setTypeOverrides(nextMap);
-    if (concert.id !== undefined && concert.id !== null) {
+
+    const kindLabel = nextKind === "festiwal" ? "Festiwal" : "Koncert solowy";
+    if (onSaveConcert && concert.id !== undefined && concert.id !== null) {
+      const { id, ...rest } = concert;
+      await onSaveConcert({ ...rest, podgatunek: kindLabel }, id);
+    } else if (concert.id !== undefined && concert.id !== null) {
       await supabase
         .from("concerts")
-        .update({ typ: nextKind } as any)
+        .update({ podgatunek: kindLabel } as any)
         .eq("id", concert.id);
     }
   };
@@ -192,47 +199,54 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
       ocena: Number(c.ocena) || 0,
       cena: c.cena != null ? String(c.cena) : "",
       uwagi: c.uwagi || "",
-      kind: detectConcertKind(c, typeOverrides),
+      kind: detectConcertKind(c, typeOverrides, eventsMeta, concerts),
     });
   };
 
   const handleSaveInlineEdit = async (c: any) => {
     if (!editDraft) return;
     setSavingRow(true);
-    const parsedYear = editDraft.data ? parseInt(editDraft.data.slice(0, 4), 10) : c.rok;
-    const updates: any = {
-      event: editDraft.event.trim(),
-      rok: parsedYear || c.rok || null,
-      data: editDraft.data || null,
-      godzina: editDraft.godzina.trim(),
-      scena: editDraft.scena.trim(),
-      miejsce: editDraft.miejsce.trim(),
-      miasto: editDraft.miasto.trim(),
-      kraj: editDraft.kraj.trim(),
-      gatunek: editDraft.gatunek.trim(),
-      z_kim: editDraft.z_kim.trim(),
-      ocena: Number(editDraft.ocena) || 0,
-      cena: editDraft.cena !== "" ? Number(editDraft.cena) : null,
-      uwagi: editDraft.uwagi.trim(),
-    };
+    try {
+      const parsedYear = editDraft.data ? parseInt(editDraft.data.slice(0, 4), 10) : c.rok;
+      const kindLabel = editDraft.kind === "festiwal" ? "Festiwal" : "Koncert solowy";
+      const updates: Omit<Concert, "id"> = {
+        rok: parsedYear || c.rok || null,
+        event: editDraft.event.trim(),
+        artysta: c.artysta || artistName,
+        data: editDraft.data || null,
+        dzien: c.dzien || "",
+        godzina: editDraft.godzina.trim(),
+        scena: editDraft.scena.trim(),
+        miejsce: editDraft.miejsce.trim(),
+        miasto: editDraft.miasto.trim(),
+        district: c.district || "",
+        kraj: editDraft.kraj.trim(),
+        gatunek: editDraft.gatunek.trim(),
+        podgatunek: kindLabel,
+        kto: c.kto || "Razem",
+        z_kim: editDraft.z_kim.trim(),
+        ocena: Number(editDraft.ocena) || 0,
+        cena: editDraft.cena !== "" ? Number(editDraft.cena) : null,
+        uwagi: editDraft.uwagi.trim(),
+      };
 
-    const nextMap = saveConcertKindLocal({ ...c, ...updates }, editDraft.kind);
-    setTypeOverrides(nextMap);
+      const nextMap = saveConcertKindLocal({ ...c, ...updates }, editDraft.kind);
+      setTypeOverrides(nextMap);
 
-    if (c.id !== undefined && c.id !== null) {
-      await supabase.from("concerts").update(updates).eq("id", c.id);
-      await supabase
-        .from("concerts")
-        .update({ typ: editDraft.kind } as any)
-        .eq("id", c.id);
-      Object.assign(c, updates);
+      if (onSaveConcert && c.id !== undefined && c.id !== null) {
+        await onSaveConcert(updates, c.id);
+      } else if (c.id !== undefined && c.id !== null) {
+        await supabase.from("concerts").update(updates).eq("id", c.id);
+        Object.assign(c, updates);
+      }
+
+      setEditingRowId(null);
+      setEditDraft(null);
+      window.dispatchEvent(new Event("festlife:concert-updated"));
+      onConcertSaved?.();
+    } finally {
+      setSavingRow(false);
     }
-
-    setSavingRow(false);
-    setEditingRowId(null);
-    setEditDraft(null);
-    window.dispatchEvent(new Event("festlife:concert-updated"));
-    onConcertSaved?.();
   };
 
   const handleEventPhotosSelected = async (files: File[]) => {
@@ -244,26 +258,14 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
       if (onUploadEventPhotos) {
         await onUploadEventPhotos(eventKey, files);
       } else {
-        // Fallback: bezpośredni upload do Supabase Storage lub lokalny podgląd DataURL
         const uploadedUrls: string[] = [];
         for (const file of files) {
-          const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-          const path = `events/${encodeURIComponent(eventKey)}/${safeName}`;
-          const { error } = await supabase.storage
-            .from("event-photos")
-            .upload(path, file, { upsert: true });
-
-          if (!error) {
-            const { data } = supabase.storage.from("event-photos").getPublicUrl(path);
-            if (data?.publicUrl) uploadedUrls.push(data.publicUrl);
-          } else {
-            const dataUrl = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(String(reader.result || ""));
-              reader.readAsDataURL(file);
-            });
-            if (dataUrl) uploadedUrls.push(dataUrl);
-          }
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ""));
+            reader.readAsDataURL(file);
+          });
+          if (dataUrl) uploadedUrls.push(dataUrl);
         }
 
         if (uploadedUrls.length) {
@@ -521,7 +523,7 @@ export const ArtistDossierSheet: React.FC<ArtistDossierSheetProps> = ({
               <div className="mt-3 space-y-2.5">
                 {artistConcerts.map((c, idx) => {
                   const rowKey = String(c.id ?? `${idx}_${c.data}`);
-                  const kind = detectConcertKind(c, typeOverrides);
+                  const kind = detectConcertKind(c, typeOverrides, eventsMeta, concerts);
                   const eventKey = `${c.event || "Koncert"}|${c.rok || "?"}`;
                   const evMeta = eventsMeta[eventKey];
                   const mergedPhotos = [

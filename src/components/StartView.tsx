@@ -33,7 +33,7 @@ import {
   resolveArtistsBatch,
 } from "../lib/artistResolver";
 import { getCityCoords, haversineKm } from "../lib/geo";
-import { supabase } from "../lib/supabase";
+import type { EventMeta } from "../types";
 import { ArtistDossierSheet } from "./ArtistDossierSheet";
 
 export type ConcertKind = "solowy" | "festiwal";
@@ -76,14 +76,16 @@ export function saveConcertKindLocal(c: any, kind: ConcertKind): Record<string, 
 export function inferKindFromFields(eventName?: string, artistName?: string): ConcertKind {
   const ev = String(eventName || "").trim().toLowerCase();
   const art = String(artistName || "").trim().toLowerCase();
-  if (!ev || ev === art) return "solowy";
+  if (!ev || ev === art || /^koncert(\s+solowy)?$/i.test(ev)) return "solowy";
 
   if (
     ev.includes("fest") ||
     ev.includes("open'er") ||
+    ev.includes("open’er") ||
     ev.includes("opener") ||
     ev.includes("orange") ||
     ev.includes("pol'and'rock") ||
+    ev.includes("pol’and’rock") ||
     ev.includes("polandrock") ||
     ev.includes("woodstock") ||
     ev.includes("tauron") ||
@@ -120,7 +122,9 @@ export function inferKindFromFields(eventName?: string, artistName?: string): Co
 
 export function detectConcertKind(
   c: any,
-  overrides?: Record<string, ConcertKind>
+  overrides?: Record<string, ConcertKind>,
+  eventsMeta?: Record<string, EventMeta>,
+  allConcerts?: any[]
 ): ConcertKind {
   const map = overrides || loadTypeOverrides();
   if (c.id !== undefined && c.id !== null && map[String(c.id)]) {
@@ -131,11 +135,38 @@ export function detectConcertKind(
     return map[compKey];
   }
 
-  const rawTyp = String(c.typ || c.type || c.rodzaj || "")
+  // Sprawdź zapisane pole podgatunek (używane przez AddView i EventsView) lub typ/rodzaj
+  const rawTyp = String(c.podgatunek || c.typ || c.type || c.rodzaj || "")
     .trim()
     .toLowerCase();
-  if (rawTyp === "solowy" || rawTyp === "solo" || rawTyp === "klubowy") return "solowy";
-  if (rawTyp === "festiwal" || rawTyp === "festival" || rawTyp === "fest") return "festiwal";
+  if (rawTyp === "solowy" || rawTyp === "solo" || rawTyp === "koncert solowy" || rawTyp === "klubowy") {
+    return "solowy";
+  }
+  if (rawTyp === "festiwal" || rawTyp === "festival" || rawTyp === "fest") {
+    return "festiwal";
+  }
+
+  const ev = String(c.event || "").trim();
+  if (!ev || /^koncert(\s+solowy)?$/i.test(ev)) return "solowy";
+
+  if (eventsMeta) {
+    const key = `${ev}|${c.rok || "?"}`;
+    if ((eventsMeta[key]?.lineup?.length || 0) > 1) return "festiwal";
+  }
+
+  if (allConcerts && allConcerts.length > 0) {
+    const sameEventArtists = new Set(
+      allConcerts
+        .filter(
+          (other) =>
+            String(other.event || "").trim().toLowerCase() === ev.toLowerCase() &&
+            String(other.rok || "") === String(c.rok || "")
+        )
+        .map((other) => String(other.artysta || "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+    if (sameEventArtists.size > 1) return "festiwal";
+  }
 
   return inferKindFromFields(c.event, c.artysta);
 }
@@ -261,22 +292,18 @@ const StableChartBox: React.FC<{
 };
 
 export const StartView: React.FC<any> = (props) => {
-  const rawConcerts: any[] = Array.isArray(props.concerts)
-    ? props.concerts
-    : Array.isArray(props.filteredConcerts)
+  const rawConcerts: any[] = Array.isArray(props.filteredConcerts)
     ? props.filteredConcerts
-    : Array.isArray(props.filtered)
-    ? props.filtered
+    : Array.isArray(props.concerts)
+    ? props.concerts
     : Array.isArray(props.allConcerts)
     ? props.allConcerts
-    : Array.isArray(props.items)
-    ? props.items
     : [];
 
   // Stabilizacja referencji tablicy koncertów — chroni przed przeliczaniem przy każdym re-renderze App.tsx
   const concertsSig = `${rawConcerts.length}:${rawConcerts[0]?.id ?? ""}:${
     rawConcerts[rawConcerts.length - 1]?.id ?? ""
-  }:${props.activeArtist || props.artistFilter || ""}`;
+  }:${props.activeArtist || props.artistFilter || ""}:${props.hasActiveFilters ? "1" : "0"}`;
   const stableConcertsRef = useRef<{ sig: string; list: any[] }>({
     sig: "",
     list: rawConcerts,
@@ -290,12 +317,13 @@ export const StartView: React.FC<any> = (props) => {
     ? props.allConcerts
     : concerts;
 
-  const upcoming: any[] = Array.isArray(props.upcoming)
-    ? props.upcoming
-    : Array.isArray(props.upcomingConcerts)
+  const upcoming: any[] = Array.isArray(props.upcomingConcerts)
     ? props.upcomingConcerts
+    : Array.isArray(props.upcoming)
+    ? props.upcoming
     : [];
 
+  const eventsMeta: Record<string, EventMeta> | undefined = props.eventsMeta;
   const parentArtistsCache = props.artistsCache || props.artistsMetaCache || props.artists;
   const cityCoords: Record<string, [number, number]> | undefined =
     props.cityCoords || props.citiesCache;
@@ -311,16 +339,16 @@ export const StartView: React.FC<any> = (props) => {
   }, [props.settings?.hometown_coords, props.profile?.hometown_lat, props.profile?.hometown_lng]);
 
   const activeArtist = props.activeArtist || props.artistFilter || "";
-  const hasActiveFilters = Boolean(props.hasActiveFilters || activeArtist);
+  const hasActiveFilters = Boolean(props.hasActiveFilters || props.hasActiveFilter || activeArtist);
   const onSelectArtist =
-    props.onSelectArtist || props.setArtistFilter || props.onFilterArtist;
+    props.onSelectArtist || props.onQuickSearch || props.setArtistFilter;
   const onResetFilters = props.onResetFilters || props.resetFilters;
   const onOpenWrapped =
     props.onOpenWrapped || props.setWrappedOpen || props.onShowWrapped;
   const streamingPlatform =
+    props.streamingProvider ||
     props.streamingPlatform ||
     props.settings?.streaming_platform ||
-    props.profile?.streaming_platform ||
     "spotify";
 
   const [localCache, setLocalCache] = useState<Record<string, ResolvedArtist>>(() => ({
@@ -412,11 +440,15 @@ export const StartView: React.FC<any> = (props) => {
     const nextMap = saveConcertKindLocal(concert, nextKind);
     setTypeOverrides(nextMap);
 
-    if (concert.id !== undefined && concert.id !== null) {
-      await supabase
-        .from("concerts")
-        .update({ typ: nextKind } as any)
-        .eq("id", concert.id);
+    if (props.onSaveConcert && concert.id !== undefined && concert.id !== null) {
+      const { id, ...rest } = concert;
+      await props.onSaveConcert(
+        {
+          ...rest,
+          podgatunek: nextKind === "festiwal" ? "Festiwal" : "Koncert solowy",
+        },
+        id
+      );
     }
   };
 
@@ -504,7 +536,7 @@ export const StartView: React.FC<any> = (props) => {
       }
 
       // Koncert solowy vs Festiwal
-      const kind = detectConcertKind(c, typeOverrides);
+      const kind = detectConcertKind(c, typeOverrides, eventsMeta, allConcerts);
       if (kind === "festiwal") {
         festivalCount += 1;
       } else {
@@ -595,7 +627,7 @@ export const StartView: React.FC<any> = (props) => {
       ratingSeries,
       hasRatings: Array.from(ratingCounts.values()).some((v) => v > 0),
     };
-  }, [concerts, cityCoords, homeCoords, localCache, typeOverrides]);
+  }, [concerts, allConcerts, eventsMeta, cityCoords, homeCoords, localCache, typeOverrides]);
 
   const badgeMilestone = useMemo(() => {
     const n = stats.totalConcerts;
@@ -1243,7 +1275,7 @@ export const StartView: React.FC<any> = (props) => {
                 />
                 <div className="mt-2 max-h-52 space-y-1.5 overflow-y-auto pr-1">
                   {filteredConcertsForEditor.map((c, idx) => {
-                    const kind = detectConcertKind(c, typeOverrides);
+                    const kind = detectConcertKind(c, typeOverrides, eventsMeta, allConcerts);
                     return (
                       <div
                         key={c.id ?? idx}
@@ -1428,14 +1460,15 @@ export const StartView: React.FC<any> = (props) => {
       <ArtistDossierSheet
         artistName={dossierArtist}
         onClose={() => setDossierArtist(null)}
-        concerts={concerts}
+        concerts={allConcerts}
         artistMeta={dossierArtist ? localCache[dossierArtist.toLowerCase()] : undefined}
         artistsCache={localCache}
         onUpdateCache={setLocalCache}
         onSelectArtistFilter={onSelectArtist}
         onOpenOtherArtist={(other) => setDossierArtist(other)}
         streamingPlatform={streamingPlatform}
-        eventsMeta={props.eventsMeta}
+        eventsMeta={eventsMeta}
+        onSaveConcert={props.onSaveConcert}
         onEditConcert={props.onEditConcert}
         onUploadEventPhotos={props.onUploadEventPhotos}
         onOpenEvent={props.onOpenEvent}

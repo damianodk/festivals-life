@@ -92,6 +92,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<MainTab>("start");
   const [addSubTab, setAddSubTab] = useState<"concert" | "upcoming" | "database">("concert");
+  const [focusedEventKey, setFocusedEventKey] = useState<string | null>(null);
 
   const [allConcerts, setAllConcerts] = useState<Concert[]>([]);
   const [upcomingConcerts, setUpcomingConcerts] = useState<UpcomingConcert[]>([]);
@@ -137,6 +138,9 @@ export default function App() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const bootedRef = useRef(false);
+  const artistsMetaCacheRef = useRef(artistsMetaCache);
+  artistsMetaCacheRef.current = artistsMetaCache;
 
   const isPublicView = storageMode === "public";
 
@@ -178,11 +182,12 @@ export default function App() {
     setFollowingList((data || []) as PublicProfileSummary[]);
   }, []);
 
-  // Sync artist avatars from Edge Function (Spotify + Apple preview)
+  // Sync artist avatars from Edge Function (bez przebudowywania referencji funkcji przy zmianie cache)
   const syncArtistsFromEdge = useCallback(
     async (concertsSource: Concert[], manual = false) => {
       const sb = getSupabase();
       if (!sb) return;
+      const currentCache = artistsMetaCacheRef.current;
       const byArt: Record<string, number> = {};
       concertsSource.forEach((c) => {
         if (c.artysta) byArt[c.artysta] = (byArt[c.artysta] || 0) + 1;
@@ -196,7 +201,7 @@ export default function App() {
       const missing = manual
         ? topNames
         : topNames.filter((n) => {
-            const url = artistsMetaCache[n.trim().toLowerCase()]?.image_url || "";
+            const url = currentCache[n.trim().toLowerCase()]?.image_url || "";
             return !url || !url.includes("scdn.co");
           });
       if (!missing.length) return;
@@ -204,7 +209,7 @@ export default function App() {
 
       try {
         let toInvoke = missing;
-        const nextCache = { ...artistsMetaCache };
+        const nextCache = { ...currentCache };
         if (!manual) {
           const keys = missing.map((n) => n.trim().toLowerCase());
           const { data: cachedRows } = await sb.from("artists_cache").select("*").in("artist_key", keys);
@@ -238,7 +243,7 @@ export default function App() {
         if (manual) toast.error("Błąd synchronizacji: " + err.message);
       }
     },
-    [artistsMetaCache]
+    []
   );
 
   // Load authenticated user's Supabase data
@@ -411,8 +416,11 @@ export default function App() {
     if (savedSet) setSettings(savedSet);
   }, []);
 
-  // Bootstrap on mount
+  // Bootstrap strictly once on mount (prevents continuous re-fetching loop)
   useEffect(() => {
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+
     const boot = async () => {
       const slug = new URLSearchParams(location.search).get("u")?.trim().toLowerCase() || "";
       if (slug && isSupabaseConfigured()) {
@@ -639,6 +647,18 @@ export default function App() {
       r.onerror = rej;
       r.readAsDataURL(file);
     });
+  };
+
+  const handleUploadEventPhotos = async (ek: string, files: File[]) => {
+    toast.info(`Zapisuję ${files.length} zdjęć...`);
+    const cur = eventsMeta[ek] || { poster: "", poster_path: "", photos: [], lineup: [] };
+    const photos = [...(cur.photos || [])];
+    for (const f of files) {
+      const u = await uploadImage(f, "photo");
+      photos.push({ path: u.path, url: u.url, added_at: new Date().toISOString() });
+    }
+    await persistEventMeta(ek, { ...cur, photos });
+    toast.success("Zapisano zdjęcia!");
   };
 
   // Splitwise
@@ -1114,21 +1134,36 @@ export default function App() {
                 filteredConcerts={filteredConcerts}
                 upcomingConcerts={upcomingConcerts}
                 travelMeta={travelMeta}
+                eventsMeta={eventsMeta}
                 artistsMetaCache={artistsMetaCache}
                 settings={settings}
                 cityCoords={cityCoords}
                 theme={theme}
                 streamingProvider={streamingProvider}
                 playingPreviewArtist={playingPreviewArtist}
-                hasActiveFilter={activeFilterParts.length > 0}
+                hasActiveFilters={activeFilterParts.length > 0}
                 isPublicView={isPublicView}
-                onQuickSearch={(val) => setFilters((f) => ({ ...f, search: val }))}
-                onQuickFilter={(key, val) =>
+                onSelectArtist={(artist: string) => setFilters((f) => ({ ...f, search: artist }))}
+                onResetFilters={() => setFilters(EMPTY_FILTERS)}
+                onOpenWrapped={() => setWrappedOpen(true)}
+                onSaveConcert={saveConcert}
+                onEditConcert={(c: Concert) => {
+                  setEditingConcert(c);
+                  setAddSubTab("concert");
+                  switchTab("add");
+                }}
+                onUploadEventPhotos={handleUploadEventPhotos}
+                onOpenEvent={(eventKey: string) => {
+                  setFocusedEventKey(eventKey);
+                  switchTab("events");
+                }}
+                onQuickSearch={(val: string) => setFilters((f) => ({ ...f, search: val }))}
+                onQuickFilter={(key: keyof FilterState, val: string) =>
                   setFilters((f) => ({ ...f, [key]: f[key] === val ? "" : val }))
                 }
                 onTogglePreview={togglePreview}
                 onOpenStreamingPlaylist={openStreamingPlaylist}
-                onOpenTicket={async (path) => {
+                onOpenTicket={async (path: string) => {
                   const u = await resolveSignedUrl("tickets", path);
                   if (u) window.open(u, "_blank");
                 }}
@@ -1175,6 +1210,8 @@ export default function App() {
                 settings={settings}
                 cityCoords={cityCoords}
                 isPublicView={isPublicView}
+                focusedEventKey={focusedEventKey}
+                onClearFocusedEvent={() => setFocusedEventKey(null)}
                 onQuickAddFromLineup={(ek, artist) => {
                   const [ev, yr] = ek.split("|");
                   const sample = allConcerts.find((c) => `${c.event}|${c.rok}` === ek);
@@ -1193,17 +1230,7 @@ export default function App() {
                   setAddSubTab("concert");
                   switchTab("add");
                 }}
-                onUploadEventPhotos={async (ek, files) => {
-                  toast.info(`Zapisuję ${files.length} zdjęć...`);
-                  const cur = eventsMeta[ek] || { poster: "", poster_path: "", photos: [], lineup: [] };
-                  const photos = [...(cur.photos || [])];
-                  for (const f of files) {
-                    const u = await uploadImage(f, "photo");
-                    photos.push({ path: u.path, url: u.url, added_at: new Date().toISOString() });
-                  }
-                  await persistEventMeta(ek, { ...cur, photos });
-                  toast.success("Zapisano zdjęcia!");
-                }}
+                onUploadEventPhotos={handleUploadEventPhotos}
                 onUploadEventPoster={async (ek, file) => {
                   toast.info("Zapisuję plakat...");
                   const cur = eventsMeta[ek] || { poster: "", poster_path: "", photos: [], lineup: [] };
@@ -1228,6 +1255,7 @@ export default function App() {
                   toast.success("Zapisano line-up!");
                 }}
                 onOpenSplitwise={(ek) => setSplitwiseKey(ek)}
+                onSaveConcert={saveConcert}
                 onEditConcert={(c) => { setEditingConcert(c); setAddSubTab("concert"); switchTab("add"); }}
                 onDeleteConcert={deleteConcert}
                 onFilterByCrew={(crew) => { setFilters((f) => ({ ...f, crew })); switchTab("start"); }}

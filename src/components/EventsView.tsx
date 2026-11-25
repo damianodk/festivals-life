@@ -7,18 +7,13 @@ import {
   IconTrash,
   IconEdit,
   IconPlus,
-  IconAlertTriangle
+  IconAlertTriangle,
+  IconMusic,
+  IconSparkles
 } from "@tabler/icons-react";
 import type { ClashSlot, Concert, EventMeta, TripExpense, UserSettings } from "../types";
 import { getCityCoords, haversineKm, setlistSearchUrl, topEntry } from "../lib/geo";
-import { supabase } from "../lib/supabase";
 import { BottomSheet } from "./ui/BottomSheet";
-import {
-  ConcertKind,
-  detectConcertKind,
-  loadTypeOverrides,
-  saveConcertKindLocal,
-} from "./StartView";
 
 interface EventsViewProps {
   allConcerts: Concert[];
@@ -29,6 +24,8 @@ interface EventsViewProps {
   settings: UserSettings;
   cityCoords: Record<string, [number, number]>;
   isPublicView: boolean;
+  focusedEventKey?: string | null;
+  onClearFocusedEvent?: () => void;
   onQuickAddFromLineup: (eventKey: string, artist: string) => void;
   onUploadEventPhotos: (eventKey: string, files: File[]) => Promise<void>;
   onUploadEventPoster: (eventKey: string, file: File) => Promise<void>;
@@ -36,11 +33,52 @@ interface EventsViewProps {
   onRemovePhoto: (eventKey: string, idx: number) => Promise<void>;
   onSaveLineup: (eventKey: string, lineup: string[]) => Promise<void>;
   onOpenSplitwise: (eventKey: string) => void;
+  onSaveConcert?: (rec: Omit<Concert, "id">, id?: number) => Promise<void>;
   onEditConcert: (c: Concert) => void;
   onDeleteConcert: (id: number) => Promise<void>;
   onFilterByCrew: (crew: string) => void;
   onAddClashSlot: (slot: ClashSlot) => void;
   onDeleteClashSlot: (idx: number) => void;
+}
+
+type ConcertKind = "solo" | "festival";
+
+const FESTIVAL_KEYWORDS_RE =
+  /festi[wv]al|open['’]?er|m[eę]skie\s*granie|pol['’]?and['’]?rock|woodstock|audioriver|orange\s*warsaw|tauron|colours\s*of\s*ostrava|sziget|primavera|coachella|glastonbury|rock\s*am\s*ring|nos\s*alive|roskilde|tomorrowland|sunrise|clout|bitter\s?sweet|salt\s*wave|next\s*fest|great\s*september|soundrive|up\s*to\s*date|inside\s*seaside|mystic|jarocin|off\s+/i;
+
+function getConcertKind(
+  c: Concert,
+  eventsMeta?: Record<string, EventMeta>,
+  allConcerts?: Concert[]
+): ConcertKind {
+  const explicit = ((c as unknown as { rodzaj?: string }).rodzaj || c.podgatunek || "").trim().toLowerCase();
+  if (explicit === "festival" || explicit === "festiwal") return "festival";
+  if (explicit === "solo" || explicit === "koncert solowy" || explicit === "solowy") return "solo";
+
+  const ev = (c.event || "").trim();
+  if (!ev || /^koncert(\s+solowy)?$/i.test(ev)) return "solo";
+  if (FESTIVAL_KEYWORDS_RE.test(ev)) return "festival";
+
+  if (eventsMeta) {
+    const key = `${ev}|${c.rok || "?"}`;
+    if ((eventsMeta[key]?.lineup?.length || 0) > 1) return "festival";
+  }
+
+  if (allConcerts && allConcerts.length > 0) {
+    const sameEventArtists = new Set(
+      allConcerts
+        .filter(
+          (other) =>
+            (other.event || "").trim().toLowerCase() === ev.toLowerCase() &&
+            String(other.rok || "") === String(c.rok || "")
+        )
+        .map((other) => other.artysta.trim().toLowerCase())
+        .filter(Boolean)
+    );
+    if (sameEventArtists.size > 1) return "festival";
+  }
+
+  return "solo";
 }
 
 function timeToMins(t: string): number | null {
@@ -57,6 +95,8 @@ export const EventsView: React.FC<EventsViewProps> = ({
   settings,
   cityCoords,
   isPublicView,
+  focusedEventKey,
+  onClearFocusedEvent,
   onQuickAddFromLineup,
   onUploadEventPhotos,
   onUploadEventPoster,
@@ -64,6 +104,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
   onRemovePhoto,
   onSaveLineup,
   onOpenSplitwise,
+  onSaveConcert,
   onEditConcert,
   onDeleteConcert,
   onFilterByCrew,
@@ -73,13 +114,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
   const [subTab, setSubTab] = useState<"cards" | "concerts" | "crew" | "clash">("cards");
   const [expandedLineups, setExpandedLineups] = useState<Set<string>>(new Set());
   const [selectedEventKey, setSelectedEventKey] = useState<string>("");
-  const [highlightedEventKey, setHighlightedEventKey] = useState<string>("");
+  const [kindFilter, setKindFilter] = useState<"all" | "festival" | "solo">("all");
+  const [savingKindId, setSavingKindId] = useState<number | null>(null);
   const [lineupEditKey, setLineupEditKey] = useState<string | null>(null);
   const [lineupText, setLineupText] = useState("");
   const [lightbox, setLightbox] = useState<{ url: string; title: string } | null>(null);
-  const [typeOverrides, setTypeOverrides] = useState<Record<string, ConcertKind>>(() =>
-    loadTypeOverrides()
-  );
 
   const [cfArtist, setCfArtist] = useState("");
   const [cfStage, setCfStage] = useState("");
@@ -91,72 +130,58 @@ export const EventsView: React.FC<EventsViewProps> = ({
   const posterInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    const syncTypes = () => setTypeOverrides(loadTypeOverrides());
-    window.addEventListener("festlife:concert-updated", syncTypes);
-
-    // Obsługa przejścia z karty artysty bezpośrednio do konkretnego wydarzenia
-    const pendingKey = sessionStorage.getItem("festlife_focus_event");
-    if (pendingKey) {
-      sessionStorage.removeItem("festlife_focus_event");
-      setSubTab("cards");
-      setHighlightedEventKey(pendingKey);
-    }
-
-    const handleOpenEvent = (ev: Event) => {
-      const detail = (ev as CustomEvent<string>).detail;
-      if (detail) {
-        setSubTab("cards");
-        setHighlightedEventKey(detail);
-      }
-    };
-    window.addEventListener("festlife:open-event", handleOpenEvent);
-
-    return () => {
-      window.removeEventListener("festlife:concert-updated", syncTypes);
-      window.removeEventListener("festlife:open-event", handleOpenEvent);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!highlightedEventKey) return;
-    const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-event-key="${CSS.escape(highlightedEventKey)}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 120);
-    return () => clearTimeout(timer);
-  }, [highlightedEventKey, subTab]);
-
-  const handleToggleRowKind = async (c: Concert, nextKind: ConcertKind) => {
-    const nextMap = saveConcertKindLocal(c, nextKind);
-    setTypeOverrides(nextMap);
-    if (c.id) {
-      await supabase.from("concerts").update({ typ: nextKind } as any).eq("id", c.id);
-    }
-  };
+    if (!focusedEventKey) return;
+    setSubTab("cards");
+    setExpandedLineups((prev) => new Set(prev).add(focusedEventKey));
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(`event-card-${focusedEventKey}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [focusedEventKey]);
 
   const eventGroups = useMemo(() => {
     const map: Record<
       string,
       {
-        key: string; rok: number; data: string; event: string; miasto: string;
-        kraj: string; miejsce: string; crews: Set<string>; artists: string[]; sample: Concert;
+        key: string;
+        rok: number;
+        data: string;
+        event: string;
+        miasto: string;
+        kraj: string;
+        miejsce: string;
+        crews: Set<string>;
+        artists: string[];
+        sample: Concert;
+        kind: ConcertKind;
       }
     > = {};
     filteredConcerts.forEach((c) => {
       const key = `${c.event || "Koncert"}|${c.rok || "?"}`;
+      const cKind = getConcertKind(c, eventsMeta, allConcerts);
       if (!map[key]) {
         map[key] = {
-          key, rok: c.rok || 0, data: c.data || "", event: c.event || "Koncert",
-          miasto: c.miasto, kraj: c.kraj, miejsce: c.miejsce, crews: new Set(), artists: [], sample: c
+          key,
+          rok: c.rok || 0,
+          data: c.data || "",
+          event: c.event || "Koncert",
+          miasto: c.miasto,
+          kraj: c.kraj,
+          miejsce: c.miejsce,
+          crews: new Set(),
+          artists: [],
+          sample: c,
+          kind: cKind
         };
+      } else if (cKind === "festival") {
+        map[key].kind = "festival";
       }
       if (c.z_kim) map[key].crews.add(c.z_kim);
       map[key].artists.push(c.artysta);
     });
     return Object.values(map).sort((a, b) => (b.data || "").localeCompare(a.data || ""));
-  }, [filteredConcerts]);
+  }, [filteredConcerts, eventsMeta, allConcerts]);
 
   const crewProfiles = useMemo(() => {
     const home = settings.hometown_coords || [52.4064, 16.9252];
@@ -188,8 +213,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
     for (let i = 0; i < items.length; i++) {
       for (let j = i + 1; j < items.length; j++) {
         if (
-          items[i].sMin != null && items[i].eMin != null &&
-          items[j].sMin != null && items[j].eMin != null &&
+          items[i].sMin != null &&
+          items[i].eMin != null &&
+          items[j].sMin != null &&
+          items[j].eMin != null &&
           Math.max(items[i].sMin!, items[j].sMin!) < Math.min(items[i].eMin!, items[j].eMin!)
         ) {
           conflicts.add(i);
@@ -207,6 +234,19 @@ export const EventsView: React.FC<EventsViewProps> = ({
       else n.add(k);
       return n;
     });
+  };
+
+  const handleToggleRowKind = async (c: Concert) => {
+    if (!onSaveConcert || savingKindId === c.id) return;
+    setSavingKindId(c.id);
+    try {
+      const current = getConcertKind(c, eventsMeta, allConcerts);
+      const nextLabel = current === "festival" ? "Koncert solowy" : "Festiwal";
+      const { id, ...rest } = c;
+      await onSaveConcert({ ...rest, podgatunek: nextLabel }, id);
+    } finally {
+      setSavingKindId(null);
+    }
   };
 
   return (
@@ -239,22 +279,46 @@ export const EventsView: React.FC<EventsViewProps> = ({
         }}
       />
 
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => setSubTab("cards")} className={`fl-btn !text-xs ${subTab === "cards" ? "fl-btn-primary" : ""}`}>
-          Karty Eventów ({eventGroups.length})
-        </button>
-        {!isPublicView && (
-          <>
-            <button type="button" onClick={() => setSubTab("concerts")} className={`fl-btn !text-xs ${subTab === "concerts" ? "fl-btn-primary" : ""}`}>
-              Baza koncertów eventu
-            </button>
-            <button type="button" onClick={() => setSubTab("crew")} className={`fl-btn !text-xs ${subTab === "crew" ? "fl-btn-primary" : ""}`}>
-              Baza Ekipy ({crewProfiles.length})
-            </button>
-            <button type="button" onClick={() => setSubTab("clash")} className={`fl-btn !text-xs ${subTab === "clash" ? "fl-btn-primary" : ""}`}>
-              Clashfinder
-            </button>
-          </>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setSubTab("cards")}
+            className={`fl-btn !text-xs ${subTab === "cards" ? "fl-btn-primary" : ""}`}
+          >
+            Karty Eventów ({eventGroups.length})
+          </button>
+          {!isPublicView && (
+            <>
+              <button
+                type="button"
+                onClick={() => setSubTab("concerts")}
+                className={`fl-btn !text-xs ${subTab === "concerts" ? "fl-btn-primary" : ""}`}
+              >
+                Baza koncertów eventu
+              </button>
+              <button
+                type="button"
+                onClick={() => setSubTab("crew")}
+                className={`fl-btn !text-xs ${subTab === "crew" ? "fl-btn-primary" : ""}`}
+              >
+                Baza Ekipy ({crewProfiles.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSubTab("clash")}
+                className={`fl-btn !text-xs ${subTab === "clash" ? "fl-btn-primary" : ""}`}
+              >
+                Clashfinder
+              </button>
+            </>
+          )}
+        </div>
+
+        {focusedEventKey && onClearFocusedEvent && (
+          <button type="button" onClick={onClearFocusedEvent} className="fl-btn !text-xs">
+            Wyczyść podświetlenie eventu ×
+          </button>
         )}
       </div>
 
@@ -266,27 +330,40 @@ export const EventsView: React.FC<EventsViewProps> = ({
             const fullL = meta.lineup || [];
             const unseen = fullL.filter((a) => !seenLower.has(a.toLowerCase()));
             const isExp = expandedLineups.has(g.key);
+            const isFocused = focusedEventKey === g.key;
+            const isFest = g.kind === "festival";
             const expSum = tripExpenses
               .filter((x) => x.event_key === g.key)
               .reduce((s, x) => s + Number(x.amount_pln || 0), 0);
-            const isHighlighted = highlightedEventKey === g.key;
 
             return (
               <div
+                id={`event-card-${g.key}`}
                 key={g.key}
-                data-event-key={g.key}
-                className={`flex flex-col justify-between gap-3 rounded-2xl border bg-[var(--surface)] p-4 ${
-                  isHighlighted
-                    ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/40"
+                className={`flex flex-col justify-between gap-3 rounded-2xl border bg-[var(--surface)] p-4 transition ${
+                  isFocused
+                    ? "border-[var(--accent)] ring-2 ring-[var(--accent)]"
                     : "border-[var(--border)]"
                 }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-display text-base font-extrabold leading-tight">{g.event}</h3>
-                    <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--accent)]">
-                      {g.rok}
-                    </span>
+                    <div className="flex flex-shrink-0 items-center gap-1.5">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                          isFest
+                            ? "border-[var(--accent)] bg-[var(--surface-2)] text-[var(--accent)]"
+                            : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)]"
+                        }`}
+                      >
+                        {isFest ? <IconSparkles size={10} /> : <IconMusic size={10} />}
+                        {isFest ? "Festiwal" : "Solowy"}
+                      </span>
+                      <span className="rounded-full bg-[var(--surface-2)] px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--accent)]">
+                        {g.rok}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-xs text-[var(--text-muted)]">
                     {g.miejsce || "—"} • {g.miasto || "—"}, {g.kraj}
@@ -310,7 +387,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       {!isPublicView && (
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); onRemovePoster(g.key); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemovePoster(g.key);
+                          }}
                           className="fl-btn fl-btn-danger !p-1"
                         >
                           <IconTrash size={13} stroke={1.75} />
@@ -327,7 +407,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             src={ph.url}
                             alt=""
                             onClick={() => setLightbox({ url: ph.url, title: `${g.event} • Zdjęcie ${idx + 1}` })}
-                            className="h-16 w-16 cursor-pointer rounded-xl object-cover border border-[var(--border)]"
+                            className="h-16 w-16 cursor-pointer rounded-xl border border-[var(--border)] object-cover"
                           />
                           {!isPublicView && (
                             <button
@@ -397,28 +477,40 @@ export const EventsView: React.FC<EventsViewProps> = ({
                     <>
                       <button
                         type="button"
-                        onClick={() => { setSelectedEventKey(g.key); setSubTab("concerts"); }}
+                        onClick={() => {
+                          setSelectedEventKey(g.key);
+                          setSubTab("concerts");
+                        }}
                         className="fl-btn !px-2.5 !py-1 !text-[11px]"
                       >
                         Lista ({g.artists.length})
                       </button>
                       <button
                         type="button"
-                        onClick={() => { activeUploadKeyRef.current = g.key; photoInputRef.current?.click(); }}
+                        onClick={() => {
+                          activeUploadKeyRef.current = g.key;
+                          photoInputRef.current?.click();
+                        }}
                         className="fl-btn !px-2.5 !py-1 !text-[11px]"
                       >
                         <IconPhoto size={12} stroke={1.75} /> Zdjęcia
                       </button>
                       <button
                         type="button"
-                        onClick={() => { activeUploadKeyRef.current = g.key; posterInputRef.current?.click(); }}
+                        onClick={() => {
+                          activeUploadKeyRef.current = g.key;
+                          posterInputRef.current?.click();
+                        }}
                         className="fl-btn !px-2.5 !py-1 !text-[11px]"
                       >
                         Plakat
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setLineupEditKey(g.key); setLineupText((meta.lineup || []).join("\n")); }}
+                        onClick={() => {
+                          setLineupEditKey(g.key);
+                          setLineupText((meta.lineup || []).join("\n"));
+                        }}
                         className="fl-btn !px-2.5 !py-1 !text-[11px]"
                       >
                         <IconListDetails size={12} stroke={1.75} /> Line-up
@@ -440,27 +532,40 @@ export const EventsView: React.FC<EventsViewProps> = ({
       )}
 
       {subTab === "concerts" && !isPublicView && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 space-y-3">
-          <select
-            className="fl-input w-full sm:max-w-md"
-            value={selectedEventKey}
-            onChange={(e) => setSelectedEventKey(e.target.value)}
-          >
-            <option value="">Wszystkie eventy ({eventGroups.length})</option>
-            {eventGroups.map((g) => (
-              <option key={g.key} value={g.key}>
-                {g.event} ({g.rok})
-              </option>
-            ))}
-          </select>
+        <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+          <div className="flex flex-wrap gap-2">
+            <select
+              className="fl-input w-full sm:max-w-md"
+              value={selectedEventKey}
+              onChange={(e) => setSelectedEventKey(e.target.value)}
+            >
+              <option value="">Wszystkie eventy ({eventGroups.length})</option>
+              {eventGroups.map((g) => (
+                <option key={g.key} value={g.key}>
+                  {g.event} ({g.rok})
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="fl-input w-full sm:max-w-xs"
+              value={kindFilter}
+              onChange={(e) => setKindFilter(e.target.value as "all" | "festival" | "solo")}
+            >
+              <option value="all">Wszystkie rodzaje (Solowe + Festiwale)</option>
+              <option value="festival">Tylko festiwale</option>
+              <option value="solo">Tylko koncerty solowe</option>
+            </select>
+          </div>
+
           <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--surface-2)] text-left font-mono text-[10px] uppercase text-[var(--text-muted)]">
                   <th className="px-3 py-2">Data</th>
                   <th className="px-3 py-2">Artysta</th>
-                  <th className="px-3 py-2">Event</th>
                   <th className="px-3 py-2">Rodzaj</th>
+                  <th className="px-3 py-2">Event</th>
                   <th className="px-3 py-2">Scena / Miejsce</th>
                   <th className="px-3 py-2">Akcje</th>
                 </tr>
@@ -468,46 +573,53 @@ export const EventsView: React.FC<EventsViewProps> = ({
               <tbody>
                 {filteredConcerts
                   .filter((c) => !selectedEventKey || `${c.event || "Koncert"}|${c.rok || "?"}` === selectedEventKey)
+                  .filter((c) => kindFilter === "all" || getConcertKind(c, eventsMeta, allConcerts) === kindFilter)
                   .map((c) => {
-                    const kind = detectConcertKind(c, typeOverrides);
+                    const kind = getConcertKind(c, eventsMeta, allConcerts);
+                    const isFest = kind === "festival";
                     return (
-                      <tr key={c.id} className="border-b border-[var(--border)]">
-                        <td className="whitespace-nowrap px-3 py-2 font-mono">{c.data} {c.godzina}</td>
-                        <td className="px-3 py-2 font-semibold">{c.artysta}</td>
-                        <td className="px-3 py-2">{c.event} ({c.rok})</td>
-                        <td className="whitespace-nowrap px-3 py-2">
-                          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-0.5 text-[10px]">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleRowKind(c, "solowy")}
-                              className={`rounded px-1.5 py-0.5 font-semibold ${
-                                kind === "solowy"
-                                  ? "bg-[var(--accent)] text-[var(--accent-ink,#fff)]"
-                                  : "text-[var(--text-muted)] hover:text-[var(--text)]"
-                              }`}
-                            >
-                              Solowy
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleToggleRowKind(c, "festiwal")}
-                              className={`rounded px-1.5 py-0.5 font-semibold ${
-                                kind === "festiwal"
-                                  ? "bg-[#38bdf8] text-slate-950"
-                                  : "text-[var(--text-muted)] hover:text-[var(--text)]"
-                              }`}
-                            >
-                              Festiwal
-                            </button>
-                          </div>
+                      <tr key={c.id} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
+                        <td className="whitespace-nowrap px-3 py-2 font-mono">
+                          {c.data} {c.godzina}
                         </td>
-                        <td className="px-3 py-2 text-[var(--text-muted)]">{c.scena ? `${c.scena} • ` : ""}{c.miejsce}</td>
+                        <td className="px-3 py-2 font-semibold">{c.artysta}</td>
+                        <td className="whitespace-nowrap px-3 py-2">
+                          <button
+                            type="button"
+                            disabled={!onSaveConcert || savingKindId === c.id}
+                            onClick={() => handleToggleRowKind(c)}
+                            title={
+                              onSaveConcert
+                                ? "Kliknij, aby przełączyć Solowy / Festiwal"
+                                : "Rodzaj wydarzenia"
+                            }
+                            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition ${
+                              isFest
+                                ? "border-[var(--accent)] bg-[var(--surface-2)] text-[var(--accent)]"
+                                : "border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text)]"
+                            }`}
+                          >
+                            {isFest ? <IconSparkles size={11} /> : <IconMusic size={11} />}
+                            {isFest ? "Festiwal" : "Solowy"}
+                          </button>
+                        </td>
+                        <td className="px-3 py-2">
+                          {c.event} ({c.rok})
+                        </td>
+                        <td className="px-3 py-2 text-[var(--text-muted)]">
+                          {c.scena ? `${c.scena} • ` : ""}
+                          {c.miejsce}
+                        </td>
                         <td className="whitespace-nowrap px-3 py-2">
                           <div className="flex gap-1">
                             <button type="button" onClick={() => onEditConcert(c)} className="fl-btn !p-1.5">
                               <IconEdit size={13} stroke={1.75} />
                             </button>
-                            <button type="button" onClick={() => onDeleteConcert(c.id)} className="fl-btn fl-btn-danger !p-1.5">
+                            <button
+                              type="button"
+                              onClick={() => onDeleteConcert(c.id)}
+                              className="fl-btn fl-btn-danger !p-1.5"
+                            >
                               <IconTrash size={13} stroke={1.75} />
                             </button>
                           </div>
@@ -529,7 +641,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
               .filter((ex) => cr.events.has(ex.event_key))
               .reduce((s, x) => s + Number(x.amount_pln || 0), 0);
             return (
-              <div key={cr.name} className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              <div
+                key={cr.name}
+                className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
+              >
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="font-display text-base font-extrabold">{cr.name}</h4>
@@ -566,7 +681,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
       )}
 
       {subTab === "clash" && !isPublicView && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 space-y-4">
+        <div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
           <p className="text-xs text-[var(--text-muted)]">
             Dodawaj godziny występów — nakładające się sloty zostaną automatycznie oznaczone jako konflikt.
           </p>
@@ -580,10 +695,33 @@ export const EventsView: React.FC<EventsViewProps> = ({
             }}
             className="grid grid-cols-2 gap-2 sm:grid-cols-[2fr_1fr_1fr_1fr_auto]"
           >
-            <input required className="fl-input col-span-2 sm:col-span-1" value={cfArtist} onChange={(e) => setCfArtist(e.target.value)} placeholder="Artysta" />
-            <input className="fl-input" value={cfStage} onChange={(e) => setCfStage(e.target.value)} placeholder="Scena" />
-            <input required className="fl-input" value={cfStart} onChange={(e) => setCfStart(e.target.value)} placeholder="Start (21:00)" />
-            <input required className="fl-input" value={cfEnd} onChange={(e) => setCfEnd(e.target.value)} placeholder="Koniec (22:15)" />
+            <input
+              required
+              className="fl-input col-span-2 sm:col-span-1"
+              value={cfArtist}
+              onChange={(e) => setCfArtist(e.target.value)}
+              placeholder="Artysta"
+            />
+            <input
+              className="fl-input"
+              value={cfStage}
+              onChange={(e) => setCfStage(e.target.value)}
+              placeholder="Scena"
+            />
+            <input
+              required
+              className="fl-input"
+              value={cfStart}
+              onChange={(e) => setCfStart(e.target.value)}
+              placeholder="Start (21:00)"
+            />
+            <input
+              required
+              className="fl-input"
+              value={cfEnd}
+              onChange={(e) => setCfEnd(e.target.value)}
+              placeholder="Koniec (22:15)"
+            />
             <button type="submit" className="fl-btn fl-btn-primary col-span-2 sm:col-span-1">
               <IconPlus size={15} stroke={1.75} /> Dodaj
             </button>
@@ -614,7 +752,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       {it.start} – {it.end} • {it.stage || "Scena"}
                     </div>
                   </div>
-                  <button type="button" onClick={() => onDeleteClashSlot(it.idx)} className="fl-btn fl-btn-danger !p-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onDeleteClashSlot(it.idx)}
+                    className="fl-btn fl-btn-danger !p-1.5"
+                  >
                     <IconTrash size={14} stroke={1.75} />
                   </button>
                 </div>
