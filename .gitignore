@@ -1,7 +1,8 @@
+node_modules/
+dist/
 .env
-__pycache__/
-*.pyc
-uploads/
-backups/
+.env.local
+ios/App/Pods/
+android/.gradle/
+android/app/build/
 .DS_Store
-Thumbs.db

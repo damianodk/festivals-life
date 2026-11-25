@@ -2,11 +2,11 @@
   "name": "FEST LIFE",
   "short_name": "FEST LIFE",
   "description": "Twoja koncertowa HeatMapa, historia festiwali, line-upy, bilety, zdjęcia i statystyki.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0B0616",
-  "theme_color": "#0B0616",
+  "background_color": "#09090B",
+  "theme_color": "#09090B",
   "icons": [
     {
       "src": "./icon.svg",

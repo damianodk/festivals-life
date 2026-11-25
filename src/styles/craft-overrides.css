@@ -1,0 +1,57 @@
+/* FEST LIFE — Editorial Design Craft Overrides (Zero-token CSS layer) */
+
+:root {
+  --craft-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --craft-duration-fast: 150ms;
+  --craft-duration-base: 220ms;
+}
+
+/* 1. Typografia posterowa i czytelne liczby */
+h1, h2, h3, .font-display {
+  letter-spacing: -0.028em;
+}
+
+.tabular-nums, [data-kpi-value] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 2. Koniec z "AI-slopem": usuwamy zbędne poświaty i ciężkie ramki */
+.fl-surface, .card, [data-card] {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+  transition: transform var(--craft-duration-base) var(--craft-ease),
+              border-color var(--craft-duration-fast) var(--craft-ease),
+              background-color var(--craft-duration-fast) var(--craft-ease);
+}
+
+.fl-surface:hover {
+  transform: translateY(-1px);
+}
+
+/* 3. Czyste kadrowanie portretów artystów bez błotnistych filtrów */
+.artist-portrait {
+  object-fit: cover;
+  object-position: center 20%;
+  transition: transform 320ms var(--craft-ease);
+}
+
+.group:hover .artist-portrait {
+  transform: scale(1.03);
+}
+
+/* 4. Płynne przewijanie na iOS/Android i poszanowanie dostępności */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
